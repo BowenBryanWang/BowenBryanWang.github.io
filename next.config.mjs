@@ -5,6 +5,12 @@ import remarkGfm from 'remark-gfm'
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   pageExtensions: ['js', 'jsx', 'ts', 'tsx', 'mdx'],
+  output: 'export',
+  basePath: '/gh-pages',
+  images: {
+    unoptimized: true,
+  },
+  distDir: 'build',
 }
 
 const withMDX = nextMDX({

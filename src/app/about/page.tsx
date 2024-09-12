@@ -25,7 +25,7 @@ import image2 from '@/images/photos/image-2.jpg'
 import image3 from '@/images/photos/image-3.jpg'
 import image4 from '@/images/photos/image-4.jpg'
 import image5 from '@/images/photos/image-5.jpg'
-import { type ArticleWithSlug, getAllArticles } from '@/lib/articles'
+import { MyArticle, myarticles } from '@/lib/articles'
 import { formatDate } from '@/lib/formatDate'
 import { use } from 'react'
 import MyTypewriter from './TypeWritter'
@@ -222,11 +222,11 @@ function ArrowDownIcon(props: React.ComponentPropsWithoutRef<'svg'>) {
   )
 }
 
-function Article({ article }: { article: ArticleWithSlug }) {
+function Article({ article }: { article: MyArticle }) {
   return (
     <Card as="article">
       {article.link === "True" ? (
-        <Card.Title href={`/articles/${article.slug}`}>
+        <Card.Title href={`${article.url}`}>
           {article.title}
         </Card.Title>
       ) : (
@@ -249,7 +249,6 @@ export const metadata: Metadata = {
 }
 
 export default async function About() {
-  let articles = (await getAllArticles())
   return (
     <>
       <Container className="mt-8 sm:mt-16">
@@ -277,7 +276,7 @@ export default async function About() {
             />
             <div className="mt-6 space-y-7 text-base text-zinc-600 dark:text-zinc-400">
               <div>
-                👋 Hi! I'm a <p className="inline ordinal">1st</p> year Ph.D.
+                👋 Hi! I&apos;m a <p className="inline ordinal">1st</p> year Ph.D.
                 student at
                 <a
                   href="https://www.hku.hk/"
@@ -285,7 +284,7 @@ export default async function About() {
                 >
                   the University of Hong Kong
                 </a>
-                , with deep focus and passion on NLP and LLM-based Agent. I'm
+                , with deep focus and passion on NLP and LLM-based Agent. I&apos;m
                 fortunate to get advised by
                 <a
                   href="https://taoyds.github.io/"
@@ -308,7 +307,7 @@ export default async function About() {
                   HKU NLP Lab
                 </a>
                 . Previously I got
-                my bachlor's degree of Computer Science and Technology at
+                my bachlor&apos;s degree of Computer Science and Technology at
                 <a
                   href="https://www.tsinghua.edu.cn/"
                   className="inline underline decoration-amber-800 decoration-wavy underline-offset-4 dark:decoration-amber-300"
@@ -380,8 +379,8 @@ export default async function About() {
             <Resume />
           </div>
           <div className="col-span-3 flex flex-col gap-16">
-            {articles.map((article) => (
-              <Article key={article.slug} article={article} />
+            {myarticles.map((article) => (
+              <Article key={article.url} article={article} />
             ))}
           </div>
         </div>
