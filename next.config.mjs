@@ -10,7 +10,6 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
-  distDir: 'build',
 }
 
 const withMDX = nextMDX({
