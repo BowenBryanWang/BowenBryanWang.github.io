@@ -6,7 +6,7 @@ import remarkGfm from 'remark-gfm'
 const nextConfig = {
   pageExtensions: ['js', 'jsx', 'ts', 'tsx', 'mdx'],
   output: 'export',
-  basePath: '/gh-pages',
+  basePath: '/',
   images: {
     unoptimized: true,
   },
