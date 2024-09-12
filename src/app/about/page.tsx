@@ -278,7 +278,7 @@ export default async function About() {
             <div className="mt-6 space-y-7 text-base text-zinc-600 dark:text-zinc-400">
               <div>
                 👋 Hi! I'm a <p className="inline ordinal">1st</p> year Ph.D.
-                student at{' '}
+                student at
                 <a
                   href="https://www.hku.hk/"
                   className="inline underline decoration-amber-800 decoration-wavy underline-offset-4 dark:decoration-amber-300"
@@ -286,35 +286,35 @@ export default async function About() {
                   the University of Hong Kong
                 </a>
                 , with deep focus and passion on NLP and LLM-based Agent. I'm
-                fortunate to get advised by{' '}
+                fortunate to get advised by
                 <a
                   href="https://taoyds.github.io/"
                   className="inline underline decoration-amber-800 decoration-wavy underline-offset-4 dark:decoration-amber-300"
                 >
                   Prof. Tao Yu
-                </a>{' '}
-                and be a part of{' '}
+                </a>
+                and be a part of
                 <a
                   href="https://www.xlang.ai/"
                   className="inline underline decoration-amber-800 decoration-wavy underline-offset-4 dark:decoration-amber-300"
                 >
                   the XLANG Lab
-                </a>{' '}
-                and{' '}
+                </a>
+                and
                 <a
                   href="https://hkunlp.github.io/"
                   className="inline underline decoration-amber-800 decoration-wavy underline-offset-4 dark:decoration-amber-300"
                 >
                   HKU NLP Lab
-                </a>{' '}
+                </a>
                 . Previously I got
-                my bachlor's degree of Computer Science and Technology at{' '}
+                my bachlor's degree of Computer Science and Technology at
                 <a
                   href="https://www.tsinghua.edu.cn/"
                   className="inline underline decoration-amber-800 decoration-wavy underline-offset-4 dark:decoration-amber-300"
                 >
                   Tsinghua University
-                </a>{' '}
+                </a>
                 focusing on Human-Computer Interaction
                 (HCI), advised by Prof. Chun Yu and Prof. Yuanchun Shi.
               </div>
