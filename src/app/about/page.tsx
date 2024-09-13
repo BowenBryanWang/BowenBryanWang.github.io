@@ -278,7 +278,7 @@ export default async function About() {
             <div className="mt-6 space-y-7 text-base text-zinc-600 dark:text-zinc-400">
               <div>
                 👋 Hi! I&apos;m a <p className="inline ordinal">1st</p> year Ph.D.
-                student at
+                student at&nbsp;
                 <a
                   href="https://www.hku.hk/"
                   className="inline underline decoration-amber-800 decoration-wavy underline-offset-4 dark:decoration-amber-300"
@@ -286,21 +286,21 @@ export default async function About() {
                   the University of Hong Kong
                 </a>
                 , with deep focus and passion on NLP and LLM-based Agent. I&apos;m
-                fortunate to get advised by
+                fortunate to get advised by&nbsp;
                 <a
                   href="https://taoyds.github.io/"
                   className="inline underline decoration-amber-800 decoration-wavy underline-offset-4 dark:decoration-amber-300"
                 >
                   Prof. Tao Yu
-                </a>
-                and be a part of
+                </a>&nbsp;
+                and be a part of&nbsp;
                 <a
                   href="https://www.xlang.ai/"
                   className="inline underline decoration-amber-800 decoration-wavy underline-offset-4 dark:decoration-amber-300"
                 >
                   the XLANG Lab
-                </a>
-                and
+                </a>&nbsp;
+                and&nbsp;
                 <a
                   href="https://hkunlp.github.io/"
                   className="inline underline decoration-amber-800 decoration-wavy underline-offset-4 dark:decoration-amber-300"
@@ -308,13 +308,13 @@ export default async function About() {
                   HKU NLP Lab
                 </a>
                 . Previously I got
-                my bachlor&apos;s degree of Computer Science and Technology at
+                my bachlor&apos;s degree of Computer Science and Technology at&nbsp;
                 <a
                   href="https://www.tsinghua.edu.cn/"
                   className="inline underline decoration-amber-800 decoration-wavy underline-offset-4 dark:decoration-amber-300"
                 >
                   Tsinghua University
-                </a>
+                </a>&nbsp;
                 focusing on Human-Computer Interaction
                 (HCI), advised by Prof. Chun Yu and Prof. Yuanchun Shi.
               </div>
@@ -333,7 +333,7 @@ export default async function About() {
           </div>
           <div className="lg:col-span-2 lg:pl-20">
             <ul role="list">
-              <li className={clsx("mt-4", 'flex')}>
+              {/* <li className={clsx("mt-4", 'flex')}>
                 <Link
                   href="https://scholar.google.com/citations?user=Y0JPOD0AAAAJ"
                   target="_blank"
@@ -343,6 +343,17 @@ export default async function About() {
                   <span className="ml-4">Google Scholar</span>
                 </Link>
               </li>
+              <li className={clsx("mt-4", 'flex')}>
+                <Link
+                  href="https://x.com/Saltyp0rridge24"
+                  target="_blank"
+                  className="group flex text-sm font-medium text-zinc-800 transition hover:text-teal-500 dark:text-zinc-200 dark:hover:text-teal-500"
+                >
+                  <TwitterIcon className="h-6 w-6 flex-none fill-zinc-500 transition group-hover:fill-teal-500" />
+                  <span className="ml-4">X (Twitter)</span>
+                </Link>
+              </li> */}
+
               <SocialLink
                 icon={GoogleScholarIcon}
                 href="https://scholar.google.com/citations?user=Y0JPOD0AAAAJ"
