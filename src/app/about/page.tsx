@@ -285,7 +285,7 @@ export default async function About() {
                 >
                   the University of Hong Kong
                 </a>
-                , with deep focus and passion on NLP and LLM-based Agent. I&apos;m
+                , with deep focus and passion on NLP and fundamental model-based agent. I&apos;m
                 fortunate to get advised by&nbsp;
                 <a
                   href="https://taoyds.github.io/"
