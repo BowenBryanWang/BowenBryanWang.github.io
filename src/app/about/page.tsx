@@ -333,6 +333,16 @@ export default async function About() {
           </div>
           <div className="lg:col-span-2 lg:pl-20">
             <ul role="list">
+              <li className={clsx("mt-4", 'flex')}>
+                <Link
+                  href="https://scholar.google.com/citations?user=Y0JPOD0AAAAJ"
+                  target="_blank"
+                  className="group flex text-sm font-medium text-zinc-800 transition hover:text-teal-500 dark:text-zinc-200 dark:hover:text-teal-500"
+                >
+                  <GoogleScholarIcon className="h-6 w-6 flex-none fill-zinc-500 transition group-hover:fill-teal-500" />
+                  <span className="ml-4">Google Scholar</span>
+                </Link>
+              </li>
               <SocialLink
                 icon={GoogleScholarIcon}
                 href="https://scholar.google.com/citations?user=Y0JPOD0AAAAJ"
