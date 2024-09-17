@@ -272,7 +272,7 @@ export default async function About() {
               text={[
                 'Natural Language Processing',
                 'Multi-modal Large Language Models',
-                'Autonomous Digital Agents',
+                'Autonomous GUI Agents',
               ]}
             />
             <div className="mt-6 space-y-7 text-base text-zinc-600 dark:text-zinc-400">
@@ -319,9 +319,9 @@ export default async function About() {
                 (HCI), advised by Prof. Chun Yu and Prof. Yuanchun Shi.
               </div>
               <div>
-                My long-term research goal is to build autonomous computer agents that can
+                My long-term research goal is to build autonomous GUI agents that can
                 1) understand open-ended natural language (or even multi-modal) instructions;
-                2) observe the wild OS environment with grounded knowledge;
+                2) observe the wild GUI environment (OS, Mobile and more) with grounded knowledge;
                 3) generate executable steps (e.g. atomic actions, system shortcuts, codes, etc.)
                 iteratively to finalize the task.
               </div>
@@ -332,8 +332,7 @@ export default async function About() {
                   </svg>
                 </blockquote>
                 The ultimate goal of my research is to build fundamental large agent models that could be seamlessly integrated into the daily use just like ChatGPT, rather than prompt-based warpper of existing LLMs.
-                To implement this vision, my research covers a various range of topics, from data collection, training, evaluation and more, which could be challenging but also exciting.
-              </div>
+                To realize this vision, my research encompasses a wide range of topics, including data collection, model training/fine-tuning, and evaluation, presenting both significant challenges and exciting opportunities. </div>
             </div>
           </div>
           <div className="lg:col-span-2 lg:pl-20">
