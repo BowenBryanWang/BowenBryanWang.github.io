@@ -6,7 +6,7 @@ import remarkGfm from 'remark-gfm'
 const nextConfig = {
   pageExtensions: ['js', 'jsx', 'ts', 'tsx', 'mdx'],
   output: 'export',
-  basePath: 'agentnet-doc',
+  basePath: '',
   images: {
     unoptimized: true,
   },
