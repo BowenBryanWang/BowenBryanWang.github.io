@@ -6,20 +6,38 @@ import { MyArticle, myarticles } from '@/lib/articles'
 import { formatDate } from '@/lib/formatDate'
 
 function Article({ article }: { article: MyArticle }) {
+  const hasAnyUrl = article.url.website || article.url.paper || article.url.code
+  const primaryUrl = article.url.website || article.url.paper || article.url.code || '#'
+  
   return (
     <article className="md:grid md:grid-cols-4 md:items-baseline">
       <Card className="md:col-span-3">
-        {article.link === "True" ? (
-          <Card.Title href={`${article.url}`}>
-            {article.title}
-          </Card.Title>
-        ) : (
-          <Card.Title href="#">{article.title}</Card.Title>
-        )}
+        <Card.Title>{article.title}</Card.Title>
         <Card.Authors author={article.author} />
-        <Card.Description>{article.description}</Card.Description>
+        {/* <Card.Description>{article.description}</Card.Description> */}
         {article.link === "True" ? (
-          <Card.Cta>Read article</Card.Cta>
+          <div className="relative z-10 mt-1 flex flex-wrap items-center gap-3 text-sm text-zinc-600 dark:text-zinc-400">
+            {article.publication}
+            {hasAnyUrl && (
+              <>
+                {article.url.website && (
+                  <a href={article.url.website} className="text-xs text-blue-400 underline hover:text-blue-500">
+                    [Website]
+                  </a>
+                )}
+                {article.url.paper && (
+                  <a href={article.url.paper} className="text-xs text-blue-400 underline hover:text-blue-500">
+                    [Paper]
+                  </a>
+                )}
+                {article.url.code && (
+                  <a href={article.url.code} className="text-xs text-blue-400 underline hover:text-blue-500">
+                    [Code]
+                  </a>
+                )}
+              </>
+            )}
+          </div>
         ) : null}
 
       </Card>
@@ -43,8 +61,8 @@ export default async function ArticlesIndex() {
       <div className="md:border-l md:border-zinc-100 md:pl-6 md:dark:border-zinc-700/40">
 
         <div className="flex max-w- flex-col space-y-16">
-          {myarticles.map((article) => (
-            <Article key={article.url} article={article} />
+          {myarticles.map((article, index) => (
+            <Article key={`${article.title}-${index}`} article={article} />
           ))}
         </div>
       </div>
