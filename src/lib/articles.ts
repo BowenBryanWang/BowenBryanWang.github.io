@@ -1,6 +1,11 @@
 import glob from 'fast-glob'
 import React from 'react'
-
+import { StaticImageData } from 'next/image'
+import computerArenaImage from '@/images/publications/arena.gif'
+import opencuaImage from '@/images/publications/opencua.png'
+import KimiVLImage from '@/images/publications/kimi-vl.png'
+import AutoTaskImage from '@/images/publications/autotask.png'
+import IPMImage from '@/images/publications/IPM.png'
 export interface MyArticle {
   title: string
   description: string
@@ -8,6 +13,7 @@ export interface MyArticle {
   author: string
   date: string
   link: string
+  image?: StaticImageData | string
   url: {
     website?: string
     paper?: string
@@ -29,7 +35,8 @@ export const myarticles = [
       link: 'True',
       url: {
         website: 'https://arena.xlang.ai',
-      }
+      },
+      image: computerArenaImage
     },
     {
       author:
@@ -60,6 +67,7 @@ export const myarticles = [
         paper: 'https://arxiv.org/abs/2508.09123',
         code: "https://github.com/xlang-ai/OpenCUA"
       },
+      image: opencuaImage
     },
     {
       author:
@@ -73,6 +81,7 @@ export const myarticles = [
       url: {
         paper: 'https://arxiv.org/abs/2504.07491',
       },
+      image: KimiVLImage
     },
     {
       author:
@@ -87,6 +96,7 @@ export const myarticles = [
       url: {
         paper: "https://arxiv.org/abs/2312.16062"
       },
+      image: AutoTaskImage
     },
     {
       author:
@@ -101,5 +111,6 @@ export const myarticles = [
       url: {
         paper: 'https://dl.acm.org/doi/abs/10.1145/3610929'
       },
+      image: IPMImage
     }
   ] 

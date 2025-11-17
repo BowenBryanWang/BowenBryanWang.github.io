@@ -1,4 +1,5 @@
 import { type Metadata } from 'next'
+import Image from 'next/image'
 
 import { Card } from '@/components/Card'
 import { SimpleLayout } from '@/components/SimpleLayout'
@@ -10,37 +11,53 @@ function Article({ article }: { article: MyArticle }) {
   const primaryUrl = article.url.website || article.url.paper || article.url.code || '#'
   
   return (
-    <article className="md:grid md:grid-cols-4 md:items-baseline">
-      <Card className="md:col-span-3">
-        <Card.Title>{article.title}</Card.Title>
-        <Card.Authors author={article.author} />
-        {/* <Card.Description>{article.description}</Card.Description> */}
-        {article.link === "True" ? (
-          <div className="relative z-10 mt-1 flex flex-wrap items-center gap-3 text-sm text-zinc-600 dark:text-zinc-400">
-            {article.publication}
-            {hasAnyUrl && (
-              <>
-                {article.url.website && (
-                  <a href={article.url.website} className="text-xs text-blue-400 underline hover:text-blue-500">
-                    [Website]
-                  </a>
-                )}
-                {article.url.paper && (
-                  <a href={article.url.paper} className="text-xs text-blue-400 underline hover:text-blue-500">
-                    [Paper]
-                  </a>
-                )}
-                {article.url.code && (
-                  <a href={article.url.code} className="text-xs text-blue-400 underline hover:text-blue-500">
-                    [Code]
-                  </a>
-                )}
-              </>
-            )}
+    <article className="flex flex-col md:flex-row gap-6 group">
+      {/* Image on the left */}
+      {article.image && (
+        <div className="w-full md:w-64 flex-shrink-0">
+          <div className="relative aspect-video w-full overflow-hidden rounded-2xl bg-zinc-100 dark:bg-zinc-800">
+            <Image
+              src={article.image}
+              alt={article.title}
+              fill
+              className="object-cover transition group-hover:scale-100"
+            />
           </div>
-        ) : null}
-
-      </Card>
+        </div>
+      )}
+      
+      {/* Content on the right */}
+      <div className="flex-1 min-w-0">
+        <Card className="h-full">
+          <Card.Title>{article.title}</Card.Title>
+          <Card.Authors author={article.author} />
+          {/* <Card.Description>{article.description}</Card.Description> */}
+          {article.link === "True" ? (
+            <div className="relative z-10 mt-1 flex flex-wrap items-center gap-3 text-sm text-zinc-600 dark:text-zinc-400">
+              {article.publication}
+              {hasAnyUrl && (
+                <>
+                  {article.url.website && (
+                    <a href={article.url.website} className="text-xs text-blue-400 underline hover:text-blue-500">
+                      [Website]
+                    </a>
+                  )}
+                  {article.url.paper && (
+                    <a href={article.url.paper} className="text-xs text-blue-400 underline hover:text-blue-500">
+                      [Paper]
+                    </a>
+                  )}
+                  {article.url.code && (
+                    <a href={article.url.code} className="text-xs text-blue-400 underline hover:text-blue-500">
+                      [Code]
+                    </a>
+                  )}
+                </>
+              )}
+            </div>
+          ) : null}
+        </Card>
+      </div>
     </article >
   )
 }
@@ -55,8 +72,8 @@ export default async function ArticlesIndex() {
 
   return (
     <SimpleLayout
-      title="I research on Agents from Benchmark, Evaluation, Pre-training, and Tuning etc."
-      intro="On the journey to build autonomous agents, I believe that the roadmap should start from high-quality datasets, decent benchmarks and effective evaluation metrics to large-scale pre-training and fine-tuning techniques. More is coming soon..."
+      title="Publications"
+      intro="I research on digital agents on evaluation, foundation models, data, training etc."
     >
       <div className="md:border-l md:border-zinc-100 md:pl-6 md:dark:border-zinc-700/40">
 
