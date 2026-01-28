@@ -21,6 +21,7 @@ import NUS from '@/images/logos/nus.jpg'
 import THU from '@/images/logos/thu.jpg'
 import logoStarbucks from '@/images/logos/starbucks.svg'
 import MoonShot from '@/images/logos/moonshot.jpeg'
+import Qwen from '@/images/logos/qwen.png'
 import image1 from '@/images/photos/image-1.jpg'
 import image2 from '@/images/photos/image-2.jpg'
 import image3 from '@/images/photos/image-3.jpg'
@@ -144,6 +145,19 @@ function Role({ role }: { role: Role }) {
 function Experiences() {
   let experiences: Array<Role> = [
     {
+      company: 'Qwen Team, Alibaba Group',
+      title: 'Research Intern',
+      logo: Qwen,
+      start: {
+        label: 'Dec 2025',
+        dateTime: '2025-12',
+      },
+      end: {
+        label: 'Present',
+        dateTime: new Date().getFullYear().toString(),
+      },
+    },
+    {
       company: 'Moonshot AI',
       title: 'Research Intern',
       logo: MoonShot,
@@ -152,8 +166,8 @@ function Experiences() {
         dateTime: '2025-02',
       },
       end: {
-        label: 'Present',
-        dateTime: new Date().getFullYear().toString(),
+        label: 'Dec 2025',
+        dateTime: '2025-12',
       },
     },
   ]
@@ -365,8 +379,6 @@ export default async function About() {
                 >
                   Tsinghua University
                 </a>&nbsp;
-                focusing on Human-Computer Interaction
-                (HCI), advised by Prof. Chun Yu and Prof. Yuanchun Shi.
               </div>
               <div>
                 My long-term research goal is to build autonomous GUI agents that can

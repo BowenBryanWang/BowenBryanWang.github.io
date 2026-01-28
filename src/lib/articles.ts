@@ -27,7 +27,15 @@ export const myarticles = [
       author:
         'Bowen Wang*, Xinyuan Wang*, Jiaqi Deng*, Tianbao Xie, Ryan Li, Yanzhe Zhang, Zicheng Gong, Gavin Li, Toh Jing Hua, Ion Stoica, Wei-Lin Chiang, Diyi Yang, Yu Su, Yi Zhang, Zhiguo Wang, Victor Zhong, Tao Yu',
       date: '2025-08',
-      publication: "",
+      publication: React.createElement(
+        'span',
+        { className: 'inline-flex flex-wrap items-center gap-2' },
+        React.createElement(
+          'span',
+          { className: 'inline-flex items-center gap-1' },
+          React.createElement('span', { className: 'text-sm font-semibold' }, "ICLR'26 "),
+        )
+      ),
       title:
         'Computer Agent Arena: Evaluating Computer-Use Agents via Crowdsourcing from Real Users',
       description:
