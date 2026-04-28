@@ -6,18 +6,16 @@ import { Container } from '@/components/Container'
 import { Button } from '@/components/Button'
 import { Card } from '@/components/Card'
 import {
-  GitHubIcon,
   GoogleScholarIcon,
-  InstagramIcon,
   LinkedInIcon,
   TwitterIcon,
 } from '@/components/SocialIcons'
 import portraitImage from '@/images/portrait.jpg'
+import Apple from '@/images/logos/apple.svg'
 
 import logoAirbnb from '@/images/logos/airbnb.svg'
 import logoFacebook from '@/images/logos/facebook.svg'
 import HKU from '@/images/logos/hku.jpg'
-import NUS from '@/images/logos/nus.jpg'
 import THU from '@/images/logos/thu.jpg'
 import logoStarbucks from '@/images/logos/starbucks.svg'
 import MoonShot from '@/images/logos/moonshot.jpeg'
@@ -48,10 +46,10 @@ function SocialLink({
       <Link
         href={href}
         target="_blank"
-        className="group flex text-sm font-medium text-zinc-800 transition hover:text-amber-700 dark:text-zinc-200 dark:hover:text-amber-300"
+        className="group flex items-center text-sm font-medium text-zinc-800 transition hover:text-amber-700 dark:text-zinc-200 dark:hover:text-amber-300"
       >
         <Icon className="h-6 w-6 flex-none fill-zinc-500 transition group-hover:fill-amber-700 dark:group-hover:fill-amber-300" />
-        <span className="ml-4">{children}</span>
+        <span className="ml-4 whitespace-nowrap">{children}</span>
       </Link>
     </li>
   )
@@ -100,9 +98,28 @@ function Newsletter() {
 interface Role {
   company: string
   title: string
-  logo: ImageProps['src']
+  logo?: ImageProps['src']
+  description?: string
+  advisor?: React.ReactNode
   start: string | { label: string; dateTime: string }
   end: string | { label: string; dateTime: string }
+}
+
+interface TechnicalReport {
+  year: string
+  title: string
+  authors: string
+  url?: string
+}
+
+interface HonorAward {
+  year: string
+  title: React.ReactNode
+}
+
+interface TalkItem {
+  year: string
+  title: React.ReactNode
 }
 
 function Role({ role }: { role: Role }) {
@@ -116,8 +133,17 @@ function Role({ role }: { role: Role }) {
 
   return (
     <li className="flex gap-4">
-      <div className="relative mt-1 flex h-12 w-12 flex-none items-center justify-center rounded-full shadow-md shadow-zinc-800/5 ring-1 ring-zinc-900/5 dark:border dark:border-zinc-700/50 dark:bg-zinc-800 dark:ring-0">
-        <Image src={role.logo} alt="" className="h-10 w-10" unoptimized />
+      <div className="relative mt-1 flex h-12 w-12 flex-none items-center justify-center">
+        {role.logo ? (
+          <Image
+            src={role.logo}
+            alt=""
+            className="h-10 w-10 object-contain"
+            unoptimized
+          />
+        ) : (
+          <BriefcaseIcon className="h-6 w-6 text-zinc-400 dark:text-zinc-500" />
+        )}
       </div>
       <dl className="flex flex-auto flex-wrap gap-x-2">
         <dt className="sr-only">Company</dt>
@@ -128,6 +154,22 @@ function Role({ role }: { role: Role }) {
         <dd className="text-xs text-zinc-500 dark:text-zinc-400">
           {role.title}
         </dd>
+        {role.advisor && (
+          <>
+            <dt className="sr-only">Advisor</dt>
+            <dd className="w-full flex-none text-xs text-zinc-500 dark:text-zinc-400">
+              Advisor: {role.advisor}
+            </dd>
+          </>
+        )}
+        {role.description && (
+          <>
+            <dt className="sr-only">Description</dt>
+            <dd className="w-full flex-none text-xs text-zinc-500 dark:text-zinc-400">
+              {role.description}
+            </dd>
+          </>
+        )}
         <dt className="sr-only">Date</dt>
         <dd
           className="ml-auto text-xs text-zinc-400 dark:text-zinc-500"
@@ -145,30 +187,80 @@ function Role({ role }: { role: Role }) {
 function Experiences() {
   let experiences: Array<Role> = [
     {
+      company: 'Apple AI/ML',
+      title: 'Research Scientist Intern',
+      logo: Apple,
+      advisor: (
+        <a
+          href="https://zhegan27.github.io/"
+          target="_blank"
+          rel="noreferrer"
+          className="underline decoration-zinc-300 underline-offset-2 dark:decoration-zinc-600"
+        >
+          Zhe Gan
+        </a>
+      ),
+      description: 'Digital Agent Research',
+      start: '2026.5',
+      end: 'present',
+    },
+    {
       company: 'Qwen Team, Alibaba Group',
-      title: 'Research Intern',
+      title: 'Research Scientist Intern',
       logo: Qwen,
-      start: {
-        label: 'Dec 2025',
-        dateTime: '2025-12',
-      },
-      end: {
-        label: 'Present',
-        dateTime: new Date().getFullYear().toString(),
-      },
+      advisor: (
+        <>
+          <a
+            href="https://scholar.google.com/citations?user=3_zVvT0AAAAJ"
+            target="_blank"
+            rel="noreferrer"
+            className="underline decoration-zinc-300 underline-offset-2 dark:decoration-zinc-600"
+          >
+            Binyuan Hui
+          </a>{' '}
+          &amp;{' '}
+          <a
+            href="https://scholar.google.com/citations?user=xy6A44QAAAAJ"
+            target="_blank"
+            rel="noreferrer"
+            className="underline decoration-zinc-300 underline-offset-2 dark:decoration-zinc-600"
+          >
+            Junyang Lin
+          </a>
+        </>
+      ),
+      description: 'Post-training in CUA',
+      start: '2025.12',
+      end: '2026.4',
     },
     {
       company: 'Moonshot AI',
       title: 'Research Intern',
       logo: MoonShot,
-      start: {
-        label: 'Feb 2025',
-        dateTime: '2025-02',
-      },
-      end: {
-        label: 'Dec 2025',
-        dateTime: '2025-12',
-      },
+      advisor: (
+        <>
+          <a
+            href="https://www.haohu.tech/"
+            target="_blank"
+            rel="noreferrer"
+            className="underline decoration-zinc-300 underline-offset-2 dark:decoration-zinc-600"
+          >
+            Hao Hu
+          </a>{' '}
+          &amp;{' '}
+          <a
+            href="https://floodsung.github.io/"
+            target="_blank"
+            rel="noreferrer"
+            className="underline decoration-zinc-300 underline-offset-2 dark:decoration-zinc-600"
+          >
+            Flood Sung
+          </a>
+        </>
+      ),
+      description: 'Post-training in CUA',
+      start: '2025.02',
+      end: '2025.12',
     },
   ]
 
@@ -198,13 +290,6 @@ function Education() {
         label: 'Present',
         dateTime: new Date().getFullYear().toString(),
       },
-    },
-    {
-      company: 'National University of Singapore',
-      title: 'Research Assistant',
-      logo: NUS,
-      start: '2023.06',
-      end: '2023.09',
     },
     {
       company: 'Tsinghua University',
@@ -308,17 +393,119 @@ function Article({ article }: { article: MyArticle }) {
   )
 }
 
+function TechnicalReportItem({ report }: { report: TechnicalReport }) {
+  return (
+    <Card className="md:col-span-3">
+      <Card.Title>{report.title}</Card.Title>
+      <Card.Authors author={report.authors} />
+      <div className="relative z-10 mt-1 flex flex-wrap items-center gap-3 text-sm text-zinc-600 dark:text-zinc-400">
+        <span className="text-sm font-semibold">{report.year}</span>
+        <span>Technical Report</span>
+        {report.url && (
+          <a
+            href={report.url}
+            target="_blank"
+            rel="noreferrer"
+            className="text-xs text-blue-400 underline hover:text-blue-500"
+          >
+            [Paper]
+          </a>
+        )}
+      </div>
+    </Card>
+  )
+}
+
 export const metadata: Metadata = {
   title: 'About',
   description: 'Bryan Wang',
 }
 
 export default async function About() {
+  const selectedPublications = myarticles.filter(
+    (article) =>
+      article.title !== 'Kimi-VL Technical Report' &&
+      article.title !==
+        'Interaction Proxy Manager: Semantic Model Generation and Run-time Support for Reconstructing Ubiquitous User Interfaces of Mobile Services',
+  )
+
+  const technicalReports: TechnicalReport[] = [
+    {
+      year: '2026',
+      title: 'Qwen3.5: Towards Native Multimodal Agents',
+      authors: 'The Qwen Team, Alibaba Group.',
+      url: 'https://qwen.ai/blog?id=qwen3.5',
+    },
+    {
+      year: '2026',
+      title: 'Kimi K2.5: Visual Agentic Intelligence',
+      authors: 'The Kimi Team.',
+      url: 'https://arxiv.org/abs/2602.02276',
+    },
+    {
+      year: '2025',
+      title: 'Kimi-VL Technical Report',
+      authors:
+        'Kimi Team: Angang Du, Bohong Yin, Bowei Xing, Bowen Qu, Bowen Wang, Cheng Chen, Chenlin Zhang, Chenzhuang Du, Chu Wei, Congcong Wang, Dehao Zhang, Dikang Du, Dongliang Wang, Enming Yuan, Enzhe Lu, Fang Li, Flood Sung, Guangda Wei, Guokun Lai, Han Zhu, Hao Ding, Hao Hu, Hao Yang, et al.',
+      url: 'https://arxiv.org/abs/2504.07491',
+    },
+  ]
+
+  const honorsAndAwards: HonorAward[] = [
+    {
+      year: '2025',
+      title: (
+        <>
+          <strong>Workshop Best Paper Award</strong>,{' '}
+          <em>COLM 2025 AIA workshop</em>
+        </>
+      ),
+    },
+    {
+      year: '2025',
+      title: (
+        <>
+          <strong>Research Postgraduate Student Innovation Award</strong>,{' '}
+          <em>The University of Hong Kong</em>
+        </>
+      ),
+    },
+    {
+      year: '2023',
+      title: (
+        <>
+          <strong>Research and Innovation Scholarship</strong>,{' '}
+          <em>Tsinghua University</em>
+        </>
+      ),
+    },
+    {
+      year: '2022',
+      title: (
+        <>
+          <strong>2-nd Prize, Challenge-Cup Competition Award</strong>,{' '}
+          <em>Tsinghua University</em>
+        </>
+      ),
+    },
+  ]
+
+  const talks: TalkItem[] = [
+    {
+      year: '2025',
+      title: (
+        <>
+          <strong>Language Agents</strong>, <em>University of Tasmania</em>
+        </>
+      ),
+    },
+  ]
+
   return (
     <>
       <Container className="mt-8 sm:mt-16">
-        <div className="grid grid-cols-1 gap-y-16 lg:grid-cols-6 lg:grid-rows-[auto_1fr] lg:gap-y-12">
-          <div className="lg:col-span-2 lg:pl-20">
+        <div className="grid grid-cols-1 gap-y-16 lg:grid-cols-10 lg:grid-rows-[auto_1fr] lg:gap-y-12">
+          <div className="lg:col-span-3 lg:pl-20">
             <div className="max-w-md px-2.5 lg:max-w-none">
               <Image
                 src={portraitImage}
@@ -328,15 +515,14 @@ export default async function About() {
               />
             </div>
           </div>
-          <div className="lg:order-first lg:col-span-4 lg:row-span-2">
+          <div className="lg:order-first lg:col-span-7 lg:row-span-2">
             <h1 className="text-4xl font-bold tracking-tight text-zinc-800 dark:text-zinc-100 sm:text-5xl">
               Bowen Wang
             </h1>
             <MyTypewriter
               text={[
-                'Natural Language Processing',
-                'Agentic Foundation Models',
-                'Computer-Use Agents',
+                'Computer-Use Agent',
+                'Agentic Models',
               ]}
             />
             <div className="mt-6 space-y-7 text-base text-zinc-600 dark:text-zinc-400">
@@ -381,19 +567,23 @@ export default async function About() {
                 </a>&nbsp;
               </div>
               <div>
-                My long-term research goal is to build autonomous GUI agents that can
-                1) understand open-ended natural language (or even multi-modal) instructions;
-                2) observe the wild GUI environment (OS, Mobile and more) with grounded knowledge;
-                3) generate executable steps (e.g. atomic actions, system shortcuts, codes, etc.)
-                iteratively to finalize the task.
+                My research focuses on building universal digital agents. I
+                have primarily worked on computer-use agents (CUA), developing
+                open foundations through mid-training and post-training and
+                building open-sourced CUA models. My current research interests
+                lie in digital agentic models, particularly in post-training
+                methodologies for creating generalizable and intelligent agents
+                that can reliably operate across diverse digital environments
+                including coding, computer-use, terminal-use and more.
               </div>
               <div>
-                <blockquote className="relative">
-                  <svg className="absolute -top-0 -start-8 size-16 text-gray-500 dark:text-neutral-700" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                    <path d="M7.39762 10.3C7.39762 11.0733 7.14888 11.7 6.6514 12.18C6.15392 12.6333 5.52552 12.86 4.76621 12.86C3.84979 12.86 3.09047 12.5533 2.48825 11.94C1.91222 11.3266 1.62421 10.4467 1.62421 9.29999C1.62421 8.07332 1.96459 6.87332 2.64535 5.69999C3.35231 4.49999 4.33418 3.55332 5.59098 2.85999L6.4943 4.25999C5.81354 4.73999 5.26369 5.27332 4.84476 5.85999C4.45201 6.44666 4.19017 7.12666 4.05926 7.89999C4.29491 7.79332 4.56983 7.73999 4.88403 7.73999C5.61716 7.73999 6.21938 7.97999 6.69067 8.45999C7.16197 8.93999 7.39762 9.55333 7.39762 10.3ZM14.6242 10.3C14.6242 11.0733 14.3755 11.7 13.878 12.18C13.3805 12.6333 12.7521 12.86 11.9928 12.86C11.0764 12.86 10.3171 12.5533 9.71484 11.94C9.13881 11.3266 8.85079 10.4467 8.85079 9.29999C8.85079 8.07332 9.19117 6.87332 9.87194 5.69999C10.5789 4.49999 11.5608 3.55332 12.8176 2.85999L13.7209 4.25999C13.0401 4.73999 12.4903 5.27332 12.0713 5.85999C11.6786 6.44666 11.4168 7.12666 11.2858 7.89999C11.5215 7.79332 11.7964 7.73999 12.1106 7.73999C12.8437 7.73999 13.446 7.97999 13.9173 8.45999C14.3886 8.93999 14.6242 9.55333 14.6242 10.3Z" fill="currentColor"></path>
-                  </svg>
-                </blockquote>
-                My research focuses on building general autonomous agents. I have primarily worked on computer-use agents (CUA), developing comprehensive evaluation frameworks and open foundations through supervised fine-tuning. My current research interests lie in digital agentic models, particularly in post-training methodologies for creating genuinely generalizable and intelligent agents that can reliably operate across diverse digital environments. </div>
+                I have also participated in building open-source foundation
+                models such as Qwen3.5 and Kimi K2.5, and I hope to make
+                computer-use a core capability of frontier models. I believe
+                universal digital agents (UDA) are a path toward AGI. If you
+                would like to talk about research or life, feel free to reach
+                out. I&apos;m open to opportunities.
+              </div>
             </div>
           </div>
           <div className="lg:col-span-2 lg:pl-20">
@@ -434,13 +624,6 @@ export default async function About() {
                 X (Twitter)
               </SocialLink>
               <SocialLink
-                href="https://github.com/BowenBryanWang"
-                icon={GitHubIcon}
-                className="mt-4"
-              >
-                GitHub
-              </SocialLink>
-              <SocialLink
                 href="https://www.linkedin.com/in/bowenwangnlp/"
                 icon={LinkedInIcon}
                 className="mt-4"
@@ -467,11 +650,76 @@ export default async function About() {
             <Education />
           </div>
           <div className="col-span-3 flex flex-col gap-16">
-            {myarticles.map((article, index) => (
-              <Article key={`${article.title}-${index}`} article={article} />
-            ))}
+            <section>
+              <h2 className="border-b border-zinc-200 pb-2 text-3xl font-semibold tracking-tight text-zinc-900 dark:border-zinc-700 dark:text-zinc-100">
+                Selected Publications
+              </h2>
+              <div className="mt-8 flex flex-col gap-10">
+                {selectedPublications.map((article, index) => (
+                  <Article key={`${article.title}-${index}`} article={article} />
+                ))}
+              </div>
+            </section>
+
+            <section>
+              <h2 className="border-b border-zinc-200 pb-2 text-3xl font-semibold tracking-tight text-zinc-900 dark:border-zinc-700 dark:text-zinc-100">
+                Technical Reports
+              </h2>
+              <div className="mt-8 flex flex-col gap-10">
+                {technicalReports.map((report, index) => (
+                  <TechnicalReportItem
+                    key={`${report.title}-${index}`}
+                    report={report}
+                  />
+                ))}
+              </div>
+            </section>
           </div>
         </div>
+      </Container>
+      <Container className="mt-16 md:mt-24">
+        <section>
+          <h2 className="border-b border-zinc-200 pb-2 text-2xl font-semibold tracking-tight text-zinc-900 dark:border-zinc-700 dark:text-zinc-100 sm:text-3xl">
+            Honors &amp; Awards
+          </h2>
+          <ol className="mt-6 space-y-4 sm:space-y-5">
+            {honorsAndAwards.map((item, index) => (
+              <li
+                key={`${item.year}-${index}`}
+                className="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:gap-5"
+              >
+                <div className="w-full flex-none text-base font-semibold tracking-tight text-zinc-900 dark:text-zinc-100 sm:w-16 sm:text-lg">
+                  {item.year}
+                </div>
+                <div className="min-w-0 text-base leading-7 text-zinc-900 dark:text-zinc-100 sm:text-[1.05rem] sm:leading-7 sm:[&_strong]:font-semibold sm:[&_em]:font-normal sm:[&_em]:italic">
+                  {item.title}
+                </div>
+              </li>
+            ))}
+          </ol>
+        </section>
+      </Container>
+      <Container className="mt-16 md:mt-20">
+        <section>
+          <h2 className="border-b border-zinc-200 pb-2 text-2xl font-semibold tracking-tight text-zinc-900 dark:border-zinc-700 dark:text-zinc-100 sm:text-3xl">
+            Talks
+          </h2>
+          <ol className="mt-6 space-y-4">
+            {talks.map((item, index) => (
+              <li
+                key={`${item.year}-${index}`}
+                className="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:gap-5"
+              >
+                <div className="w-full flex-none text-base font-semibold tracking-tight text-zinc-900 dark:text-zinc-100 sm:w-16 sm:text-lg">
+                  {item.year}
+                </div>
+                <div className="min-w-0 text-base leading-7 text-zinc-900 dark:text-zinc-100 sm:text-[1.05rem] sm:leading-7 sm:[&_strong]:font-semibold sm:[&_em]:font-normal sm:[&_em]:italic">
+                  {item.title}
+                </div>
+              </li>
+            ))}
+          </ol>
+        </section>
       </Container>
     </>
   )

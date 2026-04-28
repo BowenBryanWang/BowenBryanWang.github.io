@@ -4,7 +4,13 @@ import Image from 'next/image'
 import { Card } from '@/components/Card'
 import { SimpleLayout } from '@/components/SimpleLayout'
 import { MyArticle, myarticles } from '@/lib/articles'
-import { formatDate } from '@/lib/formatDate'
+
+interface TechnicalReport {
+  year: string
+  title: string
+  authors: string
+  url?: string
+}
 
 function Article({ article }: { article: MyArticle }) {
   const hasAnyUrl = article.url.website || article.url.paper || article.url.code
@@ -62,13 +68,56 @@ function Article({ article }: { article: MyArticle }) {
   )
 }
 
-// export const metadata: Metadata = {
-//   title: 'Articles',
-//   description:
-//     'All of my long-form thoughts on programming, leadership, product design, and more, collected in chronological order.',
-// }
+function TechnicalReportItem({ report }: { report: TechnicalReport }) {
+  return (
+    <Card className="h-full">
+      <Card.Title>{report.title}</Card.Title>
+      <Card.Authors author={report.authors} />
+      <div className="relative z-10 mt-1 flex flex-wrap items-center gap-3 text-sm text-zinc-600 dark:text-zinc-400">
+        <span className="text-sm font-semibold">{report.year}</span>
+        <span>Technical Report</span>
+        {report.url && (
+          <a
+            href={report.url}
+            target="_blank"
+            rel="noreferrer"
+            className="text-xs text-blue-400 underline hover:text-blue-500"
+          >
+            [Paper]
+          </a>
+        )}
+      </div>
+    </Card>
+  )
+}
+
+export const metadata: Metadata = {
+  title: 'Publications',
+  description: 'Selected publications and technical reports by Bryan Wang.',
+}
 
 export default async function ArticlesIndex() {
+  const technicalReports: TechnicalReport[] = [
+    {
+      year: '2026',
+      title: 'Qwen3.5: Towards Native Multimodal Agents',
+      authors: 'The Qwen Team, Alibaba Group.',
+      url: 'https://qwen.ai/blog?id=qwen3.5',
+    },
+    {
+      year: '2026',
+      title: 'Kimi K2.5: Visual Agentic Intelligence',
+      authors: 'The Kimi Team.',
+      url: 'https://arxiv.org/abs/2602.02276',
+    },
+    {
+      year: '2025',
+      title: 'Kimi-VL Technical Report',
+      authors:
+        'Kimi Team: Angang Du, Bohong Yin, Bowei Xing, Bowen Qu, Bowen Wang, Cheng Chen, Chenlin Zhang, Chenzhuang Du, Chu Wei, Congcong Wang, Dehao Zhang, Dikang Du, Dongliang Wang, Enming Yuan, Enzhe Lu, Fang Li, Flood Sung, Guangda Wei, Guokun Lai, Han Zhu, Hao Ding, Hao Hu, Hao Yang, et al.',
+      url: 'https://arxiv.org/abs/2504.07491',
+    },
+  ]
 
   return (
     <SimpleLayout
@@ -76,12 +125,30 @@ export default async function ArticlesIndex() {
       intro="I research on digital agents on evaluation, foundation models, data, training etc."
     >
       <div className="md:border-l md:border-zinc-100 md:pl-6 md:dark:border-zinc-700/40">
+        <section>
+          <h2 className="border-b border-zinc-200 pb-2 text-3xl font-semibold tracking-tight text-zinc-900 dark:border-zinc-700 dark:text-zinc-100">
+            Publications
+          </h2>
+          <div className="mt-8 flex flex-col gap-10">
+            {myarticles.map((article, index) => (
+              <Article key={`${article.title}-${index}`} article={article} />
+            ))}
+          </div>
+        </section>
 
-        <div className="flex max-w- flex-col space-y-16">
-          {myarticles.map((article, index) => (
-            <Article key={`${article.title}-${index}`} article={article} />
-          ))}
-        </div>
+        <section className="mt-16">
+          <h2 className="border-b border-zinc-200 pb-2 text-3xl font-semibold tracking-tight text-zinc-900 dark:border-zinc-700 dark:text-zinc-100">
+            Technical Reports
+          </h2>
+          <div className="mt-8 flex flex-col gap-10">
+            {technicalReports.map((report, index) => (
+              <TechnicalReportItem
+                key={`${report.title}-${index}`}
+                report={report}
+              />
+            ))}
+          </div>
+        </section>
       </div>
     </SimpleLayout>
   )
