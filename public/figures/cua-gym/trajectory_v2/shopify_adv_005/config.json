@@ -1,0 +1,32 @@
+{
+  "instruction": "I want to do a vendor consolidation. Change the vendor for all products currently under 'BasicWear' and 'HomeGoods' to 'UnifiedBrands'. Then update the product descriptions for those items to include 'Now part of the UnifiedBrands family' at the end. Don't touch products from other vendors.",
+  "id": "shopify_adv_005",
+  "app_type": "shopify_admin_mock",
+  "config": [
+    {
+      "type": "download",
+      "parameters": {
+        "files": [
+          {
+            "url": "oss://ofasys-wlcb-toshanghai/osworld/rl/tasks/rlvr/shopify_adv_005/initial_setup.py",
+            "path": "/home/user/initial_setup.py"
+          }
+        ]
+      }
+    },
+    {
+      "type": "execute",
+      "parameters": {
+        "command": "python3 /home/user/initial_setup.py"
+      }
+    }
+  ],
+  "evaluator": {
+    "type": "python",
+    "url": "oss://ofasys-wlcb-toshanghai/osworld/rl/tasks/rlvr/shopify_adv_005/reward.py"
+  },
+  "generated_at": "2026-04-01T05:18:42.851021",
+  "adversarial_rounds": 2,
+  "version": "0402",
+  "difficulty": "hard"
+}

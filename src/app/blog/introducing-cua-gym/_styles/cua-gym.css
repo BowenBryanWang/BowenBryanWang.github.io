@@ -1,0 +1,206 @@
+/* cua-gym design system — scoped to `.cua-gym-scope` so it does NOT leak
+   into the rest of the site. Tailwind base/components/utilities are
+   already loaded by src/styles/tailwind.css; we only add scoped tokens
+   and a small set of custom classes. */
+
+@import url('https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&family=DM+Sans:opsz,wght@9..40,300..700&display=swap');
+@import 'katex/dist/katex.min.css';
+
+.cua-gym-scope {
+  /* design tokens, scoped — white-on-white for personal blog integration */
+  --paper: #ffffff;
+  --paper-deep: #f4f1ea;
+  --rule: #e4ddcd;
+  --ink: #1b1816;
+  --ink-soft: #5c5651;
+  --ink-faint: #9c948a;
+  --oxblood: #862d1a;
+  --forest: #1f4e37;
+
+  /* baseline body styling that the cua-gym homepage assumes */
+  font-family: 'DM Sans', system-ui, sans-serif;
+  font-size: 16px;
+  line-height: 1.62;
+  background-color: transparent;
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+.cua-gym-scope ::selection {
+  background-color: rgba(134, 45, 26, 0.18);
+  color: var(--ink);
+}
+
+.cua-gym-scope h1,
+.cua-gym-scope h2,
+.cua-gym-scope h3,
+.cua-gym-scope h4 {
+  font-family: 'Newsreader', Georgia, serif;
+  font-feature-settings: 'kern', 'liga';
+  color: var(--ink);
+  letter-spacing: -0.005em;
+}
+
+/* Newsreader variable optical sizing 6..72; weight 200..800 */
+.cua-gym-scope .display {
+  font-family: 'Newsreader', Georgia, serif;
+  font-variation-settings: 'opsz' 60;
+  font-weight: 400;
+}
+
+.cua-gym-scope .display-italic {
+  font-family: 'Newsreader', Georgia, serif;
+  font-style: italic;
+  font-variation-settings: 'opsz' 60;
+  font-weight: 400;
+}
+
+.cua-gym-scope .container-page {
+  @apply mx-auto w-full max-w-page px-6 sm:px-10 lg:px-16;
+}
+
+.cua-gym-scope .container-prose {
+  @apply mx-auto w-full max-w-prose2 px-6 sm:px-10;
+}
+
+.cua-gym-scope .small-caps {
+  font-feature-settings: 'smcp', 'c2sc';
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+.cua-gym-scope .grid-bg {
+  background-image: linear-gradient(to right, var(--rule) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--rule) 1px, transparent 1px);
+  background-size: 56px 56px;
+  background-position: -1px -1px;
+  mask-image: radial-gradient(ellipse 60% 70% at 50% 35%, black 30%, transparent 78%);
+}
+
+.cua-gym-scope .prose-research {
+  color: var(--ink-soft);
+  font-size: 16px;
+  line-height: 1.75;
+}
+
+.cua-gym-scope .prose-research p {
+  margin-bottom: 1.1em;
+}
+
+.cua-gym-scope .prose-research p:last-child {
+  margin-bottom: 0;
+}
+
+.cua-gym-scope .prose-research strong {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.cua-gym-scope .prose-research em {
+  font-family: 'Newsreader', Georgia, serif;
+  font-style: italic;
+  color: var(--ink);
+}
+
+/* First-mention term: special serif + italic + bold */
+.cua-gym-scope .term,
+.cua-gym-scope .prose-research em.term {
+  font-family: 'Newsreader', Georgia, serif;
+  font-style: italic;
+  font-weight: 700;
+  font-variation-settings: 'opsz' 60;
+  color: var(--ink);
+}
+
+.cua-gym-scope .prose-research a {
+  color: var(--oxblood);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+}
+
+.cua-gym-scope .prose-research a:hover {
+  text-decoration-thickness: 2px;
+}
+
+/* Masonry / waterfall via CSS columns */
+.cua-gym-scope .masonry {
+  column-count: 2;
+  column-gap: 0.75rem;
+}
+@media (min-width: 640px) {
+  .cua-gym-scope .masonry {
+    column-count: 3;
+  }
+}
+@media (min-width: 1024px) {
+  .cua-gym-scope .masonry {
+    column-count: 4;
+  }
+}
+.cua-gym-scope .masonry-item {
+  -webkit-column-break-inside: avoid;
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+.cua-gym-scope .no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.cua-gym-scope .no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+@keyframes cua-gym-marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+.cua-gym-scope .marquee-track {
+  display: flex;
+  flex-wrap: nowrap;
+  width: max-content;
+  animation-name: cua-gym-marquee;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  will-change: transform;
+}
+.cua-gym-scope .marquee-track:hover {
+  animation-play-state: paused;
+}
+@media (prefers-reduced-motion: reduce) {
+  .cua-gym-scope .marquee-track {
+    animation: none;
+  }
+}
+
+.cua-gym-scope .font-system,
+.cua-gym-scope .font-system * {
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text',
+    'SF Pro Display', 'Helvetica Neue', 'Segoe UI', system-ui, sans-serif !important;
+}
+
+.cua-gym-scope .font-system .font-mono,
+.cua-gym-scope .font-system .font-mono * {
+  font-family: Consolas, 'Cascadia Code', 'JetBrains Mono', 'SF Mono',
+    ui-monospace, SFMono-Regular, Menlo, monospace !important;
+}
+
+.cua-gym-scope .marker-link {
+  background-image: linear-gradient(to right, var(--oxblood), var(--oxblood));
+  background-position: 0 100%;
+  background-repeat: no-repeat;
+  background-size: 0% 1px;
+  transition: background-size 240ms ease;
+}
+
+.cua-gym-scope .marker-link:hover {
+  background-size: 100% 1px;
+}

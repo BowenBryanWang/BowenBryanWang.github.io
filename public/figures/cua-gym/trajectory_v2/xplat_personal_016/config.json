@@ -1,0 +1,32 @@
+{
+  "instruction": "I'm a grad student tracking my research progress. Check Gmail for any messages from my advisor (Dr. Hoffman). Update my research expense tracker in Calc \u2014 add the conference registration fee from the email. Then update my Notion 'Thesis Progress' page with the feedback Dr. Hoffman gave and add a new milestone for the upcoming conference presentation.",
+  "id": "xplat_personal_016",
+  "app_type": "gmail_mock,libreoffice_calc,notion_mock",
+  "config": [
+    {
+      "type": "download",
+      "parameters": {
+        "files": [
+          {
+            "url": "oss://ofasys-wlcb-toshanghai/osworld/rl/tasks/rlvr/xplat_personal_016/initial_setup.py",
+            "path": "/home/user/initial_setup.py"
+          }
+        ]
+      }
+    },
+    {
+      "type": "execute",
+      "parameters": {
+        "command": "python3 /home/user/initial_setup.py"
+      }
+    }
+  ],
+  "evaluator": {
+    "type": "python",
+    "url": "oss://ofasys-wlcb-toshanghai/osworld/rl/tasks/rlvr/xplat_personal_016/reward.py"
+  },
+  "generated_at": "2026-03-31T04:54:26.536724",
+  "adversarial_rounds": "1",
+  "version": "0402",
+  "difficulty": "hard"
+}

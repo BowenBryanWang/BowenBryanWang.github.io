@@ -1,0 +1,32 @@
+{
+  "instruction": "Render page 3 of ~/Documents/technical_diagram.pdf as a high-resolution PNG image (300 DPI) using pymupdf. Insert this PNG into a new LibreOffice Writer document ~/Documents/diagram_reference.odt, centered on the page, with the caption 'Figure 1: System Architecture Diagram' below it in italic.",
+  "id": "pdf_cross_009",
+  "app_type": "pdf",
+  "config": [
+    {
+      "type": "download",
+      "parameters": {
+        "files": [
+          {
+            "url": "oss://ofasys-wlcb-toshanghai/osworld/rl/tasks/rlvr/pdf_cross_009/initial_setup.py",
+            "path": "/home/user/initial_setup.py"
+          }
+        ]
+      }
+    },
+    {
+      "type": "execute",
+      "parameters": {
+        "command": "python3 /home/user/initial_setup.py"
+      }
+    }
+  ],
+  "evaluator": {
+    "type": "python",
+    "url": "oss://ofasys-wlcb-toshanghai/osworld/rl/tasks/rlvr/pdf_cross_009/reward.py"
+  },
+  "generated_at": "2026-03-25T00:00:00.000000",
+  "adversarial_rounds": 1,
+  "version": "0402",
+  "difficulty": "hard"
+}

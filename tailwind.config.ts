@@ -23,6 +23,36 @@ export default {
       '8xl': ['6rem', { lineHeight: '1' }],
       '9xl': ['8rem', { lineHeight: '1' }],
     },
+    extend: {
+      // cua-gym design tokens — used only inside the
+      // /blog/introducing-cua-gym page (scoped via .cua-gym-scope)
+      colors: {
+        paper: {
+          DEFAULT: '#F7F4ED',
+          deep: '#EFEAE0',
+        },
+        ink: {
+          DEFAULT: '#1B1816',
+          soft: '#5C5550',
+          faint: '#9C948A',
+        },
+        oxblood: {
+          DEFAULT: '#862D1A',
+          dark: '#641F0F',
+        },
+        forest: '#1F6E3F',
+        rule: '#E2DDD2',
+      },
+      fontFamily: {
+        display: ['Newsreader', 'Georgia', 'serif'],
+        body: ['"DM Sans"', 'system-ui', '-apple-system', 'sans-serif'],
+        mono: ['Consolas', '"JetBrains Mono"', 'ui-monospace', 'monospace'],
+      },
+      maxWidth: {
+        prose2: '52rem',
+        page: '78rem',
+      },
+    },
     typography: typographyStyles,
   },
 } satisfies Config
