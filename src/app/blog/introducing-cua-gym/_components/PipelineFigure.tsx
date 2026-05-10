@@ -785,7 +785,7 @@ function TaskCard() {
           <i>
             Can you please send an email to each client listed in the opened
             Notion page using the template from Gmail? You should attach their
-            transactions in the <b>'clients.xlsx'</b> table on desktop.
+            transactions in the <b>&apos;clients.xlsx&apos;</b> table on desktop.
           </i>
         </p>
         <p
@@ -796,8 +796,8 @@ function TaskCard() {
             Context:
           </span>{' '}
           There should be 10 clients in the Notion database page, each with
-          email listed, and an existing email template in the 'Sent' folder of
-          Gmail. The spreadsheet <b>'clients.xlsx'</b> is a complete document
+          email listed, and an existing email template in the &apos;Sent&apos; folder of
+          Gmail. The spreadsheet <b>&apos;clients.xlsx&apos;</b> is a complete document
           containing all clients during 2024 Q1–2025 Q4…
         </p>
       </div>

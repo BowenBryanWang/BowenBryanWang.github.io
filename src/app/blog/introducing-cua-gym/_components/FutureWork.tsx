@@ -37,7 +37,7 @@ export default function FutureWork() {
           line — writing a script, running a query, editing a config file,
           then switching back to a browser. Modeling this as a unified problem
           and training an agent that reasons about both surfaces together feels
-          like the right long-term framing, and CUA-Gym's data format is
+          like the right long-term framing, and CUA-Gym&apos;s data format is
           general enough to support it.
         </p>
         <p>
