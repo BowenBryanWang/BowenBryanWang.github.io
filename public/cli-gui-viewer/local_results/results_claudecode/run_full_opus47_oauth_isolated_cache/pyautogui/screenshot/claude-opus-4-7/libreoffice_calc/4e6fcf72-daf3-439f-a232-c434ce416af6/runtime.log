@@ -1,0 +1,90 @@
+[2026-05-10 21:24:15,124][INFO] [libreoffice_calc/4e6fcf72-daf3-439f-a232-c434ce416af6] one-shot agent.predict starting...
+[2026-05-10 21:25:46,440][INFO] [libreoffice_calc/4e6fcf72-daf3-439f-a232-c434ce416af6] predict done in 91.3s
+[2026-05-10 21:25:46,444][INFO] [libreoffice_calc/4e6fcf72-daf3-439f-a232-c434ce416af6] evaluating...
+[2026-05-10 21:56:59,617][ERROR] evaluate() failed: Setup step 2 failed: _open_setup - Failed to open file '/home/user/Employee_Age_By_Birthday_gold.xlsx'. An error occurred while trying to send the request or the server responded with an error: HTTPConnectionPool(host='54.234.205.180', port=5000): Read timed out. (read timeout=1810)
+Traceback (most recent call last):
+  File "/root/.venvs/osworld-py312/lib/python3.12/site-packages/urllib3/connectionpool.py", line 534, in _make_request
+    response = conn.getresponse()
+               ^^^^^^^^^^^^^^^^^^
+  File "/root/.venvs/osworld-py312/lib/python3.12/site-packages/urllib3/connection.py", line 571, in getresponse
+    httplib_response = super().getresponse()
+                       ^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/http/client.py", line 1450, in getresponse
+    response.begin()
+  File "/root/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/http/client.py", line 336, in begin
+    version, status, reason = self._read_status()
+                              ^^^^^^^^^^^^^^^^^^^
+  File "/root/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/http/client.py", line 297, in _read_status
+    line = str(self.fp.readline(_MAXLINE + 1), "iso-8859-1")
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/socket.py", line 720, in readinto
+    return self._sock.recv_into(b)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+TimeoutError: timed out
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/root/.venvs/osworld-py312/lib/python3.12/site-packages/requests/adapters.py", line 486, in send
+    resp = conn.urlopen(
+           ^^^^^^^^^^^^^
+  File "/root/.venvs/osworld-py312/lib/python3.12/site-packages/urllib3/connectionpool.py", line 841, in urlopen
+    retries = retries.increment(
+              ^^^^^^^^^^^^^^^^^^
+  File "/root/.venvs/osworld-py312/lib/python3.12/site-packages/urllib3/util/retry.py", line 490, in increment
+    raise reraise(type(error), error, _stacktrace)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.venvs/osworld-py312/lib/python3.12/site-packages/urllib3/util/util.py", line 39, in reraise
+    raise value
+  File "/root/.venvs/osworld-py312/lib/python3.12/site-packages/urllib3/connectionpool.py", line 787, in urlopen
+    response = self._make_request(
+               ^^^^^^^^^^^^^^^^^^^
+  File "/root/.venvs/osworld-py312/lib/python3.12/site-packages/urllib3/connectionpool.py", line 536, in _make_request
+    self._raise_timeout(err=e, url=url, timeout_value=read_timeout)
+  File "/root/.venvs/osworld-py312/lib/python3.12/site-packages/urllib3/connectionpool.py", line 367, in _raise_timeout
+    raise ReadTimeoutError(
+urllib3.exceptions.ReadTimeoutError: HTTPConnectionPool(host='54.234.205.180', port=5000): Read timed out. (read timeout=1810)
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/cpfs01/user/ludunjie.ldj/OSWorld-RL/desktop_env/controllers/setup.py", line 550, in _open_setup
+    response = requests.post(self.http_server + "/setup" + "/open_file", headers=headers, data=payload, timeout=1810)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.venvs/osworld-py312/lib/python3.12/site-packages/requests/api.py", line 115, in post
+    return request("post", url, data=data, json=json, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.venvs/osworld-py312/lib/python3.12/site-packages/requests/api.py", line 59, in request
+    return session.request(method=method, url=url, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.venvs/osworld-py312/lib/python3.12/site-packages/requests/sessions.py", line 589, in request
+    resp = self.send(prep, **send_kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.venvs/osworld-py312/lib/python3.12/site-packages/requests/sessions.py", line 703, in send
+    r = adapter.send(request, **kwargs)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.venvs/osworld-py312/lib/python3.12/site-packages/requests/adapters.py", line 532, in send
+    raise ReadTimeout(e, request=request)
+requests.exceptions.ReadTimeout: HTTPConnectionPool(host='54.234.205.180', port=5000): Read timed out. (read timeout=1810)
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/cpfs01/user/ludunjie.ldj/OSWorld-RL/desktop_env/controllers/setup.py", line 356, in setup
+    getattr(self, setup_function)(**parameters)
+  File "/cpfs01/user/ludunjie.ldj/OSWorld-RL/desktop_env/controllers/setup.py", line 555, in _open_setup
+    raise Exception(f"Failed to open file '{path}'. An error occurred while trying to send the request or the server responded with an error: {e}") from e
+Exception: Failed to open file '/home/user/Employee_Age_By_Birthday_gold.xlsx'. An error occurred while trying to send the request or the server responded with an error: HTTPConnectionPool(host='54.234.205.180', port=5000): Read timed out. (read timeout=1810)
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/cpfs01/user/ludunjie.ldj/OSWorld-RL/lib_run_single_claudecode.py", line 112, in run_single_example
+    result = env.evaluate()
+             ^^^^^^^^^^^^^^
+  File "/cpfs01/user/ludunjie.ldj/OSWorld-RL/desktop_env/desktop_env.py", line 642, in evaluate
+    self.setup_controller.setup(postconfig, self.enable_proxy)
+  File "/cpfs01/user/ludunjie.ldj/OSWorld-RL/desktop_env/controllers/setup.py", line 362, in setup
+    raise Exception(f"Setup step {i+1} failed: {setup_function} - {e}") from e
+Exception: Setup step 2 failed: _open_setup - Failed to open file '/home/user/Employee_Age_By_Birthday_gold.xlsx'. An error occurred while trying to send the request or the server responded with an error: HTTPConnectionPool(host='54.234.205.180', port=5000): Read timed out. (read timeout=1810)
+[2026-05-10 21:56:59,620][INFO] [libreoffice_calc/4e6fcf72-daf3-439f-a232-c434ce416af6] reward=0.0

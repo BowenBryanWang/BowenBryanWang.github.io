@@ -1,0 +1,7 @@
+{"type":"thread.started","thread_id":"019e11d8-29aa-7d31-bf62-3bdc78529c10"}
+{"type":"turn.started"}
+{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"I’ll look up the NFL’s official game record for the Super Bowl played after the 2019 season and verify the score there."}}
+{"type":"item.started","item":{"id":"item_1","type":"web_search","id":"ws_0f950f4a16b4d7d0016a0078e799b4819188f6dcf00d41eec2","query":"","action":{"type":"other"}}}
+{"type":"item.completed","item":{"id":"item_1","type":"web_search","id":"ws_0f950f4a16b4d7d0016a0078e799b4819188f6dcf00d41eec2","query":"site:nfl.com Super Bowl 2019 season played 2020 score Chiefs 49ers NFL game center","action":{"type":"search","query":"site:nfl.com Super Bowl 2019 season played 2020 score Chiefs 49ers NFL game center","queries":["site:nfl.com Super Bowl 2019 season played 2020 score Chiefs 49ers NFL game center"]}}}
+{"type":"item.completed","item":{"id":"item_2","type":"agent_message","text":"The NFL official game record is here: https://www.nfl.com/games/49ers-at-chiefs-2019-post-4\n\nScore record for Super Bowl LIV, 2019 NFL season, played February 2, 2020:\n\nKansas City Chiefs 31, San Francisco 49ers 20\n\nQuarter scoring:\n\n| Team | Q1 | Q2 | Q3 | Q4 | Total |\n|---|---:|---:|---:|---:|---:|\n| 49ers | 3 | 7 | 10 | 0 | 20 |\n| Chiefs | 7 | 3 | 0 | 21 | 31 |\n\nLocation: Hard Rock Stadium, Miami Gardens/Opa-locka, Florida."}}
+{"type":"turn.completed","usage":{"input_tokens":21678,"cached_input_tokens":14720,"output_tokens":293,"reasoning_output_tokens":99}}

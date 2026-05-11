@@ -18,6 +18,13 @@ interface BlogPost {
 
 const posts: BlogPost[] = [
   {
+    slug: 'cli-agents-gui-benchmark',
+    title: 'Towards Universal Digital Agents',
+    date: '2026-05-11',
+    description:
+      'Empirical evidence from OSWorld-Verified: coding agents like Codex and Claude Code can solve many “GUI” tasks through the command line and why we need universal digital agents.',
+  },
+  {
     slug: 'introducing-cua-gym',
     title: 'We Spent a Year Building Verifiable Training Tasks for GUI Agents. Here\'s What We Learned.',
     date: '2026-05-10',

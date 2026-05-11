@@ -1,0 +1,22 @@
+[2026-05-10 21:32:22,640][INFO] [libreoffice_calc/21ab7b40-77c2-4ae6-8321-e00d3a086c73] one-shot agent.predict starting...
+[2026-05-10 21:33:52,102][INFO] [libreoffice_calc/21ab7b40-77c2-4ae6-8321-e00d3a086c73] predict done in 89.5s
+[2026-05-10 21:33:52,106][INFO] [libreoffice_calc/21ab7b40-77c2-4ae6-8321-e00d3a086c73] evaluating...
+[2026-05-10 21:34:55,038][ERROR] evaluate() failed: 'NoneType' object has no attribute 'rgb'
+Traceback (most recent call last):
+  File "/cpfs01/user/ludunjie.ldj/OSWorld-RL/lib_run_single_claudecode.py", line 112, in run_single_example
+    result = env.evaluate()
+             ^^^^^^^^^^^^^^
+  File "/cpfs01/user/ludunjie.ldj/OSWorld-RL/desktop_env/desktop_env.py", line 868, in evaluate
+    metric: float = self.metric(result_state, expected_state, **self.metric_options)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/cpfs01/user/ludunjie.ldj/OSWorld-RL/desktop_env/evaluators/metrics/table.py", line 478, in compare_table
+    styles1: Dict[str, List[Any]] = load_xlsx_styles(
+                                    ^^^^^^^^^^^^^^^^^
+  File "/cpfs01/user/ludunjie.ldj/OSWorld-RL/desktop_env/evaluators/metrics/utils.py", line 492, in load_xlsx_styles
+    style_list.append(_read_cell_style(st, c))
+                      ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/cpfs01/user/ludunjie.ldj/OSWorld-RL/desktop_env/evaluators/metrics/utils.py", line 379, in _read_cell_style
+    return (diff_style or cell).font.color.rgb if cell.value is not None else None
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'NoneType' object has no attribute 'rgb'
+[2026-05-10 21:34:55,044][INFO] [libreoffice_calc/21ab7b40-77c2-4ae6-8321-e00d3a086c73] reward=0.0

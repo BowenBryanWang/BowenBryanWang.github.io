@@ -1,0 +1,14 @@
+{
+  "env_reset": {
+    "elapsed_s": 134.41385225206614
+  },
+  "agent.predict": {
+    "elapsed_s": 198.93970133922994
+  },
+  "env.evaluate": {
+    "elapsed_s": 63.57237904332578
+  },
+  "episode_total": {
+    "elapsed_s": 456.9301615022123
+  }
+}

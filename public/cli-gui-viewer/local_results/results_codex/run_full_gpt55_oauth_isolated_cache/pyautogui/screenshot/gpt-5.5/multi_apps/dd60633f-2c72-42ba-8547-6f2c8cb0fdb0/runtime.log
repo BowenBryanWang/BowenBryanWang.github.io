@@ -1,0 +1,82 @@
+[2026-05-10 20:37:39,362][INFO] [multiapps/dd60633f-2c72-42ba-8547-6f2c8cb0fdb0] one-shot agent.predict starting...
+[2026-05-10 20:39:24,486][INFO] [multiapps/dd60633f-2c72-42ba-8547-6f2c8cb0fdb0] predict done in 105.1s
+[2026-05-10 20:39:24,491][INFO] [multiapps/dd60633f-2c72-42ba-8547-6f2c8cb0fdb0] evaluating...
+[2026-05-10 20:40:29,824][ERROR] evaluate() failed: HTTPSConnectionPool(host='huggingface.co', port=443): Max retries exceeded with url: /datasets/xlangai/ubuntu_osworld_file_cache/resolve/main/multi_apps/dd60633f-2c72-42ba-8547-6f2c8cb0fdb0/gpt_dev_pure_code_gold.py (Caused by SSLError(SSLCertVerificationError(1, '[SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: self-signed certificate in certificate chain (_ssl.c:1010)')))
+Traceback (most recent call last):
+  File "/root/.venvs/osworld-py312/lib/python3.12/site-packages/urllib3/connectionpool.py", line 464, in _make_request
+    self._validate_conn(conn)
+  File "/root/.venvs/osworld-py312/lib/python3.12/site-packages/urllib3/connectionpool.py", line 1093, in _validate_conn
+    conn.connect()
+  File "/root/.venvs/osworld-py312/lib/python3.12/site-packages/urllib3/connection.py", line 796, in connect
+    sock_and_verified = _ssl_wrap_socket_and_match_hostname(
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.venvs/osworld-py312/lib/python3.12/site-packages/urllib3/connection.py", line 975, in _ssl_wrap_socket_and_match_hostname
+    ssl_sock = ssl_wrap_socket(
+               ^^^^^^^^^^^^^^^^
+  File "/root/.venvs/osworld-py312/lib/python3.12/site-packages/urllib3/util/ssl_.py", line 483, in ssl_wrap_socket
+    ssl_sock = _ssl_wrap_socket_impl(sock, context, tls_in_tls, server_hostname)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.venvs/osworld-py312/lib/python3.12/site-packages/urllib3/util/ssl_.py", line 527, in _ssl_wrap_socket_impl
+    return ssl_context.wrap_socket(sock, server_hostname=server_hostname)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/ssl.py", line 457, in wrap_socket
+    return self.sslsocket_class._create(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/ssl.py", line 1053, in _create
+    self.do_handshake()
+  File "/root/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/ssl.py", line 1331, in do_handshake
+    self._sslobj.do_handshake()
+ssl.SSLCertVerificationError: [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: self-signed certificate in certificate chain (_ssl.c:1010)
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/root/.venvs/osworld-py312/lib/python3.12/site-packages/urllib3/connectionpool.py", line 787, in urlopen
+    response = self._make_request(
+               ^^^^^^^^^^^^^^^^^^^
+  File "/root/.venvs/osworld-py312/lib/python3.12/site-packages/urllib3/connectionpool.py", line 488, in _make_request
+    raise new_e
+urllib3.exceptions.SSLError: [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: self-signed certificate in certificate chain (_ssl.c:1010)
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/root/.venvs/osworld-py312/lib/python3.12/site-packages/requests/adapters.py", line 486, in send
+    resp = conn.urlopen(
+           ^^^^^^^^^^^^^
+  File "/root/.venvs/osworld-py312/lib/python3.12/site-packages/urllib3/connectionpool.py", line 841, in urlopen
+    retries = retries.increment(
+              ^^^^^^^^^^^^^^^^^^
+  File "/root/.venvs/osworld-py312/lib/python3.12/site-packages/urllib3/util/retry.py", line 535, in increment
+    raise MaxRetryError(_pool, url, reason) from reason  # type: ignore[arg-type]
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+urllib3.exceptions.MaxRetryError: HTTPSConnectionPool(host='huggingface.co', port=443): Max retries exceeded with url: /datasets/xlangai/ubuntu_osworld_file_cache/resolve/main/multi_apps/dd60633f-2c72-42ba-8547-6f2c8cb0fdb0/gpt_dev_pure_code_gold.py (Caused by SSLError(SSLCertVerificationError(1, '[SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: self-signed certificate in certificate chain (_ssl.c:1010)')))
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/cpfs01/user/ludunjie.ldj/OSWorld-RL/lib_run_single_claudecode.py", line 112, in run_single_example
+    result = env.evaluate()
+             ^^^^^^^^^^^^^^
+  File "/cpfs01/user/ludunjie.ldj/OSWorld-RL/desktop_env/desktop_env.py", line 867, in evaluate
+    expected_state = self.expected_getter(self, self.evaluator["expected"])
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/cpfs01/user/ludunjie.ldj/OSWorld-RL/desktop_env/evaluators/getters/file.py", line 149, in get_cloud_file
+    response = requests.get(download_url, stream=True, timeout=300)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.venvs/osworld-py312/lib/python3.12/site-packages/requests/api.py", line 73, in get
+    return request("get", url, params=params, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.venvs/osworld-py312/lib/python3.12/site-packages/requests/api.py", line 59, in request
+    return session.request(method=method, url=url, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.venvs/osworld-py312/lib/python3.12/site-packages/requests/sessions.py", line 589, in request
+    resp = self.send(prep, **send_kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.venvs/osworld-py312/lib/python3.12/site-packages/requests/sessions.py", line 703, in send
+    r = adapter.send(request, **kwargs)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/.venvs/osworld-py312/lib/python3.12/site-packages/requests/adapters.py", line 517, in send
+    raise SSLError(e, request=request)
+requests.exceptions.SSLError: HTTPSConnectionPool(host='huggingface.co', port=443): Max retries exceeded with url: /datasets/xlangai/ubuntu_osworld_file_cache/resolve/main/multi_apps/dd60633f-2c72-42ba-8547-6f2c8cb0fdb0/gpt_dev_pure_code_gold.py (Caused by SSLError(SSLCertVerificationError(1, '[SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: self-signed certificate in certificate chain (_ssl.c:1010)')))
+[2026-05-10 20:40:29,826][INFO] [multiapps/dd60633f-2c72-42ba-8547-6f2c8cb0fdb0] reward=0.0
