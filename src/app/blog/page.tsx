@@ -17,6 +17,14 @@ interface BlogPost {
 }
 
 const posts: BlogPost[] = [
+  // hidden — draft not ready for public
+  // {
+  //   slug: 'cli-agents-gui-benchmark',
+  //   title: 'Towards Universal Digital Agents',
+  //   date: '2026-05-11',
+  //   description:
+  //     'Empirical evidence from OSWorld-Verified: coding agents like Codex and Claude Code can solve many “GUI” tasks through the command line and why we need universal digital agents.',
+  // },
   {
     slug: 'cli-agents-gui-benchmark',
     title: 'Towards Universal Digital Agents',

@@ -2,3 +2,9 @@
 @import 'tailwindcss/components';
 @import './prism.css';
 @import 'tailwindcss/utilities';
+
+@layer base {
+  body {
+    font-family: "Palatino Linotype", Palatino, "Book Antiqua", Georgia, ui-serif, serif;
+  }
+}

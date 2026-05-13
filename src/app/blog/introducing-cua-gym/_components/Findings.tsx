@@ -58,7 +58,7 @@ const FINDINGS: Finding[] = [
 
 export default function Findings() {
   return (
-    <section className="pb-20">
+    <section id="findings" className="pb-20">
       <div className="container-prose">
         <SectionTitle label="Findings" />
         <div className="prose-research mb-10">
