@@ -2,7 +2,7 @@ import SectionTitle from './SectionTitle';
 
 export default function FutureWork() {
   return (
-    <section className="container-prose pb-20">
+    <section id="future-work" className="container-prose pb-20">
       <SectionTitle label="Limitations & Future Work" />
 
       <div className="prose-research space-y-4">

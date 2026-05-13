@@ -2,7 +2,7 @@ import SectionTitle from './SectionTitle';
 
 export default function Abstract() {
   return (
-    <section className="container-prose pt-12 pb-20">
+    <section id="motivation" className="container-prose pt-8 pb-20">
       <SectionTitle label="Motivation" />
 
       <div className="prose-research">

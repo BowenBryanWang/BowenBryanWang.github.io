@@ -45,7 +45,7 @@ export default {
       },
       fontFamily: {
         display: ['Newsreader', 'Georgia', 'serif'],
-        body: ['"DM Sans"', 'system-ui', '-apple-system', 'sans-serif'],
+        body: ['"Palatino Linotype"', 'Palatino', '"Book Antiqua"', 'Georgia', 'ui-serif', 'serif'],
         mono: ['Consolas', '"JetBrains Mono"', 'ui-monospace', 'monospace'],
       },
       maxWidth: {
