@@ -99,6 +99,7 @@ interface Role {
   company: string
   title: string
   logo?: ImageProps['src']
+  logoClassName?: string
   description?: string
   advisor?: React.ReactNode
   start: string | { label: string; dateTime: string }
@@ -145,7 +146,10 @@ function Role({ role }: { role: Role }) {
           <Image
             src={role.logo}
             alt=""
-            className="h-10 w-10 object-contain"
+            className={clsx(
+              'h-10 w-10 object-contain',
+              role.logoClassName,
+            )}
             unoptimized
           />
         ) : (
@@ -197,6 +201,7 @@ function Experiences() {
       company: 'Apple AI/ML',
       title: 'Research Scientist Intern',
       logo: Apple,
+      logoClassName: 'dark:invert',
       advisor: (
         <a
           href="https://zhegan27.github.io/"
