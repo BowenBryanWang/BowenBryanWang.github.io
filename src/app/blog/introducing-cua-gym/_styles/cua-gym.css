@@ -1,9 +1,7 @@
-/* cua-gym design system — scoped to `.cua-gym-scope` so it does NOT leak
-   into the rest of the site. Tailwind base/components/utilities are
-   already loaded by src/styles/tailwind.css; we only add scoped tokens
-   and a small set of custom classes. */
+/* CUA-Gym page styles — scoped to `.cua-gym-scope` so layout/color tokens do
+   not leak into the rest of the site. Typography intentionally inherits the
+   global personal-site font stack from src/styles/tailwind.css. */
 
-@import url('https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&family=DM+Sans:opsz,wght@9..40,300..700&display=swap');
 @import 'katex/dist/katex.min.css';
 
 .cua-gym-scope {
@@ -17,8 +15,7 @@
   --oxblood: #862d1a;
   --forest: #1f4e37;
 
-  /* baseline body styling that the cua-gym homepage assumes */
-  font-family: 'DM Sans', system-ui, sans-serif;
+  font-family: inherit;
   font-size: 16px;
   line-height: 1.62;
   background-color: transparent;
@@ -37,23 +34,20 @@
 .cua-gym-scope h2,
 .cua-gym-scope h3,
 .cua-gym-scope h4 {
-  font-family: 'Newsreader', Georgia, serif;
+  font-family: inherit;
   font-feature-settings: 'kern', 'liga';
   color: var(--ink);
   letter-spacing: -0.005em;
 }
 
-/* Newsreader variable optical sizing 6..72; weight 200..800 */
 .cua-gym-scope .display {
-  font-family: 'Newsreader', Georgia, serif;
-  font-variation-settings: 'opsz' 60;
+  font-family: inherit;
   font-weight: 400;
 }
 
 .cua-gym-scope .display-italic {
-  font-family: 'Newsreader', Georgia, serif;
+  font-family: inherit;
   font-style: italic;
-  font-variation-settings: 'opsz' 60;
   font-weight: 400;
 }
 
@@ -77,7 +71,11 @@
     linear-gradient(to bottom, var(--rule) 1px, transparent 1px);
   background-size: 56px 56px;
   background-position: -1px -1px;
-  mask-image: radial-gradient(ellipse 60% 70% at 50% 35%, black 30%, transparent 78%);
+  mask-image: radial-gradient(
+    ellipse 60% 70% at 50% 35%,
+    black 30%,
+    transparent 78%
+  );
 }
 
 .cua-gym-scope .prose-research {
@@ -100,18 +98,16 @@
 }
 
 .cua-gym-scope .prose-research em {
-  font-family: 'Newsreader', Georgia, serif;
+  font-family: inherit;
   font-style: italic;
   color: var(--ink);
 }
 
-/* First-mention term: special serif + italic + bold */
 .cua-gym-scope .term,
 .cua-gym-scope .prose-research em.term {
-  font-family: 'Newsreader', Georgia, serif;
+  font-family: inherit;
   font-style: italic;
   font-weight: 700;
-  font-variation-settings: 'opsz' 60;
   color: var(--ink);
 }
 
@@ -183,8 +179,7 @@
 
 .cua-gym-scope .font-system,
 .cua-gym-scope .font-system * {
-  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text',
-    'SF Pro Display', 'Helvetica Neue', 'Segoe UI', system-ui, sans-serif !important;
+  font-family: inherit !important;
 }
 
 .cua-gym-scope .font-system .font-mono,

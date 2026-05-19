@@ -37,7 +37,7 @@ export default function RootLayout({
           `}
         </Script>
       </head>
-      <body className="flex h-full bg-zinc-50 dark:bg-black">
+      <body className="flex h-full bg-paper dark:bg-black">
         <Providers>
           <div className="flex w-full">
             <Layout>{children}</Layout>

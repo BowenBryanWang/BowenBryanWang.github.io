@@ -5,6 +5,44 @@
 
 @layer base {
   body {
-    font-family: "Palatino Linotype", Palatino, "Book Antiqua", Georgia, ui-serif, serif;
+    font-family: 'Palatino Linotype', Palatino, 'Book Antiqua', Georgia,
+      ui-serif, serif;
+  }
+}
+
+@layer utilities {
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .bg-grid-paper {
+    background-image: linear-gradient(to right, #e2ddd2 1px, transparent 1px),
+      linear-gradient(to bottom, #e2ddd2 1px, transparent 1px);
+    background-size: 56px 56px;
+    background-position: -1px -1px;
+    -webkit-mask-image: radial-gradient(
+      ellipse 50% 55% at 45% 25%,
+      black 0%,
+      transparent 75%
+    );
+    mask-image: radial-gradient(
+      ellipse 50% 55% at 45% 25%,
+      black 0%,
+      transparent 75%
+    );
+  }
+
+  .dark .bg-grid-paper {
+    background-image: linear-gradient(
+        to right,
+        rgba(255, 255, 255, 0.06) 1px,
+        transparent 1px
+      ),
+      linear-gradient(to bottom, rgba(255, 255, 255, 0.06) 1px, transparent 1px);
   }
 }

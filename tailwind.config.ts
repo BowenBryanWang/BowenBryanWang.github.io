@@ -28,8 +28,8 @@ export default {
       // /blog/introducing-cua-gym page (scoped via .cua-gym-scope)
       colors: {
         paper: {
-          DEFAULT: '#F7F4ED',
-          deep: '#EFEAE0',
+          DEFAULT: '#FDFBF5',
+          deep: '#F7F3EA',
         },
         ink: {
           DEFAULT: '#1B1816',
@@ -44,8 +44,22 @@ export default {
         rule: '#E2DDD2',
       },
       fontFamily: {
-        display: ['Newsreader', 'Georgia', 'serif'],
-        body: ['"Palatino Linotype"', 'Palatino', '"Book Antiqua"', 'Georgia', 'ui-serif', 'serif'],
+        display: [
+          '"Palatino Linotype"',
+          'Palatino',
+          '"Book Antiqua"',
+          'Georgia',
+          'ui-serif',
+          'serif',
+        ],
+        body: [
+          '"Palatino Linotype"',
+          'Palatino',
+          '"Book Antiqua"',
+          'Georgia',
+          'ui-serif',
+          'serif',
+        ],
         mono: ['Consolas', '"JetBrains Mono"', 'ui-monospace', 'monospace'],
       },
       maxWidth: {

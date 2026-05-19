@@ -112,14 +112,21 @@ interface TechnicalReport {
   url?: string
 }
 
+interface NewsItem {
+  date: string
+  content: React.ReactNode
+}
+
 interface HonorAward {
   year: string
-  title: React.ReactNode
+  title: string
+  organization: string
 }
 
 interface TalkItem {
   year: string
-  title: React.ReactNode
+  title: string
+  organization: string
 }
 
 function Role({ role }: { role: Role }) {
@@ -265,7 +272,7 @@ function Experiences() {
   ]
 
   return (
-    <div className="rounded-2xl border border-zinc-100 p-6 dark:border-zinc-700/40">
+    <div className="rounded-2xl border border-rule p-6 dark:border-zinc-700/40">
       <h2 className="flex text-sm font-semibold text-zinc-900 dark:text-zinc-100">
         <BriefcaseIcon className="h-6 w-6 flex-none" />
         <span className="ml-3">Experiences</span>
@@ -301,7 +308,7 @@ function Education() {
   ]
 
   return (
-    <div className="rounded-2xl border border-zinc-100 p-6 dark:border-zinc-700/40">
+    <div className="rounded-2xl border border-rule p-6 dark:border-zinc-700/40">
       <h2 className="flex text-sm font-semibold text-zinc-900 dark:text-zinc-100">
         <BriefcaseIcon className="h-6 w-6 flex-none" />
         <span className="ml-3">Education</span>
@@ -356,40 +363,68 @@ function ArrowDownIcon(props: React.ComponentPropsWithoutRef<'svg'>) {
 }
 
 function Article({ article }: { article: MyArticle }) {
-  const hasAnyUrl = article.url.website || article.url.paper || article.url.code
-  const primaryUrl = article.url.website || article.url.paper || article.url.code || '#'
-  
+  const hasAnyUrl =
+    article.url.website ||
+    article.url.paper ||
+    article.url.code ||
+    article.url.dataset ||
+    article.url.environments
+
   return (
     <Card className="md:col-span-3">
-        <Card.Title>{article.title}</Card.Title>
-        <Card.Authors author={article.author} />
-        {/* <Card.Description>{article.description}</Card.Description> */}
-        {article.link === "True" ? (
-          <div className="relative z-10 mt-1 flex flex-wrap items-center gap-3 text-sm text-zinc-600 dark:text-zinc-400">
-            {article.publication}
-            {hasAnyUrl && (
-              <>
-                {article.url.website && (
-                  <a href={article.url.website} className="text-xs text-blue-400 underline hover:text-blue-500">
-                    [Website]
-                  </a>
-                )}
-                {article.url.paper && (
-                  <a href={article.url.paper} className="text-xs text-blue-400 underline hover:text-blue-500">
-                    [Paper]
-                  </a>
-                )}
-                {article.url.code && (
-                  <a href={article.url.code} className="text-xs text-blue-400 underline hover:text-blue-500">
-                    [Code]
-                  </a>
-                )}
-              </>
-            )}
-          </div>
-        ) : null}
-
-      </Card>
+      <Card.Title>{article.title}</Card.Title>
+      <Card.Authors author={article.author} />
+      {/* <Card.Description>{article.description}</Card.Description> */}
+      {article.link === 'True' ? (
+        <div className="relative z-10 mt-1 flex flex-wrap items-center gap-3 text-sm text-zinc-600 dark:text-zinc-400">
+          {article.publication}
+          {hasAnyUrl && (
+            <>
+              {article.url.website && (
+                <a
+                  href={article.url.website}
+                  className="text-xs text-blue-400 underline hover:text-blue-500"
+                >
+                  [Website]
+                </a>
+              )}
+              {article.url.paper && (
+                <a
+                  href={article.url.paper}
+                  className="text-xs text-blue-400 underline hover:text-blue-500"
+                >
+                  [Paper]
+                </a>
+              )}
+              {article.url.code && (
+                <a
+                  href={article.url.code}
+                  className="text-xs text-blue-400 underline hover:text-blue-500"
+                >
+                  [Code]
+                </a>
+              )}
+              {article.url.dataset && (
+                <a
+                  href={article.url.dataset}
+                  className="text-xs text-blue-400 underline hover:text-blue-500"
+                >
+                  [Dataset]
+                </a>
+              )}
+              {article.url.environments && (
+                <a
+                  href={article.url.environments}
+                  className="text-xs text-blue-400 underline hover:text-blue-500"
+                >
+                  [Environments]
+                </a>
+              )}
+            </>
+          )}
+        </div>
+      ) : null}
+    </Card>
   )
 }
 
@@ -426,6 +461,8 @@ export default async function About() {
     (article) =>
       article.title !== 'Kimi-VL Technical Report' &&
       article.title !==
+        'AutoTask: Executing Arbitrary Voice Commands by Exploring and Learning from Mobile GUI' &&
+      article.title !==
         'Interaction Proxy Manager: Semantic Model Generation and Run-time Support for Reconstructing Ubiquitous User Interfaces of Mobile Services',
   )
 
@@ -445,66 +482,116 @@ export default async function About() {
     {
       year: '2025',
       title: 'Kimi-VL Technical Report',
-      authors:
-        'Kimi Team: Angang Du, Bohong Yin, Bowei Xing, Bowen Qu, Bowen Wang, Cheng Chen, Chenlin Zhang, Chenzhuang Du, Chu Wei, Congcong Wang, Dehao Zhang, Dikang Du, Dongliang Wang, Enming Yuan, Enzhe Lu, Fang Li, Flood Sung, Guangda Wei, Guokun Lai, Han Zhu, Hao Ding, Hao Hu, Hao Yang, et al.',
+      authors: 'The Kimi Team.',
       url: 'https://arxiv.org/abs/2504.07491',
+    },
+  ]
+
+  const newsItems: NewsItem[] = [
+    {
+      date: '05/2026',
+      content: (
+        <>
+          We&apos;re thrilled to release{' '}
+          <a href="https://cua-gym.xlang.ai">CUA-Gym</a>, check it out!
+          We&apos;ll gradually release the full data and models, stay tuned.
+        </>
+      ),
+    },
+    {
+      date: '05/2026',
+      content: (
+        <>
+          New blog post:{' '}
+          <Link href="/blog/introducing-cua-gym">
+            We Spent a Year Building Verifiable Training Tasks for GUI Agents
+          </Link>
+          .
+        </>
+      ),
+    },
+    {
+      date: '05/2026',
+      content: (
+        <>
+          New blog post:{' '}
+          <Link href="/blog/cli-agents-gui-benchmark">
+            Towards Universal Digital Agents
+          </Link>
+          .
+        </>
+      ),
+    },
+    {
+      date: '02/2026',
+      content: (
+        <>
+          Computer Agent Arena was accepted to ICLR&apos;26 as a poster (top
+          3%). See you in Brazil 🇧🇷!
+        </>
+      ),
+    },
+    {
+      date: '12/2025',
+      content: (
+        <>
+          Joined the Qwen team, advised by Binyuan Hui and Junyang Lin — hoping
+          to build open-sourced computer-use agents.
+        </>
+      ),
+    },
+    {
+      date: '10/2025',
+      content: <>OpenCUA was accepted to NeurIPS 2025 as a Spotlight.</>,
+    },
+    {
+      date: '09/2025',
+      content: (
+        <>OpenCUA received the Best Paper Award at the COLM AIA workshop.</>
+      ),
     },
   ]
 
   const honorsAndAwards: HonorAward[] = [
     {
       year: '2025',
-      title: (
-        <>
-          <strong>Workshop Best Paper Award</strong>,{' '}
-          <em>COLM 2025 AIA workshop</em>
-        </>
-      ),
+      title: 'Workshop Best Paper Award',
+      organization: 'COLM 2025 AIA workshop',
     },
     {
       year: '2025',
-      title: (
-        <>
-          <strong>Research Postgraduate Student Innovation Award</strong>,{' '}
-          <em>The University of Hong Kong</em>
-        </>
-      ),
+      title: 'Research Postgraduate Student Innovation Award',
+      organization: 'The University of Hong Kong',
     },
     {
       year: '2023',
-      title: (
-        <>
-          <strong>Research and Innovation Scholarship</strong>,{' '}
-          <em>Tsinghua University</em>
-        </>
-      ),
+      title: 'Research and Innovation Scholarship',
+      organization: 'Tsinghua University',
     },
     {
       year: '2022',
-      title: (
-        <>
-          <strong>2-nd Prize, Challenge-Cup Competition Award</strong>,{' '}
-          <em>Tsinghua University</em>
-        </>
-      ),
+      title: '2-nd Prize, Challenge-Cup Competition Award',
+      organization: 'Tsinghua University',
     },
   ]
 
   const talks: TalkItem[] = [
     {
       year: '2025',
-      title: (
-        <>
-          <strong>Language Agents</strong>, <em>University of Tasmania</em>
-        </>
-      ),
+      title: 'Language Agents',
+      organization: 'University of Tasmania',
     },
   ]
 
   return (
     <>
-      <Container className="mt-8 sm:mt-16">
-        <div className="grid grid-cols-1 gap-y-16 lg:grid-cols-10 lg:grid-rows-[auto_1fr] lg:gap-y-12">
+      <div className="relative isolate">
+        <div
+          aria-hidden="true"
+          className="bg-grid-paper pointer-events-none absolute inset-0 -z-10"
+        />
+        <Container className="mt-8 sm:mt-16">
+          <div className="grid grid-cols-1 gap-y-16 lg:grid-cols-10 lg:grid-rows-[auto_1fr] lg:gap-y-12">
           <div className="lg:col-span-3 lg:pl-20">
             <div className="max-w-md px-2.5 lg:max-w-none">
               <Image
@@ -519,59 +606,40 @@ export default async function About() {
             <h1 className="text-4xl font-bold tracking-tight text-zinc-800 dark:text-zinc-100 sm:text-5xl">
               Bowen Wang
             </h1>
-            <MyTypewriter
-              text={[
-                'Computer-Use Agent',
-                'Agentic Models',
-              ]}
-            />
+            <MyTypewriter text={['Computer-Use Agent', 'Agentic Models']} />
             <div className="mt-6 space-y-7 text-base text-zinc-600 dark:text-zinc-400">
               <div>
                 I&apos;m a <p className="inline ordinal">2nd</p> year Ph.D.
                 student at&nbsp;
                 <a
                   href="https://www.hku.hk/"
-                  className="inline underline decoration-amber-800 decoration-wavy underline-offset-4 dark:decoration-amber-300 hover:text-amber-700 dark:hover:text-amber-300"
+                  className="inline underline decoration-amber-800 decoration-wavy underline-offset-4 hover:text-amber-700 dark:decoration-amber-300 dark:hover:text-amber-300"
                 >
                   the University of Hong Kong
                 </a>
-                , with deep focus and passion on NLP and fundamental model-based agent. I&apos;m
-                fortunate to get advised by&nbsp;
+                , advised by&nbsp;
                 <a
                   href="https://taoyds.github.io/"
-                  className="inline underline decoration-amber-800 decoration-wavy underline-offset-4 dark:decoration-amber-300 hover:text-amber-700 dark:hover:text-amber-300"
+                  className="inline underline decoration-amber-800 decoration-wavy underline-offset-4 hover:text-amber-700 dark:decoration-amber-300 dark:hover:text-amber-300"
                 >
                   Prof. Tao Yu
-                </a>&nbsp;
-                and be a part of&nbsp;
-                <a
-                  href="https://www.xlang.ai/"
-                  className="inline underline decoration-amber-800 decoration-wavy underline-offset-4 dark:decoration-amber-300 hover:text-amber-700 dark:hover:text-amber-300"
-                >
-                  the XLANG Lab
-                </a>&nbsp;
-                and&nbsp;
-                <a
-                  href="https://hkunlp.github.io/"
-                  className="inline underline decoration-amber-800 decoration-wavy underline-offset-4 dark:decoration-amber-300 hover:text-amber-700 dark:hover:text-amber-300"
-                >
-                  HKU NLP Lab
                 </a>
-                . Previously I got
-                my bachlor&apos;s degree of Computer Science and Technology at&nbsp;
+                . Previously I got my bachlor&apos;s degree of Computer Science
+                and Technology at&nbsp;
                 <a
                   href="https://www.tsinghua.edu.cn/"
-                  className="inline underline decoration-amber-800 decoration-wavy underline-offset-4 dark:decoration-amber-300 hover:text-amber-700 dark:hover:text-amber-300"
+                  className="inline underline decoration-amber-800 decoration-wavy underline-offset-4 hover:text-amber-700 dark:decoration-amber-300 dark:hover:text-amber-300"
                 >
                   Tsinghua University
-                </a>&nbsp;
+                </a>
+                &nbsp;
               </div>
               <div>
-                My research focuses on building universal digital agents. I
-                have primarily worked on computer-use agents (CUA), developing
-                open foundations through mid-training and post-training and
-                building open-sourced CUA models. My current research interests
-                lie in digital agentic models, particularly in post-training
+                My research focuses on building universal digital agents. I have
+                primarily worked on computer-use agents (CUA), developing open
+                foundations through mid-training and post-training and building
+                open-sourced CUA models. My current research interests lie in
+                digital agentic models, particularly in post-training
                 methodologies for creating generalizable and intelligent agents
                 that can reliably operate across diverse digital environments
                 including coding, computer-use, terminal-use and more.
@@ -605,7 +673,7 @@ export default async function About() {
                   className="group flex text-sm font-medium text-zinc-800 transition hover:text-teal-500 dark:text-zinc-200 dark:hover:text-teal-500"
                 >
                   <TwitterIcon className="h-6 w-6 flex-none fill-zinc-500 transition group-hover:fill-teal-500" />
-                  <span className="ml-4">X (Twitter)</span>
+                  <span className="ml-4">X</span>
                 </Link>
               </li> */}
 
@@ -617,11 +685,11 @@ export default async function About() {
                 Google Scholar
               </SocialLink>
               <SocialLink
-                href="https://x.com/Saltyp0rridge24"
+                href="https://x.com/BowenWangNLP"
                 icon={TwitterIcon}
                 className="mt-4"
               >
-                X (Twitter)
+                X
               </SocialLink>
               <SocialLink
                 href="https://www.linkedin.com/in/bowenwangnlp/"
@@ -641,8 +709,31 @@ export default async function About() {
             </ul>
           </div>
         </div>
+        </Container>
+      </div>
+      <Container className="mt-8 md:mt-10">
+        <section>
+          <h2 className="border-b border-rule pb-1.5 text-lg font-semibold tracking-tight text-zinc-900 dark:border-zinc-700 dark:text-zinc-100 sm:text-xl">
+            What&apos;s New
+          </h2>
+          <div className="no-scrollbar mt-3 h-40 overflow-y-auto sm:h-44">
+            <ul className="list-disc space-y-1.5 pl-6 text-sm leading-6 text-zinc-700 marker:text-zinc-400 dark:text-zinc-300 dark:marker:text-zinc-500">
+              {newsItems.map((item, index) => (
+                <li
+                  key={`${item.date}-${index}`}
+                  className="[&_a:hover]:text-amber-700 dark:[&_a:hover]:text-amber-300 [&_a]:text-zinc-900 [&_a]:underline [&_a]:decoration-amber-800 [&_a]:decoration-wavy [&_a]:underline-offset-4 dark:[&_a]:text-zinc-100 dark:[&_a]:decoration-amber-300"
+                >
+                  <span className="whitespace-nowrap font-medium text-zinc-900 dark:text-zinc-100">
+                    {item.date}:
+                  </span>{' '}
+                  {item.content}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </section>
       </Container>
-      <Container className="mt-16 md:mt-32">
+      <Container className="mt-10 md:mt-16">
         <div className="mx-auto grid max-w-xl grid-cols-1 gap-y-20 lg:max-w-none lg:grid-cols-5">
           <div className="col-span-2 space-y-6 lg:pr-8 xl:pr-12">
             {/* <Newsletter /> */}
@@ -651,18 +742,21 @@ export default async function About() {
           </div>
           <div className="col-span-3 flex flex-col gap-16">
             <section>
-              <h2 className="border-b border-zinc-200 pb-2 text-3xl font-semibold tracking-tight text-zinc-900 dark:border-zinc-700 dark:text-zinc-100">
+              <h2 className="border-b border-rule pb-2 text-3xl font-semibold tracking-tight text-zinc-900 dark:border-zinc-700 dark:text-zinc-100">
                 Selected Publications
               </h2>
               <div className="mt-8 flex flex-col gap-10">
                 {selectedPublications.map((article, index) => (
-                  <Article key={`${article.title}-${index}`} article={article} />
+                  <Article
+                    key={`${article.title}-${index}`}
+                    article={article}
+                  />
                 ))}
               </div>
             </section>
 
             <section>
-              <h2 className="border-b border-zinc-200 pb-2 text-3xl font-semibold tracking-tight text-zinc-900 dark:border-zinc-700 dark:text-zinc-100">
+              <h2 className="border-b border-rule pb-2 text-3xl font-semibold tracking-tight text-zinc-900 dark:border-zinc-700 dark:text-zinc-100">
                 Technical Reports
               </h2>
               <div className="mt-8 flex flex-col gap-10">
@@ -679,42 +773,48 @@ export default async function About() {
       </Container>
       <Container className="mt-16 md:mt-24">
         <section>
-          <h2 className="border-b border-zinc-200 pb-2 text-2xl font-semibold tracking-tight text-zinc-900 dark:border-zinc-700 dark:text-zinc-100 sm:text-3xl">
+          <h2 className="border-b border-rule pb-2 text-2xl font-semibold tracking-tight text-zinc-900 dark:border-zinc-700 dark:text-zinc-100 sm:text-3xl">
             Honors &amp; Awards
           </h2>
-          <ol className="mt-6 space-y-4 sm:space-y-5">
+          <ol className="mt-4 space-y-1.5 sm:space-y-2">
             {honorsAndAwards.map((item, index) => (
               <li
                 key={`${item.year}-${index}`}
-                className="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:gap-5"
+                className="grid grid-cols-[4rem_minmax(0,1fr)] gap-x-5 sm:grid-cols-[4rem_minmax(0,1fr)_minmax(12rem,auto)] sm:items-baseline"
               >
-                <div className="w-full flex-none text-base font-semibold tracking-tight text-zinc-900 dark:text-zinc-100 sm:w-16 sm:text-lg">
+                <div className="w-full flex-none text-sm font-semibold tracking-tight text-zinc-900 dark:text-zinc-100 sm:w-16 sm:text-base">
                   {item.year}
                 </div>
-                <div className="min-w-0 text-base leading-7 text-zinc-900 dark:text-zinc-100 sm:text-[1.05rem] sm:leading-7 sm:[&_strong]:font-semibold sm:[&_em]:font-normal sm:[&_em]:italic">
+                <div className="min-w-0 text-sm font-semibold leading-6 text-zinc-900 dark:text-zinc-100 sm:text-base sm:leading-6">
                   {item.title}
+                </div>
+                <div className="col-start-2 min-w-0 text-right text-sm italic leading-6 text-zinc-600 dark:text-zinc-400 sm:col-start-auto sm:text-base sm:leading-6">
+                  {item.organization}
                 </div>
               </li>
             ))}
           </ol>
         </section>
       </Container>
-      <Container className="mt-16 md:mt-20">
+      <Container className="mt-12 md:mt-16">
         <section>
-          <h2 className="border-b border-zinc-200 pb-2 text-2xl font-semibold tracking-tight text-zinc-900 dark:border-zinc-700 dark:text-zinc-100 sm:text-3xl">
+          <h2 className="border-b border-rule pb-2 text-2xl font-semibold tracking-tight text-zinc-900 dark:border-zinc-700 dark:text-zinc-100 sm:text-3xl">
             Talks
           </h2>
-          <ol className="mt-6 space-y-4">
+          <ol className="mt-4 space-y-1.5 sm:space-y-2">
             {talks.map((item, index) => (
               <li
                 key={`${item.year}-${index}`}
-                className="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:gap-5"
+                className="grid grid-cols-[4rem_minmax(0,1fr)] gap-x-5 sm:grid-cols-[4rem_minmax(0,1fr)_minmax(12rem,auto)] sm:items-baseline"
               >
-                <div className="w-full flex-none text-base font-semibold tracking-tight text-zinc-900 dark:text-zinc-100 sm:w-16 sm:text-lg">
+                <div className="w-full flex-none text-sm font-semibold tracking-tight text-zinc-900 dark:text-zinc-100 sm:w-16 sm:text-base">
                   {item.year}
                 </div>
-                <div className="min-w-0 text-base leading-7 text-zinc-900 dark:text-zinc-100 sm:text-[1.05rem] sm:leading-7 sm:[&_strong]:font-semibold sm:[&_em]:font-normal sm:[&_em]:italic">
+                <div className="min-w-0 text-sm font-semibold leading-6 text-zinc-900 dark:text-zinc-100 sm:text-base sm:leading-6">
                   {item.title}
+                </div>
+                <div className="col-start-2 min-w-0 text-right text-sm italic leading-6 text-zinc-600 dark:text-zinc-400 sm:col-start-auto sm:text-base sm:leading-6">
+                  {item.organization}
                 </div>
               </li>
             ))}

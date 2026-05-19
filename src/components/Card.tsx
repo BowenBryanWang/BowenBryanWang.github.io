@@ -84,7 +84,7 @@ Card.Authors = function CardAuthors({
 
   return (
     <p
-      className="z-10 text-sm text-zinc-600 italic dark:text-zinc-400"
+      className="z-10 text-sm text-zinc-600 dark:text-zinc-400"
       dangerouslySetInnerHTML={{ __html: highlightAuthor(author) }}
     />
   );
