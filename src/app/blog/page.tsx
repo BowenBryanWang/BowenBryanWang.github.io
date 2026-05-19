@@ -45,9 +45,9 @@ export default function BlogIndex() {
   return (
     <SimpleLayout
       title="Blog"
-      intro="Long-form notes on agents, RL, and the systems I build."
+      intro="I share my thoughts, views and bitter lessons out of research papers here while building digital agents."
     >
-      <div className="md:border-l md:border-zinc-100 md:pl-6 md:dark:border-zinc-700/40">
+      <div className="md:border-l md:border-rule md:pl-6 md:dark:border-zinc-700/40">
         <div className="flex max-w-3xl flex-col space-y-16">
           {posts.map((post) => (
             <article key={post.slug} className="md:grid md:grid-cols-4 md:items-baseline">

@@ -12,7 +12,7 @@ export default async function ArticlesIndex() {
   return (
     <SimpleLayout
       title="Publications"
-      intro="I research on digital agents on evaluation, foundation models, data, training etc."
+      intro="I research on digital agents from evaluation, mid-training to post-training. I believe strong models come from scalable data on top of reliable algorithms and infra."
     >
       <PublicationsTabs />
     </SimpleLayout>
