@@ -62,9 +62,12 @@ export default function BlogIndex() {
                 <p className="relative z-10 mt-2 text-sm text-zinc-600 dark:text-zinc-400">
                   {post.description}
                 </p>
-                <div className="relative z-10 mt-4 flex items-center text-sm font-medium text-amber-700 dark:text-amber-300">
+                <Link
+                  href={`/blog/${post.slug}`}
+                  className="relative z-10 mt-4 flex items-center text-sm font-medium text-amber-700 hover:text-amber-800 dark:text-amber-300 dark:hover:text-amber-200"
+                >
                   Read article →
-                </div>
+                </Link>
               </div>
               <time
                 className="mt-1 hidden md:block relative z-10 order-first mb-3 items-center text-sm text-zinc-400 dark:text-zinc-500"
