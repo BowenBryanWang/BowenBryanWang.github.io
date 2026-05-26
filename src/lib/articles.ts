@@ -19,6 +19,7 @@ export interface MyArticle {
     code?: string
     dataset?: string
     environments?: string
+    blog?: string
   }
 }
 
@@ -36,7 +37,7 @@ export const myarticles = [
         React.createElement(
           'span',
           { className: 'text-sm font-semibold' },
-          'Preprint',
+          'Arxiv',
         ),
       ),
     ),
@@ -47,9 +48,11 @@ export const myarticles = [
     link: 'True',
     url: {
       website: 'https://cua-gym.xlang.ai',
+      paper: 'https://huggingface.co/papers/2605.25624',
       dataset: 'https://huggingface.co/datasets/xlangai/CUA-Gym',
       code: 'https://github.com/xlang-ai/CUA-Gym',
       environments: 'https://github.com/xlang-ai/CUA-Gym-Hub',
+      blog: '/blog/introducing-cua-gym',
     },
     image: '/figures/cua-gym/main_figure.png',
   },
@@ -67,6 +70,11 @@ export const myarticles = [
           'span',
           { className: 'text-sm font-semibold' },
           "ICLR'26 ",
+          React.createElement(
+            'span',
+            { className: 'font-bold' },
+            '(Top 3%)',
+          ),
         ),
       ),
     ),
@@ -77,6 +85,7 @@ export const myarticles = [
     link: 'True',
     url: {
       website: 'https://arena.xlang.ai',
+      paper: 'https://openreview.net/pdf?id=3x4SDbXbgl',
     },
     image: computerArenaImage,
   },

@@ -184,11 +184,21 @@ function Role({ role }: { role: Role }) {
         <dt className="sr-only">Date</dt>
         <dd
           className="ml-auto text-xs text-zinc-400 dark:text-zinc-500"
-          aria-label={`${startLabel} until ${endLabel}`}
+          aria-label={
+            startLabel === endLabel
+              ? startLabel
+              : `${startLabel} until ${endLabel}`
+          }
         >
-          <time dateTime={startDate}>{startLabel}</time>{' '}
-          <span aria-hidden="true">—</span>{' '}
-          <time dateTime={endDate}>{endLabel}</time>
+          {startLabel === endLabel ? (
+            <time dateTime={startDate}>{startLabel}</time>
+          ) : (
+            <>
+              <time dateTime={startDate}>{startLabel}</time>{' '}
+              <span aria-hidden="true">—</span>{' '}
+              <time dateTime={endDate}>{endLabel}</time>
+            </>
+          )}
         </dd>
       </dl>
     </li>
@@ -213,8 +223,8 @@ function Experiences() {
         </a>
       ),
       description: 'Digital Agent Research',
-      start: '2026.5',
-      end: 'present',
+      start: 'Incoming',
+      end: 'Incoming',
     },
     {
       company: 'Qwen Team, Alibaba Group',
@@ -373,7 +383,8 @@ function Article({ article }: { article: MyArticle }) {
     article.url.paper ||
     article.url.code ||
     article.url.dataset ||
-    article.url.environments
+    article.url.environments ||
+    article.url.blog
 
   return (
     <Card className="md:col-span-3">
@@ -423,6 +434,14 @@ function Article({ article }: { article: MyArticle }) {
                   className="text-xs text-blue-400 underline hover:text-blue-500"
                 >
                   [Environments]
+                </a>
+              )}
+              {article.url.blog && (
+                <a
+                  href={article.url.blog}
+                  className="text-xs text-blue-400 underline hover:text-blue-500"
+                >
+                  [Blog]
                 </a>
               )}
             </>
@@ -510,18 +529,6 @@ export default async function About() {
           New blog post:{' '}
           <Link href="/blog/introducing-cua-gym">
             We Spent a Year Building Verifiable Training Tasks for GUI Agents
-          </Link>
-          .
-        </>
-      ),
-    },
-    {
-      date: '05/2026',
-      content: (
-        <>
-          New blog post:{' '}
-          <Link href="/blog/cli-agents-gui-benchmark">
-            Towards Universal Digital Agents
           </Link>
           .
         </>
@@ -651,7 +658,7 @@ export default async function About() {
               </div>
               <div>
                 I have also participated in building open-source foundation
-                models such as Qwen3.5 and Kimi K2.5, and I hope to make
+                models such as Qwen 3.7, Qwen3.5 and Kimi K2.5, and I hope to make
                 computer-use a core capability of frontier models. I believe
                 universal digital agents (UDA) are a path toward AGI. If you
                 would like to talk about research or life, feel free to reach

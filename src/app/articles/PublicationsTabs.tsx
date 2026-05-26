@@ -48,7 +48,8 @@ function Article({ article }: { article: MyArticle }) {
     article.url.paper ||
     article.url.code ||
     article.url.dataset ||
-    article.url.environments
+    article.url.environments ||
+    article.url.blog
 
   return (
     <article className="group flex flex-col gap-6 md:flex-row">
@@ -112,6 +113,14 @@ function Article({ article }: { article: MyArticle }) {
                       className="text-xs text-blue-400 underline hover:text-blue-500"
                     >
                       [Environments]
+                    </a>
+                  )}
+                  {article.url.blog && (
+                    <a
+                      href={article.url.blog}
+                      className="text-xs text-blue-400 underline hover:text-blue-500"
+                    >
+                      [Blog]
                     </a>
                   )}
                 </>
