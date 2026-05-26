@@ -37,7 +37,7 @@ export const myarticles = [
         React.createElement(
           'span',
           { className: 'text-sm font-semibold' },
-          'Arxiv',
+          'ArXiv',
         ),
       ),
     ),
