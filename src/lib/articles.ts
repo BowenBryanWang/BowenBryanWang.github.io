@@ -26,7 +26,7 @@ export interface MyArticle {
 export const myarticles = [
   {
     author:
-      'Bowen Wang, Dunjie Lu, Junli Wang, Tianyi Bai, Shixuan Liu, Zhipeng Zhang, Haiquan Wang, Hao Hu, Shuai Bai, Dayiheng Liu, Que Shen, Junyang Lin, Tao Yu',
+      'Bowen Wang, Dunjie Lu, Junli Wang, Tianyi Bai, Shixuan Liu, Zhipeng Zhang, Haiquan Wang, Hao Hu, Tianbao Xie, Shuai Bai, Dayiheng Liu, Que Shen, Junyang Lin, Tao Yu',
     date: '2026-05',
     publication: React.createElement(
       'span',
