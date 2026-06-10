@@ -122,13 +122,18 @@ const SLIDES: Slide<never>[] = [
   //   label: 'Qwen team is hiring' },
 ]
 
-export default function CUAGymSlidesPage() {
+export default function CUAGymSlidesPage({
+  initialSlideIdx = 0,
+}: {
+  initialSlideIdx?: number
+}) {
   return (
     <SlidesDeck
       slides={SLIDES}
       FrameContext={FrameContext}
       title="CUA-Gym"
       subtitle="Scaling Training for Computer-Use Agents · Bowen Wang"
+      initialSlideIdx={initialSlideIdx}
     />
   )
 }

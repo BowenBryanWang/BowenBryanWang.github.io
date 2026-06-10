@@ -20,6 +20,8 @@ import {
   type Context,
   type ReactNode,
 } from 'react'
+import { createPortal } from 'react-dom'
+import Link from 'next/link'
 
 const STAGE_W_DEFAULT = 1920
 const STAGE_H_DEFAULT = 1080
@@ -55,11 +57,24 @@ export type SlidesDeckProps = {
   /** Canvas dimensions; defaults to 1920×1080. */
   stageWidth?: number
   stageHeight?: number
+  /** Zero-based slide index to render on first paint for /pageN routes. */
+  initialSlideIdx?: number
+  /** Destination of the "← Back" link in the top bar. Defaults to "/" so
+   *  users can return to the rest of the site (the deck takes over the full
+   *  viewport, so the site's regular nav isn't visible). */
+  backHref?: string
+  /** Label for the back link. Defaults to the title or "Back". */
+  backLabel?: string
 }
 
 // ─── Utilities ────────────────────────────────────────────────────────────
 function easeOutCubic(t: number) {
   return 1 - Math.pow(1 - t, 3)
+}
+
+function clampSlideIdx(idx: number, slideCount: number) {
+  if (!Number.isFinite(idx)) return 0
+  return Math.max(0, Math.min(slideCount - 1, Math.floor(idx)))
 }
 
 // ─── Main ─────────────────────────────────────────────────────────────────
@@ -70,33 +85,58 @@ export default function SlidesDeck({
   subtitle,
   stageWidth = STAGE_W_DEFAULT,
   stageHeight = STAGE_H_DEFAULT,
+  initialSlideIdx = 0,
+  backHref = '/',
+  backLabel = 'Bowen Wang',
 }: SlidesDeckProps) {
-  const [slideIdx, setSlideIdx] = useState(0)
+  const initialIdx = clampSlideIdx(initialSlideIdx, slides.length)
+
+  const getLocationSlideIdx = useCallback(() => {
+    if (typeof window === 'undefined') return 0
+    let n: number | null = null
+    const m = window.location.pathname.match(/\/page(\d+)\/?$/)
+    if (m) n = parseInt(m[1], 10)
+    if (n === null) {
+      const hash = window.location.hash.replace(/^#/, '')
+      if (/^\d+$/.test(hash)) n = parseInt(hash, 10)
+    }
+    if (n !== null && n >= 1 && n <= slides.length) return n - 1
+    return 0
+  }, [slides])
+
+  const [slideIdx, setSlideIdx] = useState(initialIdx)
   const [stepIdx, setStepIdx] = useState(0)
-  const [frame, setFrame] = useState(slides[0].frames[0])
+  const [frame, setFrame] = useState(slides[initialIdx].frames[0])
   const [present, setPresent] = useState(false)
   const [isFullscreen, setIsFullscreen] = useState(false)
+  const [mounted, setMounted] = useState(false)
+  const [locationReady, setLocationReady] = useState(false)
 
-  // ── URL deep-link on mount ────────────────────────────────────────────
   useEffect(() => {
-    if (typeof window === 'undefined') return
-    let n: number | null = null
-    const hash = window.location.hash.replace(/^#/, '')
-    if (/^\d+$/.test(hash)) n = parseInt(hash, 10)
-    if (n === null) {
-      const m = window.location.pathname.match(/\/page(\d+)\/?$/)
-      if (m) n = parseInt(m[1], 10)
-    }
-    if (n !== null && n >= 1 && n <= slides.length) {
-      setSlideIdx(n - 1)
-      setStepIdx(0)
-      setFrame(slides[n - 1].frames[0])
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    setMounted(true)
   }, [])
 
+  // ── URL deep-link on mount / browser route changes ───────────────────
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const syncFromLocation = () => {
+      const nextSlideIdx = getLocationSlideIdx()
+      setSlideIdx(nextSlideIdx)
+      setStepIdx(0)
+      setFrame(slides[nextSlideIdx].frames[0])
+      setLocationReady(true)
+    }
+    syncFromLocation()
+    window.addEventListener('hashchange', syncFromLocation)
+    window.addEventListener('popstate', syncFromLocation)
+    return () => {
+      window.removeEventListener('hashchange', syncFromLocation)
+      window.removeEventListener('popstate', syncFromLocation)
+    }
+  }, [getLocationSlideIdx, slides])
+
   // ── Frame animation between steps ─────────────────────────────────────
-  const lastTargetRef = useRef(slides[0].frames[0])
+  const lastTargetRef = useRef(slides[initialIdx].frames[0])
   const lastSlideIdxRef = useRef(slideIdx)
   const animRafRef = useRef<number | null>(null)
   useEffect(() => {
@@ -132,11 +172,26 @@ export default function SlidesDeck({
   // ── URL hash sync ─────────────────────────────────────────────────────
   useEffect(() => {
     if (typeof window === 'undefined') return
+    if (!locationReady) return
+    if (/\/page\d+\/?$/.test(window.location.pathname)) {
+      const desiredPath = window.location.pathname.replace(
+        /\/page\d+\/?$/,
+        `/page${slideIdx + 1}`,
+      )
+      if (window.location.pathname !== desiredPath || window.location.hash) {
+        window.history.replaceState(
+          null,
+          '',
+          `${desiredPath}${window.location.search}`,
+        )
+      }
+      return
+    }
     const desired = `#${slideIdx + 1}`
     if (window.location.hash !== desired) {
       window.history.replaceState(null, '', desired)
     }
-  }, [slideIdx])
+  }, [locationReady, slideIdx])
 
   // ── Navigation ────────────────────────────────────────────────────────
   const slideIdxRef = useRef(slideIdx)
@@ -246,8 +301,7 @@ export default function SlidesDeck({
 
   const slide = slides[slideIdx]
 
-  if (present) {
-    return (
+  const deck = present ? (
       <PresentationMode
         slide={slide}
         frame={frame}
@@ -264,14 +318,12 @@ export default function SlidesDeck({
         onExit={() => setPresent(false)}
         onToggleFullscreen={toggleFullscreen}
       />
-    )
-  }
-
-  return (
+    ) : (
     <div
       style={{
         position: 'fixed',
         inset: 0,
+        zIndex: 9999,
         backgroundColor: CANVAS_BG,
         color: INK,
         fontFamily: SERIF,
@@ -288,6 +340,8 @@ export default function SlidesDeck({
         stepIdx={stepIdx}
         stepCount={slide.frames.length}
         onPresent={() => setPresent(true)}
+        backHref={backHref}
+        backLabel={backLabel}
       />
       <div style={{ flex: 1, display: 'flex', minHeight: 0 }}>
         <ThumbnailRail
@@ -314,6 +368,12 @@ export default function SlidesDeck({
       </div>
     </div>
   )
+
+  if (mounted && typeof document !== 'undefined') {
+    return createPortal(deck, document.body)
+  }
+
+  return deck
 }
 
 // ─── TopBar ───────────────────────────────────────────────────────────────
@@ -325,6 +385,8 @@ function TopBar({
   stepIdx,
   stepCount,
   onPresent,
+  backHref,
+  backLabel,
 }: {
   title: string
   subtitle?: string
@@ -333,6 +395,8 @@ function TopBar({
   stepIdx: number
   stepCount: number
   onPresent: () => void
+  backHref: string
+  backLabel: string
 }) {
   return (
     <div
@@ -346,6 +410,47 @@ function TopBar({
         flexShrink: 0,
       }}
     >
+      <Link
+        href={backHref}
+        title={`Back to ${backLabel}`}
+        style={{
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: 6,
+          padding: '6px 12px',
+          fontFamily: MONO,
+          fontSize: 12,
+          fontWeight: 600,
+          letterSpacing: '0.04em',
+          color: '#5C5651',
+          textDecoration: 'none',
+          backgroundColor: '#FFFFFF',
+          border: `1px solid ${RAIL_BORDER}`,
+          borderRadius: 999,
+          flexShrink: 0,
+          transition: 'background-color 120ms, color 120ms',
+        }}
+        onMouseEnter={(e) => {
+          ;(e.currentTarget as HTMLElement).style.backgroundColor = '#F7F4ED'
+          ;(e.currentTarget as HTMLElement).style.color = INK
+        }}
+        onMouseLeave={(e) => {
+          ;(e.currentTarget as HTMLElement).style.backgroundColor = '#FFFFFF'
+          ;(e.currentTarget as HTMLElement).style.color = '#5C5651'
+        }}
+      >
+        <svg width="12" height="12" viewBox="0 0 14 14" fill="none" aria-hidden>
+          <path
+            d="M11 7H2M6 3 2 7l4 4"
+            stroke="currentColor"
+            strokeWidth="1.6"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+        <span>{backLabel}</span>
+      </Link>
+
       <div style={{ flex: 1, minWidth: 0 }}>
         <div
           style={{

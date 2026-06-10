@@ -127,7 +127,9 @@ interface HonorAward {
 interface TalkItem {
   year: string
   title: string
-  organization: string
+  /** A single string renders on one line; pass an array to stack
+   *  affiliations on separate lines (right-aligned). */
+  organization: string | string[]
 }
 
 function Role({ role }: { role: Role }) {
@@ -384,7 +386,8 @@ function Article({ article }: { article: MyArticle }) {
     article.url.code ||
     article.url.dataset ||
     article.url.environments ||
-    article.url.blog
+    article.url.blog ||
+    article.url.slide
 
   return (
     <Card className="md:col-span-3">
@@ -442,6 +445,14 @@ function Article({ article }: { article: MyArticle }) {
                   className="text-xs text-blue-400 underline hover:text-blue-500"
                 >
                   [Blog]
+                </a>
+              )}
+              {article.url.slide && (
+                <a
+                  href={article.url.slide}
+                  className="text-xs text-blue-400 underline hover:text-blue-500"
+                >
+                  [Slide]
                 </a>
               )}
             </>
@@ -516,9 +527,9 @@ export default async function About() {
       date: '06/2026',
       content: (
         <>
-          Gave a talk on CUA-Gym at NVIDIA Research, the Deep Learning Group{' '}
-          @ MSR, Mila — Quebec AI Institute, WebAgentLab, and CAMEL-AI —
-          check out the <Link href="/slides/cua-gym">slides</Link>!
+          Gave talks at NVIDIA Research, the Deep Learning Group @ MSR,
+          Mila-Quebec AI Institute, WebAgentLab, and CAMEL-AI. Check out
+          the <Link href="/slides/cua-gym">slides</Link>!
         </>
       ),
     },
@@ -601,8 +612,13 @@ export default async function About() {
     {
       year: '2026',
       title: 'How Do We Scale Computer-Use Agent Post-training?',
-      organization:
-        'NVIDIA Research · MSR Deep Learning Group · Mila — Quebec AI Institute · WebAgentLab · CAMEL-AI',
+      organization: [
+        'NVIDIA Research',
+        'MSR Deep Learning Group',
+        'Mila-Quebec AI Institute',
+        'WebAgentLab',
+        'CAMEL-AI',
+      ],
     },
     {
       year: '2025',
@@ -842,7 +858,11 @@ export default async function About() {
                   {item.title}
                 </div>
                 <div className="col-start-2 min-w-0 text-right text-sm italic leading-6 text-zinc-600 dark:text-zinc-400 sm:col-start-auto sm:text-base sm:leading-6">
-                  {item.organization}
+                  {Array.isArray(item.organization)
+                    ? item.organization.map((org, i) => (
+                        <div key={i}>{org}</div>
+                      ))
+                    : item.organization}
                 </div>
               </li>
             ))}
