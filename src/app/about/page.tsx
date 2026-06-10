@@ -599,6 +599,12 @@ export default async function About() {
 
   const talks: TalkItem[] = [
     {
+      year: '2026',
+      title: 'How Do We Scale Computer-Use Agent Post-training?',
+      organization:
+        'NVIDIA Research · MSR Deep Learning Group · Mila — Quebec AI Institute · WebAgentLab · CAMEL-AI',
+    },
+    {
       year: '2025',
       title: 'Language Agents',
       organization: 'University of Tasmania',
