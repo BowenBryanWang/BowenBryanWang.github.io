@@ -513,6 +513,16 @@ export default async function About() {
 
   const newsItems: NewsItem[] = [
     {
+      date: '06/2026',
+      content: (
+        <>
+          Gave a talk on CUA-Gym at NVIDIA Research, the Deep Learning Group{' '}
+          @ MSR, Mila — Quebec AI Institute, WebAgentLab, and CAMEL-AI —
+          check out the <Link href="/slides/cua-gym">slides</Link>!
+        </>
+      ),
+    },
+    {
       date: '05/2026',
       content: (
         <>

@@ -20,6 +20,7 @@ export interface MyArticle {
     dataset?: string
     environments?: string
     blog?: string
+    slide?: string
   }
 }
 
@@ -53,6 +54,7 @@ export const myarticles = [
       code: 'https://github.com/xlang-ai/CUA-Gym',
       environments: 'https://github.com/xlang-ai/CUA-Gym-Hub',
       blog: '/blog/introducing-cua-gym',
+      slide: '/slides/cua-gym',
     },
     image: '/figures/cua-gym/main_figure.png',
   },

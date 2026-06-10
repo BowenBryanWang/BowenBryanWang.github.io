@@ -46,6 +46,7 @@ function Article({ article }: { article: MyArticle }) {
   const hasAnyUrl =
     article.url.website ||
     article.url.paper ||
+    article.url.slide ||
     article.url.code ||
     article.url.dataset ||
     article.url.environments ||
@@ -121,6 +122,14 @@ function Article({ article }: { article: MyArticle }) {
                       className="text-xs text-blue-400 underline hover:text-blue-500"
                     >
                       [Blog]
+                    </a>
+                  )}
+                  {article.url.slide && (
+                    <a
+                      href={article.url.slide}
+                      className="text-xs text-blue-400 underline hover:text-blue-500"
+                    >
+                      [Slide]
                     </a>
                   )}
                 </>
