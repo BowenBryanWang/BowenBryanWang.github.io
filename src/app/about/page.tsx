@@ -11,15 +11,9 @@ import {
   TwitterIcon,
 } from '@/components/SocialIcons'
 import portraitImage from '@/images/portrait.jpg'
-import Apple from '@/images/logos/apple.svg'
 
-import logoAirbnb from '@/images/logos/airbnb.svg'
-import logoFacebook from '@/images/logos/facebook.svg'
 import HKU from '@/images/logos/hku.jpg'
 import THU from '@/images/logos/thu.jpg'
-import logoStarbucks from '@/images/logos/starbucks.svg'
-import MoonShot from '@/images/logos/moonshot.jpeg'
-import Qwen from '@/images/logos/qwen.png'
 import image1 from '@/images/photos/image-1.jpg'
 import image2 from '@/images/photos/image-2.jpg'
 import image3 from '@/images/photos/image-3.jpg'
@@ -104,13 +98,6 @@ interface Role {
   advisor?: React.ReactNode
   start: string | { label: string; dateTime: string }
   end: string | { label: string; dateTime: string }
-}
-
-interface TechnicalReport {
-  year: string
-  title: string
-  authors: string
-  url?: string
 }
 
 interface NewsItem {
@@ -204,102 +191,6 @@ function Role({ role }: { role: Role }) {
         </dd>
       </dl>
     </li>
-  )
-}
-
-function Experiences() {
-  let experiences: Array<Role> = [
-    {
-      company: 'Apple AI/ML',
-      title: 'Research Scientist Intern',
-      logo: Apple,
-      logoClassName: 'dark:invert',
-      advisor: (
-        <a
-          href="https://zhegan27.github.io/"
-          target="_blank"
-          rel="noreferrer"
-          className="underline decoration-zinc-300 underline-offset-2 dark:decoration-zinc-600"
-        >
-          Zhe Gan
-        </a>
-      ),
-      description: 'Digital Agent Research',
-      start: 'Incoming',
-      end: 'Incoming',
-    },
-    {
-      company: 'Qwen Team, Alibaba Group',
-      title: 'Research Scientist Intern',
-      logo: Qwen,
-      advisor: (
-        <>
-          <a
-            href="https://scholar.google.com/citations?user=3_zVvT0AAAAJ"
-            target="_blank"
-            rel="noreferrer"
-            className="underline decoration-zinc-300 underline-offset-2 dark:decoration-zinc-600"
-          >
-            Binyuan Hui
-          </a>{' '}
-          &amp;{' '}
-          <a
-            href="https://scholar.google.com/citations?user=xy6A44QAAAAJ"
-            target="_blank"
-            rel="noreferrer"
-            className="underline decoration-zinc-300 underline-offset-2 dark:decoration-zinc-600"
-          >
-            Junyang Lin
-          </a>
-        </>
-      ),
-      description: 'Post-training in CUA',
-      start: '2025.12',
-      end: '2026.4',
-    },
-    {
-      company: 'Moonshot AI',
-      title: 'Research Intern',
-      logo: MoonShot,
-      advisor: (
-        <>
-          <a
-            href="https://www.haohu.tech/"
-            target="_blank"
-            rel="noreferrer"
-            className="underline decoration-zinc-300 underline-offset-2 dark:decoration-zinc-600"
-          >
-            Hao Hu
-          </a>{' '}
-          &amp;{' '}
-          <a
-            href="https://floodsung.github.io/"
-            target="_blank"
-            rel="noreferrer"
-            className="underline decoration-zinc-300 underline-offset-2 dark:decoration-zinc-600"
-          >
-            Flood Sung
-          </a>
-        </>
-      ),
-      description: 'Post-training in CUA',
-      start: '2025.02',
-      end: '2025.12',
-    },
-  ]
-
-  return (
-    <div className="rounded-2xl border border-rule p-6 dark:border-zinc-700/40">
-      <h2 className="flex text-sm font-semibold text-zinc-900 dark:text-zinc-100">
-        <BriefcaseIcon className="h-6 w-6 flex-none" />
-        <span className="ml-3">Experiences</span>
-      </h2>
-      <ol className="mt-6 space-y-4">
-        {experiences.map((role, roleIndex) => (
-          <Role key={roleIndex} role={role} />
-        ))}
-      </ol>
-    </div>
   )
 }
 
@@ -463,29 +354,6 @@ function Article({ article }: { article: MyArticle }) {
   )
 }
 
-function TechnicalReportItem({ report }: { report: TechnicalReport }) {
-  return (
-    <Card className="md:col-span-3">
-      <Card.Title>{report.title}</Card.Title>
-      <Card.Authors author={report.authors} />
-      <div className="relative z-10 mt-1 flex flex-wrap items-center gap-3 text-sm text-zinc-600 dark:text-zinc-400">
-        <span className="text-sm font-semibold">{report.year}</span>
-        <span>Technical Report</span>
-        {report.url && (
-          <a
-            href={report.url}
-            target="_blank"
-            rel="noreferrer"
-            className="text-xs text-blue-400 underline hover:text-blue-500"
-          >
-            [Paper]
-          </a>
-        )}
-      </div>
-    </Card>
-  )
-}
-
 export const metadata: Metadata = {
   title: 'About',
   description: 'Bryan Wang',
@@ -494,33 +362,12 @@ export const metadata: Metadata = {
 export default async function About() {
   const selectedPublications = myarticles.filter(
     (article) =>
-      article.title !== 'Kimi-VL Technical Report' &&
+      !article.title.toLowerCase().includes('technical report') &&
       article.title !==
         'AutoTask: Executing Arbitrary Voice Commands by Exploring and Learning from Mobile GUI' &&
       article.title !==
         'Interaction Proxy Manager: Semantic Model Generation and Run-time Support for Reconstructing Ubiquitous User Interfaces of Mobile Services',
   )
-
-  const technicalReports: TechnicalReport[] = [
-    {
-      year: '2026',
-      title: 'Qwen3.5: Towards Native Multimodal Agents',
-      authors: 'The Qwen Team, Alibaba Group.',
-      url: 'https://qwen.ai/blog?id=qwen3.5',
-    },
-    {
-      year: '2026',
-      title: 'Kimi K2.5: Visual Agentic Intelligence',
-      authors: 'The Kimi Team.',
-      url: 'https://arxiv.org/abs/2602.02276',
-    },
-    {
-      year: '2025',
-      title: 'Kimi-VL Technical Report',
-      authors: 'The Kimi Team.',
-      url: 'https://arxiv.org/abs/2504.07491',
-    },
-  ]
 
   const newsItems: NewsItem[] = [
     {
@@ -561,15 +408,6 @@ export default async function About() {
         <>
           Computer Agent Arena was accepted to ICLR&apos;26 as a poster (top
           3%). See you in Brazil 🇧🇷!
-        </>
-      ),
-    },
-    {
-      date: '12/2025',
-      content: (
-        <>
-          Joined the Qwen team, advised by Binyuan Hui and Junyang Lin — hoping
-          to build open-sourced computer-use agents.
         </>
       ),
     },
@@ -689,12 +527,10 @@ export default async function About() {
                 including coding, computer-use, terminal-use and more.
               </div>
               <div>
-                I have also participated in building open-source foundation
-                models such as Qwen 3.7, Qwen3.5 and Kimi K2.5, and I hope to make
-                computer-use a core capability of frontier models. I believe
-                universal digital agents (UDA) are a path toward AGI. If you
-                would like to talk about research or life, feel free to reach
-                out. I&apos;m open to opportunities.
+                I hope to make computer-use a core capability of frontier
+                models. I believe universal digital agents (UDA) are a path
+                toward AGI. If you would like to talk about research or life,
+                feel free to reach out. I&apos;m open to opportunities.
               </div>
             </div>
           </div>
@@ -781,7 +617,6 @@ export default async function About() {
         <div className="mx-auto grid max-w-xl grid-cols-1 gap-y-20 lg:max-w-none lg:grid-cols-5">
           <div className="col-span-2 space-y-6 lg:pr-8 xl:pr-12">
             {/* <Newsletter /> */}
-            <Experiences />
             <Education />
           </div>
           <div className="col-span-3 flex flex-col gap-16">
@@ -799,19 +634,6 @@ export default async function About() {
               </div>
             </section>
 
-            <section>
-              <h2 className="border-b border-rule pb-2 text-3xl font-semibold tracking-tight text-zinc-900 dark:border-zinc-700 dark:text-zinc-100">
-                Technical Reports
-              </h2>
-              <div className="mt-8 flex flex-col gap-10">
-                {technicalReports.map((report, index) => (
-                  <TechnicalReportItem
-                    key={`${report.title}-${index}`}
-                    report={report}
-                  />
-                ))}
-              </div>
-            </section>
           </div>
         </div>
       </Container>
