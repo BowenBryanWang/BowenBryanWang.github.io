@@ -135,7 +135,11 @@ const LIMITATIONS = [
   },
 ];
 
-export const EnvironmentScaling = () => {
+export const EnvironmentScaling = ({
+  titleOverride,
+}: {
+  titleOverride?: string
+}) => {
   const frame = useCurrentFrame();
 
   const titleOp = fadeIn(frame, 0, 60);
@@ -243,11 +247,15 @@ export const EnvironmentScaling = () => {
               opacity: titleOp,
             }}
           >
-            CUA RLVR still needs another scale axis:{' '}
-            <span style={{ color: '#862D1A', fontStyle: 'italic', fontWeight: 600 }}>
-              environments
-            </span>
-            .
+            {titleOverride ?? (
+              <>
+                CUA RLVR still needs another scale axis:{' '}
+                <span style={{ color: '#862D1A', fontStyle: 'italic', fontWeight: 600 }}>
+                  environments
+                </span>
+                .
+              </>
+            )}
           </div>
 
           {/* Phase-1 subtitle: leads into the 3 limitations */}

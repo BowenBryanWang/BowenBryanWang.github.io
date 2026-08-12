@@ -42,7 +42,11 @@ const FADE_OUT_START = SCENE_FRAMES - FADE_OUT_FRAMES;
 //   0 – 270  hold (every component rendered, discriminator overlay = green ✓)
 // 270 – 300  scene fade out
 
-export const RewardScripter = () => {
+export const RewardScripter = ({
+  titleOverride,
+}: {
+  titleOverride?: string
+}) => {
   const frame = useCurrentFrame();
 
   // Slide mode: restore staggered reveal so right-arrow steps walk through
@@ -143,11 +147,15 @@ export const RewardScripter = () => {
             opacity: titleOp,
           }}
         >
-          We hand reward writing off to a{' '}
-          <span style={{ color: '#862D1A', fontStyle: 'italic', fontWeight: 600 }}>
-            coding agent
-          </span>
-          .
+          {titleOverride ?? (
+            <>
+              We hand reward writing off to a{' '}
+              <span style={{ color: '#862D1A', fontStyle: 'italic', fontWeight: 600 }}>
+                coding agent
+              </span>
+              .
+            </>
+          )}
         </div>
 
         {/* Orchestrator dark window — narrows when the Filter card slides in
