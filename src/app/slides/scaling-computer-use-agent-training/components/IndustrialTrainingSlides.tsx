@@ -71,6 +71,42 @@ export function IndustrialTrainingSectionSlide() {
   )
 }
 
+export function WhatsNextSlide() {
+  return (
+    <AbsoluteFill
+      style={{
+        backgroundColor: PAPER,
+        color: INK,
+        fontFamily: PALATINO,
+        overflow: 'hidden',
+      }}
+    >
+      <Grid />
+      <div
+        style={{
+          position: 'absolute',
+          inset: 0,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        <h1
+          style={{
+            margin: 0,
+            fontSize: 150,
+            lineHeight: 1,
+            letterSpacing: '-0.035em',
+            fontWeight: 600,
+          }}
+        >
+          What&apos;s Next?
+        </h1>
+      </div>
+    </AbsoluteFill>
+  )
+}
+
 function Milestone({ left, top, label, date, metric, detail, tone, width = 250 }: {
   left: number
   top: number

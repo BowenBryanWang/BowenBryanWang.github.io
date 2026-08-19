@@ -31,6 +31,7 @@ import {
   IndustrialExperienceScalingSlide,
   IndustrialFoundationTimelineSlide,
   IndustrialTrainingSectionSlide,
+  WhatsNextSlide,
 } from './components/IndustrialTrainingSlides'
 
 const asSlide = (Component: React.ComponentType) =>
@@ -148,14 +149,13 @@ const SLIDES: Slide<never>[] = [
     label: 'Industrial experiences: RL and delivery',
   },
   {
-    Component: asBanner(Banner) as unknown as Slide<never>['Component'],
+    Component: asSlide(WhatsNextSlide),
     frames: [30],
-    props: { variant: 'teaser' } as never,
-    label: "And what's next?",
+    label: "What's Next?",
   },
   {
     Component: TerminalUsageFinding as unknown as Slide<never>['Component'],
-    frames: [30, 120, 220, 300, 380],
+    frames: [380],
     label: 'Unexpected: terminal-usage rises',
   },
   {

@@ -2054,12 +2054,7 @@ export function OpenCUATrainingSlide() {
 
 export function OpenCUAResultsSlide() {
   const frame = useCurrentFrame()
-  const plot = {
-    left: 340,
-    top: 370,
-    width: 950,
-    height: 420,
-  }
+  const plot = { left: 220, top: 350, width: 1040, height: 440 }
   const xMax = 55
   const yMax = 40
   const x = (value: number) => plot.left + (value / xMax) * plot.width
@@ -2085,36 +2080,16 @@ export function OpenCUAResultsSlide() {
     <Shell kicker="OpenCUA result" title="The recipe turns data scale into agent capability.">
       <svg
         viewBox="0 0 1920 1080"
-        style={{
-          position: 'absolute',
-          inset: 0,
-          opacity: fadeIn(frame, 10, 38),
-        }}
+        style={{ position: 'absolute', inset: 0, opacity: fadeIn(frame, 10, 38) }}
         aria-label="OSWorld success rate versus data scale"
       >
-        <defs>
-          <filter id="starShadow" x="-40%" y="-40%" width="180%" height="180%">
-            <feDropShadow dx="0" dy="10" stdDeviation="8" floodColor="#862D1A" floodOpacity="0.18" />
-          </filter>
-          <marker
-            id="arrowOx"
-            viewBox="0 0 10 10"
-            refX="8"
-            refY="5"
-            markerWidth="7"
-            markerHeight="7"
-            orient="auto-start-reverse"
-          >
-            <path d="M 0 0 L 10 5 L 0 10 z" fill={OXBLOOD} />
-          </marker>
-        </defs>
-
         <rect
-          x={plot.left - 74}
-          y={plot.top - 92}
-          width={plot.width + 470}
-          height={plot.height + 170}
-          fill="rgba(255,255,255,0.44)"
+          x={plot.left - 54}
+          y={plot.top - 42}
+          width={plot.width + 108}
+          height={plot.height + 120}
+          rx="10"
+          fill="rgba(255,255,255,0.5)"
           stroke={RULE}
           strokeWidth="2"
         />
@@ -2126,16 +2101,15 @@ export function OpenCUAResultsSlide() {
               x2={plot.left + plot.width}
               y1={y(tick)}
               y2={y(tick)}
-              stroke={tick === 0 ? INK : RULE}
-              strokeWidth={tick === 0 ? 3 : 1.5}
-              opacity={tick === 0 ? 0.85 : 0.72}
+              stroke={tick === 0 ? MUTED : RULE}
+              strokeWidth={tick === 0 ? 2.5 : 1.5}
             />
             <text
-              x={plot.left - 28}
+              x={plot.left - 24}
               y={y(tick) + 8}
               textAnchor="end"
               fontFamily={MONO}
-              fontSize="22"
+              fontSize="21"
               fill={MUTED}
             >
               {tick}
@@ -2143,23 +2117,14 @@ export function OpenCUAResultsSlide() {
           </g>
         ))}
 
-        {[0, 10, 20, 27, 42, 55].map((tick) => (
+        {[0, 10, 27, 42, 55].map((tick) => (
           <g key={`x-${tick}`}>
-            <line
-              x1={x(tick)}
-              x2={x(tick)}
-              y1={plot.top}
-              y2={plot.top + plot.height}
-              stroke={RULE}
-              strokeWidth="1.2"
-              opacity="0.52"
-            />
             <text
               x={x(tick)}
-              y={plot.top + plot.height + 46}
+              y={plot.top + plot.height + 42}
               textAnchor="middle"
               fontFamily={MONO}
-              fontSize="22"
+              fontSize="21"
               fill={MUTED}
             >
               {tick}
@@ -2167,164 +2132,78 @@ export function OpenCUAResultsSlide() {
           </g>
         ))}
 
-        <line
-          x1={plot.left}
-          y1={plot.top}
-          x2={plot.left}
-          y2={plot.top + plot.height}
-          stroke={INK}
-          strokeWidth="3"
-        />
-        <line
-          x1={plot.left}
-          y1={plot.top + plot.height}
-          x2={plot.left + plot.width}
-          y2={plot.top + plot.height}
-          stroke={INK}
-          strokeWidth="3"
-        />
+        <line x1={plot.left} y1={plot.top} x2={plot.left} y2={plot.top + plot.height} stroke={MUTED} strokeWidth="2.5" />
 
         <path
           d={linePath(basePoints)}
           fill="none"
-          stroke="#C9C9C9"
-          strokeWidth="6"
+          stroke="#AAA39A"
+          strokeWidth="5"
           strokeLinecap="round"
-          strokeDasharray="18 18"
+          strokeDasharray="14 14"
         />
         <path
           d={linePath(ourPoints)}
           fill="none"
           stroke={BLUE}
-          strokeWidth="9"
+          strokeWidth="7"
           strokeLinecap="round"
           strokeLinejoin="round"
         />
 
+        {basePoints.slice(1).map(([px, py]) => (
+          <circle key={`base-${px}`} cx={x(px)} cy={y(py)} r="7" fill={PAPER} stroke="#8E877F" strokeWidth="4" />
+        ))}
+        {ourPoints.slice(1).map(([px, py]) => (
+          <circle key={`ours-${px}`} cx={x(px)} cy={y(py)} r="9" fill={BLUE} stroke={PAPER} strokeWidth="4" />
+        ))}
+
         {ourPoints.slice(2).map(([px, py], i) => (
-          <g key={`star-${px}`} filter="url(#starShadow)">
-            <text
-              x={x(px)}
-              y={y(py) - 44}
-              textAnchor="middle"
-              fontFamily={MONO}
-              fontSize="30"
-              fontWeight="800"
-              fill={INK}
-            >
+          <g key={`model-${px}`}>
+            <rect x={x(px) - 31} y={y(py) - 52} width="62" height="30" rx="15" fill={INK} />
+            <text x={x(px)} y={y(py) - 31} textAnchor="middle" fontFamily={MONO} fontSize="17" fontWeight="800" fill={PAPER}>
               {['7B', '32B', '72B'][i]}
-            </text>
-            <text
-              x={x(px)}
-              y={y(py) + 18}
-              textAnchor="middle"
-              dominantBaseline="middle"
-              fontSize="64"
-              fill="#FF7A1A"
-            >
-              ★
             </text>
           </g>
         ))}
 
         <text
           x={plot.left + plot.width / 2}
-          y={plot.top - 38}
+          y={plot.top + plot.height + 88}
           textAnchor="middle"
-          fontFamily={PALATINO}
-          fontSize="38"
-          fontWeight="700"
-          fill={INK}
+          fontFamily={MONO}
+          fontSize="23"
+          fill={MUTED}
         >
-          OSWorld SR (%) vs. Data Scale (k)
+          Training pairs (k)
         </text>
         <text
-          x={plot.left + plot.width / 2}
-          y={plot.top + plot.height + 96}
-          textAnchor="middle"
-          fontFamily={PALATINO}
-          fontSize="30"
-          fill={INK}
-        >
-          Data Scale (k)
-        </text>
-        <text
-          x={plot.left - 104}
+          x={plot.left - 92}
           y={plot.top + plot.height / 2}
           textAnchor="middle"
-          fontFamily={PALATINO}
-          fontSize="30"
-          fill={INK}
-          transform={`rotate(-90 ${plot.left - 104} ${plot.top + plot.height / 2})`}
+          fontFamily={MONO}
+          fontSize="23"
+          fill={MUTED}
+          transform={`rotate(-90 ${plot.left - 92} ${plot.top + plot.height / 2})`}
         >
           OSWorld SR (%)
         </text>
 
-        <g transform={`translate(${plot.left + 44}, ${plot.top + 36})`}>
-          <line x1="0" y1="0" x2="58" y2="0" stroke="#C9C9C9" strokeWidth="6" strokeDasharray="14 14" />
-          <text x="76" y="9" fontFamily={PALATINO} fontSize="28" fill={MUTED}>
-            Base recipe
-          </text>
-          <line x1="0" y1="46" x2="58" y2="46" stroke={BLUE} strokeWidth="8" />
-          <text x="76" y="55" fontFamily={PALATINO} fontSize="28" fill={INK}>
-            OpenCUA recipe
-          </text>
+        <g transform="translate(1390 375)">
+          <text x="0" y="0" fontFamily={MONO} fontSize="20" letterSpacing="2" fill={BLUE}>OPENCUA RECIPE</text>
+          <text x="0" y="84" fontFamily={MONO} fontSize="70" fontWeight="800" fill={BLUE}>36%</text>
+          <text x="0" y="122" fontFamily={PALATINO} fontSize="27" fill={MUTED}>OSWorld SR at 55k pairs</text>
+
+          <line x1="0" x2="410" y1="172" y2="172" stroke={RULE} strokeWidth="2" />
+
+          <text x="0" y="226" fontFamily={MONO} fontSize="20" letterSpacing="2" fill="#8E877F">STATE-ACTION ONLY</text>
+          <text x="0" y="304" fontFamily={MONO} fontSize="58" fontWeight="800" fill="#8E877F">4.5%</text>
+          <text x="0" y="342" fontFamily={PALATINO} fontSize="27" fill={MUTED}>performance plateaus</text>
+
+          <line x1="0" x2="410" y1="394" y2="394" stroke={RULE} strokeWidth="2" />
+          <text x="0" y="452" fontFamily={PALATINO} fontSize="31" fontWeight="700" fill={INK}>Data mixture unlocks scaling</text>
+          <text x="0" y="492" fontFamily={PALATINO} fontSize="25" fill={MUTED}>from 7B → 32B → 72B.</text>
         </g>
-
-        <path
-          d={`M ${x(3)} ${y(4.4)} L ${x(10)} ${y(4.4)}`}
-          stroke={OXBLOOD}
-          strokeWidth="6"
-          fill="none"
-          markerEnd="url(#arrowOx)"
-        />
-        <text
-          x={plot.left + 92}
-          y={y(4.4) - 62}
-          textAnchor="start"
-          fontFamily={PALATINO}
-          fontSize="27"
-          fill={INK}
-        >
-          <tspan x={plot.left + 92} dy="0">State-action pairs alone</tspan>
-          <tspan x={plot.left + 92} dy="31">flatten around 4.4% SR.</tspan>
-        </text>
-
-        <path
-          d={`M ${x(37)} ${y(12)} L ${x(34)} ${y(22)}`}
-          stroke={OXBLOOD}
-          strokeWidth="6"
-          fill="none"
-          markerEnd="url(#arrowOx)"
-        />
-        <text
-          x={x(39)}
-          y={y(12) + 8}
-          fontFamily={PALATINO}
-          fontSize="28"
-          fill={INK}
-        >
-          <tspan x={x(39)} dy="0">Data mixture unlocks</tspan>
-          <tspan x={x(39)} dy="34">robust scaling.</tspan>
-        </text>
-
-        <path
-          d={`M ${plot.left + plot.width + 82} ${y(36)} C ${plot.left + plot.width + 130} ${y(36)}, ${plot.left + plot.width + 130} ${y(20)}, ${plot.left + plot.width + 82} ${y(20)}`}
-          stroke="#FF7A1A"
-          strokeWidth="8"
-          fill="none"
-          strokeLinecap="round"
-        />
-        <text
-          x={plot.left + plot.width + 160}
-          y={y(30)}
-          fontFamily={PALATINO}
-          fontSize="28"
-          fill={INK}
-        >
-          <tspan x={plot.left + plot.width + 160} dy="0">The same recipe</tspan>
-          <tspan x={plot.left + plot.width + 160} dy="32">scales with model size.</tspan>
-        </text>
       </svg>
     </Shell>
   )
