@@ -45,17 +45,17 @@ const asBanner = <T,>(c: T) =>
 const SLIDES: Slide<never>[] = [
   {
     Component: asSlide(TitleSlide),
-    frames: [30, 110],
+    frames: [110],
     label: 'Title',
   },
   {
     Component: asSlide(ThesisMap),
-    frames: [48, 118],
+    frames: [118],
     label: 'Research arc',
   },
   {
     Component: asSlide(OpenCUAQuestion),
-    frames: [40, 90, 140],
+    frames: [140],
     label: 'Scaling data is not enough',
   },
   {
