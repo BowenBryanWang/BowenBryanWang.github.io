@@ -1903,11 +1903,6 @@ export function OpenCUATrainingSlide() {
         ['GUI grounding data', 'interface localization and semantics', 1.05, '#63C5E6'],
         ['Early action traces', 'light agentic bridge', 0.72, '#2F5D7C'],
       ],
-      notes: [
-        'keep broad visual-language ability',
-        'teach screen localization and UI semantics',
-        'introduce low-level mouse / keyboard actions',
-      ],
     },
     {
       phase: 'Mid-training',
@@ -1918,16 +1913,11 @@ export function OpenCUATrainingSlide() {
         ['Reasoning annotations', 'observation, thought, and action alignment', 0.98, '#C46A45'],
         ['History context', 'long-horizon recovery signal', 0.78, '#E7B18D'],
       ],
-      notes: [
-        'scale expert desktop demonstrations',
-        'align observations, thoughts, and actions',
-        'train multi-step recovery and long-horizon context',
-      ],
     },
   ]
 
   return (
-    <Shell kicker="OpenCUA recipe" title="A open training recipe for computer-use agent.">
+    <Shell kicker="OpenCUA recipe" title="An open training recipe for computer-use agents.">
       <div style={{ position: 'absolute', left: 106, top: 292, width: 720 }}>
         <Claim>
           The recipe is not just adding AgentNet at the end. OpenCUA changes the
@@ -2026,33 +2016,6 @@ export function OpenCUATrainingSlide() {
                       {description}
                     </span>
                   </span>
-                </div>
-              ))}
-            </div>
-            <div
-              style={{
-                marginTop: 28,
-                borderTop: `2px solid ${RULE}`,
-                paddingTop: 22,
-                display: 'grid',
-                gap: 16,
-              }}
-            >
-              {stage.notes.map((note) => (
-                <div
-                  key={note}
-                  style={{
-                    display: 'grid',
-                    gridTemplateColumns: '28px 1fr',
-                    gap: 12,
-                    alignItems: 'start',
-                    fontSize: 23,
-                    lineHeight: 1.18,
-                    color: MUTED,
-                  }}
-                >
-                  <span style={{ color: stage.tone, fontFamily: MONO, fontWeight: 800 }}>+</span>
-                  <span>{note}</span>
                 </div>
               ))}
             </div>

@@ -332,26 +332,19 @@ export const TrainingDetails = () => {
         }}
       >
         <Point num="i." opacity={adv1Op}>
-          <Lead>Full supervision coverage.</Lead> Sliding window only updates
-          the last <em>N</em> rounds — truncation discards precisely the late
-          turns where success or failure is decided. Slicing emits{' '}
-          <em>M</em> training samples per rollout, each anchored at a
-          different starting point, so every assistant turn receives a
-          gradient through the union of all slices.
+          <Lead>Full supervision coverage.</Lead> Slicing emits multiple
+          training samples from each rollout, so every assistant turn receives
+          a learning signal.
         </Point>
         <Point num="ii." opacity={adv2Op}>
-          <Lead>Only screenshots collapse, never thoughts.</Lead> The
-          placeholder <Code>&lt;image collapsed&gt;</Code> swaps out a single
-          field — the screenshot. User prompts and the assistant&apos;s entire
-          chain-of-thought and tool calls remain verbatim, so the reasoning
-          trace is intact as context for every later turn.
+          <Lead>Collapse screenshots, not reasoning.</Lead> Older images become
+          <Code>&lt;image collapsed&gt;</Code>, while prompts, thoughts, and tool
+          calls remain intact.
         </Point>
         <Point num="iii." opacity={adv3Op}>
-          <Lead>Deterministic and cache-friendly.</Lead> Slicing buys the same
-          context relief as summarization without the extra LM call, the
-          quality variance, or the lost screenshot→pixel grounding. Adjacent
-          slices share an identical prefix, so the KV cache is reusable when
-          computing policy log-probabilities across slices.
+          <Lead>Deterministic and cache-friendly.</Lead> Shared prefixes reuse
+          the KV cache without an extra summarization model or lost visual
+          grounding.
         </Point>
       </div>
     </AbsoluteFill>

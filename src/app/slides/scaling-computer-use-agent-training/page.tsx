@@ -9,8 +9,6 @@ import { ComputerUseTask } from '../cua-gym/components/ComputerUseTask'
 import { RewardScripter } from '../cua-gym/components/RewardScripter'
 import { EnvironmentScaling } from '../cua-gym/components/EnvironmentScaling'
 import { HowToScaleEnvs } from '../cua-gym/components/HowToScaleEnvs'
-import { HowToCombine } from '../cua-gym/components/HowToCombine'
-import { TaskExample } from '../cua-gym/components/TaskExample'
 import { DatasetResults } from '../cua-gym/components/DatasetResults'
 import { TrainingDetails } from '../cua-gym/components/TrainingDetails'
 import { ResultsScene } from '../cua-gym/components/ResultsScene'
@@ -22,14 +20,18 @@ import { UnifiedAgent } from '../cua-gym/components/UnifiedAgent'
 
 import {
   AgentNetDatasetSlide,
-  AgentNetPipelineFigureSlide,
-  BridgeToCUAGymSlide,
   OpenCUAQuestion,
   OpenCUAResultsSlide,
   OpenCUATrainingSlide,
   ThesisMap,
   TitleSlide,
 } from './components/ResearchIntroSlides'
+import {
+  IndustrialExperienceRLSlide,
+  IndustrialExperienceScalingSlide,
+  IndustrialFoundationTimelineSlide,
+  IndustrialTrainingSectionSlide,
+} from './components/IndustrialTrainingSlides'
 
 const asSlide = (Component: React.ComponentType) =>
   Component as unknown as Slide<never>['Component']
@@ -55,11 +57,6 @@ const SLIDES: Slide<never>[] = [
     label: 'Scaling data is not enough',
   },
   {
-    Component: asSlide(AgentNetPipelineFigureSlide),
-    frames: [30],
-    label: 'AgentNet pipeline figure',
-  },
-  {
     Component: asSlide(AgentNetDatasetSlide),
     frames: [50],
     label: 'AgentNet data',
@@ -73,11 +70,6 @@ const SLIDES: Slide<never>[] = [
     Component: asSlide(OpenCUAResultsSlide),
     frames: [90],
     label: 'OpenCUA scaling result',
-  },
-  {
-    Component: asSlide(BridgeToCUAGymSlide),
-    frames: [45, 105],
-    label: 'Bridge to RLVR',
   },
   {
     Component: Banner as unknown as Slide<never>['Component'],
@@ -96,7 +88,7 @@ const SLIDES: Slide<never>[] = [
   },
   {
     Component: RewardScripter as unknown as Slide<never>['Component'],
-    frames: [40, 130, 260, 340, 420, 520, 670, 760, 890],
+    frames: [890],
     label: 'Reward scripter',
   },
   {
@@ -106,18 +98,8 @@ const SLIDES: Slide<never>[] = [
   },
   {
     Component: HowToScaleEnvs as unknown as Slide<never>['Component'],
-    frames: [60, 160, 260],
+    frames: [260],
     label: 'How do we scale environments?',
-  },
-  {
-    Component: HowToCombine as unknown as Slide<never>['Component'],
-    frames: [30, 90, 200, 290],
-    label: 'How do we combine environments and tasks?',
-  },
-  {
-    Component: TaskExample as unknown as Slide<never>['Component'],
-    frames: [60],
-    label: 'Example of a CUA-Gym task',
   },
   {
     Component: DatasetResults as unknown as Slide<never>['Component'],
@@ -144,6 +126,26 @@ const SLIDES: Slide<never>[] = [
     frames: [30],
     props: { variant: 'outro' } as never,
     label: 'Try it out',
+  },
+  {
+    Component: asSlide(IndustrialTrainingSectionSlide),
+    frames: [30],
+    label: 'Industrial computer-use agent training',
+  },
+  {
+    Component: asSlide(IndustrialFoundationTimelineSlide),
+    frames: [30],
+    label: 'Industrial foundation model timeline',
+  },
+  {
+    Component: asSlide(IndustrialExperienceScalingSlide),
+    frames: [30],
+    label: 'Industrial experiences: environment and data scaling',
+  },
+  {
+    Component: asSlide(IndustrialExperienceRLSlide),
+    frames: [30],
+    label: 'Industrial experiences: RL and delivery',
   },
   {
     Component: asBanner(Banner) as unknown as Slide<never>['Component'],
