@@ -31,6 +31,7 @@ import {
   IndustrialExperienceScalingSlide,
   IndustrialFoundationTimelineSlide,
   IndustrialTrainingSectionSlide,
+  NextChallengeSlide,
   WhatsNextSlide,
 } from './components/IndustrialTrainingSlides'
 
@@ -152,6 +153,11 @@ const SLIDES: Slide<never>[] = [
     Component: asSlide(WhatsNextSlide),
     frames: [30],
     label: "What's Next?",
+  },
+  {
+    Component: asSlide(NextChallengeSlide),
+    frames: [30],
+    label: 'The next challenge: long-horizon professional work',
   },
   {
     Component: TerminalUsageFinding as unknown as Slide<never>['Component'],

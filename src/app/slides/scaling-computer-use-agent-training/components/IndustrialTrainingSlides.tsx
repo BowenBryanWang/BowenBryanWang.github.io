@@ -107,6 +107,81 @@ export function WhatsNextSlide() {
   )
 }
 
+export function NextChallengeSlide() {
+  return (
+    <AbsoluteFill
+      style={{
+        backgroundColor: PAPER,
+        color: INK,
+        fontFamily: PALATINO,
+        overflow: 'hidden',
+      }}
+    >
+      <Grid />
+
+      <div style={{ position: 'absolute', left: 88, top: 58, right: 88 }}>
+        <div style={{ fontFamily: MONO, fontSize: 20, letterSpacing: '0.08em', color: OXBLOOD, textTransform: 'uppercase' }}>
+          The next challenge
+        </div>
+        <h1 style={{ margin: '12px 0 0', fontSize: 64, lineHeight: 1.04, letterSpacing: '-0.02em', fontWeight: 600 }}>
+          The next frontier is finishing real work.
+        </h1>
+      </div>
+
+      <div style={{ position: 'absolute', left: 88, top: 202, width: 1030 }}>
+        <div style={{ fontFamily: MONO, fontSize: 22, letterSpacing: '0.06em', color: BLUE, textTransform: 'uppercase' }}>
+          OSWorld 2.0 · Long-horizon execution
+        </div>
+        <Img
+          src={staticFile('osworld-v2-challenge.png')}
+          alt="OSWorld 2.0 long-horizon reimbursement workflow"
+          style={{ width: 1030, height: 580, objectFit: 'contain', display: 'block', marginTop: 16, background: '#fff', border: `1px solid ${RULE}` }}
+        />
+        <div style={{ marginTop: 18, fontFamily: MONO, fontSize: 23, lineHeight: 1.35, color: BLUE }}>
+          108 workflows · median 1.6 h · &gt;250 steps
+        </div>
+        <div style={{ marginTop: 5, fontSize: 25, lineHeight: 1.3, color: MUTED }}>
+          Best binary completion: <span style={{ color: OXBLOOD, fontWeight: 700 }}>20.6%</span>
+        </div>
+      </div>
+
+      <div style={{ position: 'absolute', left: 1172, top: 202, width: 660, paddingLeft: 44, borderLeft: `1px solid ${RULE}` }}>
+        <div style={{ fontFamily: MONO, fontSize: 22, letterSpacing: '0.06em', color: PURPLE, textTransform: 'uppercase' }}>
+          Agents&apos; Last Exam · Professional breadth
+        </div>
+        <Img
+          src={staticFile('agents-last-exam-taxonomy.webp')}
+          alt="Agents' Last Exam professional task taxonomy"
+          style={{ width: 616, height: 347, objectFit: 'cover', display: 'block', marginTop: 16, border: `1px solid ${RULE}` }}
+        />
+        <div style={{ display: 'flex', gap: 52, marginTop: 34 }}>
+          <div>
+            <div style={{ fontFamily: MONO, fontSize: 46, lineHeight: 1, fontWeight: 800, color: PURPLE }}>1K+</div>
+            <div style={{ marginTop: 8, fontSize: 22, color: MUTED }}>real professional tasks</div>
+          </div>
+          <div>
+            <div style={{ fontFamily: MONO, fontSize: 46, lineHeight: 1, fontWeight: 800, color: PURPLE }}>55</div>
+            <div style={{ marginTop: 8, fontSize: 22, color: MUTED }}>subfields · 13 industries</div>
+          </div>
+        </div>
+        <div style={{ marginTop: 30, paddingTop: 24, borderTop: `1px solid ${RULE}` }}>
+          <span style={{ fontFamily: MONO, fontSize: 42, lineHeight: 1, fontWeight: 800, color: OXBLOOD }}>2.6%</span>
+          <span style={{ marginLeft: 18, fontSize: 23, color: MUTED }}>average pass rate on the hardest tier</span>
+        </div>
+      </div>
+
+      <div style={{ position: 'absolute', left: 88, right: 88, bottom: 54, borderTop: `2px solid ${OXBLOOD}`, paddingTop: 20, display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+        <div style={{ fontSize: 31, lineHeight: 1.25, fontWeight: 600 }}>
+          Maintain state. Adapt. Verify. Finish.
+        </div>
+        <div style={{ fontFamily: MONO, fontSize: 14, color: '#766F69' }}>
+          Sources: osworld-v2.xlang.ai · agents-last-exam.org
+        </div>
+      </div>
+    </AbsoluteFill>
+  )
+}
+
 function Milestone({ left, top, label, date, metric, detail, tone, width = 250 }: {
   left: number
   top: number
