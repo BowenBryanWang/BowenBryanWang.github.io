@@ -117,8 +117,6 @@ export function NextChallengeSlide() {
         overflow: 'hidden',
       }}
     >
-      <Grid />
-
       <div style={{ position: 'absolute', left: 88, top: 64, right: 88 }}>
         <h1 style={{ margin: 0, fontSize: 66, lineHeight: 1.04, letterSpacing: '-0.022em', fontWeight: 600 }}>
           The next challenge: long-horizon, professional work.
@@ -132,7 +130,7 @@ export function NextChallengeSlide() {
         <Img
           src={staticFile('osworld-v2-challenge.png')}
           alt="Official OSWorld 2.0 score versus output tokens chart"
-          style={{ width: 920, height: 520, objectFit: 'contain', display: 'block', marginTop: 14, background: '#fff', border: `1px solid ${RULE}` }}
+          style={{ width: 920, height: 520, objectFit: 'contain', display: 'block', marginTop: 14, mixBlendMode: 'multiply' }}
         />
       </div>
 
@@ -143,7 +141,7 @@ export function NextChallengeSlide() {
         <Img
           src={staticFile('agents-last-exam-benchmark.png')}
           alt="Agents' Last Exam compared with existing agent benchmarks"
-          style={{ width: 772, height: 588, objectFit: 'contain', display: 'block', marginTop: 14, background: '#fff', border: `1px solid ${RULE}` }}
+          style={{ width: 772, height: 588, objectFit: 'contain', display: 'block', marginTop: 14, mixBlendMode: 'multiply' }}
         />
       </div>
 
