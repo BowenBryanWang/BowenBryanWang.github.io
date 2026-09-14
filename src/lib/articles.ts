@@ -24,7 +24,50 @@ export interface MyArticle {
   }
 }
 
+export interface TechnicalReport {
+  year: string
+  title: string
+  authors: string
+  url: string
+}
+
+export const technicalReports: TechnicalReport[] = [
+  {
+    year: '2026',
+    title: 'Qwen-CUA: Native Computer Use for (almost) Everything',
+    authors: 'The Qwen Team and XLang Lab.',
+    url: 'https://arxiv.org/abs/2608.02352',
+  },
+  {
+    year: '2026',
+    title: 'Qwen3.8-Flash-Next: A New Architecture, Towards Ultimate Cost-Efficiency',
+    authors: 'The Qwen Team, Alibaba Group.',
+    url: 'https://qwen.ai/blog?id=qwen3.8-flash-next',
+  },
+  {
+    year: '2026',
+    title: 'Kimi K2.5: Visual Agentic Intelligence',
+    authors: 'The Kimi Team.',
+    url: 'https://arxiv.org/abs/2602.02276',
+  },
+]
+
 export const myarticles = [
+  {
+    author:
+      'Mengqi Yuan, Zilong Zhou, Xinzhuang Xiong, Weiming Wu, Jiayang Sun, Jiamin Song, Kaiqian Cui, Bowen Wang, Haoyuan Wu, Yitong Li, Dunjie Lu, Haikong Lu, Qi Zhen, Xinyuan Wang, Jiaqi Deng, Yuhao Yang, Cheng Chen, Boyuan Zheng, Alex Su, Xiao Yu, Hao Zou, Saaket Agashe, Xing Han Lu, Manpreet Kaur, Zhengyang Qi, Vincent Sunn Chen, Frederic Sala, Dayiheng Liu, Junyang Lin, Zhou Yu, Yu Su, Siva Reddy, Xin Eric Wang, Peng Qi, Tianbao Xie, Tao Yu',
+    date: '2026-06',
+    publication: 'ArXiv',
+    title: 'OSWorld 2.0: Benchmarking Computer Use Agents on Long-Horizon Real-World Tasks',
+    description:
+      'OSWorld 2.0 evaluates computer-use agents on 108 long-horizon, real-world workflows spanning everyday and professional tasks.',
+    link: 'True',
+    url: {
+      website: 'https://osworld-v1.xlang.ai/',
+      paper: 'https://arxiv.org/abs/2606.29537',
+      code: 'https://github.com/xlang-ai/OSWorld',
+    },
+  },
   {
     author:
       'Bowen Wang, Dunjie Lu, Junli Wang, Tianyi Bai, Shixuan Liu, Zhipeng Zhang, Haiquan Wang, Hao Hu, Tianbao Xie, Shuai Bai, Dayiheng Liu, Que Shen, Junyang Lin, Tao Yu',

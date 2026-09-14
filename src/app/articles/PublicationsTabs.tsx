@@ -5,35 +5,7 @@ import Image from 'next/image'
 import clsx from 'clsx'
 
 import { Card } from '@/components/Card'
-import { MyArticle, myarticles } from '@/lib/articles'
-
-interface TechnicalReport {
-  year: string
-  title: string
-  authors: string
-  url?: string
-}
-
-const technicalReports: TechnicalReport[] = [
-  {
-    year: '2026',
-    title: 'Qwen3.5: Towards Native Multimodal Agents',
-    authors: 'The Qwen Team, Alibaba Group.',
-    url: 'https://qwen.ai/blog?id=qwen3.5',
-  },
-  {
-    year: '2026',
-    title: 'Kimi K2.5: Visual Agentic Intelligence',
-    authors: 'The Kimi Team.',
-    url: 'https://arxiv.org/abs/2602.02276',
-  },
-  {
-    year: '2025',
-    title: 'Kimi-VL Technical Report',
-    authors: 'The Kimi Team.',
-    url: 'https://arxiv.org/abs/2504.07491',
-  },
-]
+import { MyArticle, myarticles, technicalReports } from '@/lib/articles'
 
 type TabId = 'publications' | 'technical-reports'
 
@@ -150,16 +122,14 @@ function TechnicalReportItem({ report }: { report: TechnicalReport }) {
       <div className="relative z-10 mt-1 flex flex-wrap items-center gap-3 text-sm text-zinc-600 dark:text-zinc-400">
         <span className="text-sm font-semibold">{report.year}</span>
         <span>Technical Report</span>
-        {report.url && (
-          <a
-            href={report.url}
-            target="_blank"
-            rel="noreferrer"
-            className="text-xs text-blue-400 underline hover:text-blue-500"
-          >
-            [Paper]
-          </a>
-        )}
+        <a
+          href={report.url}
+          target="_blank"
+          rel="noreferrer"
+          className="text-xs text-blue-400 underline hover:text-blue-500"
+        >
+          [Paper]
+        </a>
       </div>
     </Card>
   )

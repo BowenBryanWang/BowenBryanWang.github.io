@@ -19,7 +19,12 @@ import image2 from '@/images/photos/image-2.jpg'
 import image3 from '@/images/photos/image-3.jpg'
 import image4 from '@/images/photos/image-4.jpg'
 import image5 from '@/images/photos/image-5.jpg'
-import { MyArticle, myarticles } from '@/lib/articles'
+import {
+  MyArticle,
+  myarticles,
+  TechnicalReport,
+  technicalReports,
+} from '@/lib/articles'
 import { formatDate } from '@/lib/formatDate'
 import { use } from 'react'
 import MyTypewriter from './TypeWritter'
@@ -354,6 +359,27 @@ function Article({ article }: { article: MyArticle }) {
   )
 }
 
+function TechnicalReportItem({ report }: { report: TechnicalReport }) {
+  return (
+    <Card className="md:col-span-3">
+      <Card.Title>{report.title}</Card.Title>
+      <Card.Authors author={report.authors} />
+      <div className="relative z-10 mt-1 flex flex-wrap items-center gap-3 text-sm text-zinc-600 dark:text-zinc-400">
+        <span className="text-sm font-semibold">{report.year}</span>
+        <span>Technical Report</span>
+        <a
+          href={report.url}
+          target="_blank"
+          rel="noreferrer"
+          className="text-xs text-blue-400 underline hover:text-blue-500"
+        >
+          [Paper]
+        </a>
+      </div>
+    </Card>
+  )
+}
+
 export const metadata: Metadata = {
   title: 'About',
   description: 'Bryan Wang',
@@ -629,6 +655,20 @@ export default async function About() {
                   <Article
                     key={`${article.title}-${index}`}
                     article={article}
+                  />
+                ))}
+              </div>
+            </section>
+
+            <section>
+              <h2 className="border-b border-rule pb-2 text-3xl font-semibold tracking-tight text-zinc-900 dark:border-zinc-700 dark:text-zinc-100">
+                Technical Reports
+              </h2>
+              <div className="mt-8 flex flex-col gap-10">
+                {technicalReports.map((report, index) => (
+                  <TechnicalReportItem
+                    key={`${report.title}-${index}`}
+                    report={report}
                   />
                 ))}
               </div>
