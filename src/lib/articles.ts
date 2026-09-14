@@ -28,27 +28,32 @@ export interface TechnicalReport {
   year: string
   title: string
   authors: string
-  url: string
+  url?: string
 }
 
 export const technicalReports: TechnicalReport[] = [
   {
     year: '2026',
     title: 'Qwen-CUA: Native Computer Use for (almost) Everything',
-    authors: 'The Qwen Team and XLang Lab.',
+    authors: 'The Qwen Team, Alibaba Group.',
     url: 'https://arxiv.org/abs/2608.02352',
   },
   {
     year: '2026',
-    title: 'Qwen3.8-Flash-Next: A New Architecture, Towards Ultimate Cost-Efficiency',
+    title: 'Qwen 3.5, Qwen 3.6, Qwen 3.7',
     authors: 'The Qwen Team, Alibaba Group.',
-    url: 'https://qwen.ai/blog?id=qwen3.8-flash-next',
   },
   {
     year: '2026',
     title: 'Kimi K2.5: Visual Agentic Intelligence',
     authors: 'The Kimi Team.',
     url: 'https://arxiv.org/abs/2602.02276',
+  },
+  {
+    year: '2025',
+    title: 'Kimi-VL Technical Report',
+    authors: 'The Kimi Team.',
+    url: 'https://arxiv.org/abs/2504.07491',
   },
 ]
 

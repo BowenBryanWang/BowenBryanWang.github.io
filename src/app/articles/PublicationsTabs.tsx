@@ -122,14 +122,16 @@ function TechnicalReportItem({ report }: { report: TechnicalReport }) {
       <div className="relative z-10 mt-1 flex flex-wrap items-center gap-3 text-sm text-zinc-600 dark:text-zinc-400">
         <span className="text-sm font-semibold">{report.year}</span>
         <span>Technical Report</span>
-        <a
-          href={report.url}
-          target="_blank"
-          rel="noreferrer"
-          className="text-xs text-blue-400 underline hover:text-blue-500"
-        >
-          [Paper]
-        </a>
+        {report.url && (
+          <a
+            href={report.url}
+            target="_blank"
+            rel="noreferrer"
+            className="text-xs text-blue-400 underline hover:text-blue-500"
+          >
+            [Paper]
+          </a>
+        )}
       </div>
     </Card>
   )
