@@ -5,7 +5,12 @@ import Image from 'next/image'
 import clsx from 'clsx'
 
 import { Card } from '@/components/Card'
-import { MyArticle, myarticles, technicalReports } from '@/lib/articles'
+import {
+  MyArticle,
+  myarticles,
+  TechnicalReport,
+  technicalReports,
+} from '@/lib/articles'
 
 type TabId = 'publications' | 'technical-reports'
 
