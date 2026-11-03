@@ -17,6 +17,13 @@ interface BlogPost {
 }
 
 const posts: BlogPost[] = [
+  {
+    slug: 'anticausal-masks',
+    title: 'Every Loss Mask Is a Reward',
+    date: '2026-11-03',
+    description:
+      'A pre-registered research plan: masking truncated or dropped rollouts in agentic RL pays them the mean reward. The identity, when it reverses the gradient, and the experiments that would confirm or kill it.',
+  },
   // hidden — draft not ready for public
   // {
   //   slug: 'cli-agents-gui-benchmark',
