@@ -1296,8 +1296,9 @@ export default function OnPolicyMergingPost() {
                       <strong>Uneven latency</strong>
                     </td>
                     <td>
-                      One domain with sandboxed, multi-turn rollouts, its
-                      worker pool cut to a fifth
+                      Add the released Xiaomi agentic tasks, whose rollouts
+                      are sandboxed and multi-turn, and cut their worker pool
+                      to a fifth
                     </td>
                     <td>
                       A shared batch waits for the slow domain or lets its
@@ -1308,6 +1309,111 @@ export default function OnPolicyMergingPost() {
                 </tbody>
               </table>
             </div>
+
+            <h3>An open data recipe</h3>
+            <p>
+              Every domain uses data that is public today together with its
+              verifier, so the whole comparison can be rerun by anyone
+              <Ref n={19} />. Stage 1 takes the released training rows of the
+              reference study as they are. Stage 2 adds domains from the two
+              labs that have released RL tasks with verifiers, NVIDIA and
+              Xiaomi, and from open benchmarks built for RL.
+            </p>
+            <div className="am-table">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Domain</th>
+                    <th>Open source of tasks</th>
+                    <th className="am-num">Size</th>
+                    <th>Verifier</th>
+                    <th>Used in</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Math</td>
+                    <td>LLM-Fusion-Train, math split (Polaris, hard subset)</td>
+                    <td className="am-num">38k</td>
+                    <td>Answer match</td>
+                    <td>Stage 1</td>
+                  </tr>
+                  <tr>
+                    <td>Science</td>
+                    <td>LLM-Fusion-Train, science split (OpenScienceReasoning-2)</td>
+                    <td className="am-num">50k</td>
+                    <td>Multiple-choice match</td>
+                    <td>Stage 1</td>
+                  </tr>
+                  <tr>
+                    <td>Code</td>
+                    <td>LLM-Fusion-Train, code split (CodeContests, Open-R1 Codeforces)</td>
+                    <td className="am-num">19k</td>
+                    <td>Unit tests in a sandbox</td>
+                    <td>Stage 1</td>
+                  </tr>
+                  <tr>
+                    <td>Instruction following</td>
+                    <td>LLM-Fusion-Train, IF split (WildChat with Open-Instruct constraints)</td>
+                    <td className="am-num">17k</td>
+                    <td>Rule checkers</td>
+                    <td>Stage 1</td>
+                  </tr>
+                  <tr>
+                    <td>Tool use</td>
+                    <td>LLM-Fusion-Train, agent split (Nemotron workplace assistant)</td>
+                    <td className="am-num">10k</td>
+                    <td>Tool-call and database-state checks</td>
+                    <td>Stage 1</td>
+                  </tr>
+                  <tr>
+                    <td>Logic</td>
+                    <td>MiniMaxAI/SynLogic</td>
+                    <td className="am-num">16k easy, 33k hard</td>
+                    <td>Rule verifiers</td>
+                    <td>Stage 2</td>
+                  </tr>
+                  <tr>
+                    <td>Structured output</td>
+                    <td>nvidia/Nemotron-RL-instruction_following-structured_outputs</td>
+                    <td className="am-num">10k</td>
+                    <td>Schema match in NeMo Gym</td>
+                    <td>Stage 2</td>
+                  </tr>
+                  <tr>
+                    <td>Search</td>
+                    <td>nvidia/Nemotron-RL-knowledge-web_search-mcqa</td>
+                    <td className="am-num">3k</td>
+                    <td>Answer match in NeMo Gym</td>
+                    <td>Stage 2</td>
+                  </tr>
+                  <tr>
+                    <td>Software-engineering agent</td>
+                    <td>R2E-Gym/R2E-Gym-Subset, or the code split of XiaomiMiMo/MiMo-V2.6-RL-oss</td>
+                    <td className="am-num">4.6k, or 2.6k</td>
+                    <td>Executable tests in Docker</td>
+                    <td>Stage 2</td>
+                  </tr>
+                  <tr>
+                    <td>Knowledge work and terminal agent</td>
+                    <td>XiaomiMiMo/MiMo-V2.6-RL-oss, general split</td>
+                    <td className="am-num">1k environments</td>
+                    <td>verify.py per environment, rules and rubric</td>
+                    <td>Stage 2</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <p>
+              The Xiaomi release is the only one from a frontier recipe that
+              contains long-horizon agentic tasks with their environments:
+              software engineering, security, knowledge work, web development
+              and composition, about 7,700 tasks with Docker images. It is
+              what the uneven-latency axis of Stage 2 uses. The reference
+              study also released its specialists and its merged, mixed and
+              distilled models at both sizes, which makes the first phase
+              below possible without training anything.
+            </p>
 
             <h3>Budget rule and logging</h3>
             <p>
@@ -1442,10 +1548,31 @@ export default function OnPolicyMergingPost() {
                 <tbody>
                   <tr>
                     <td>
-                      <strong>0</strong>
+                      <strong>0a</strong>
                     </td>
                     <td>
-                      Train the five 4B specialists as published, saving
+                      No training. Download the released 300-step specialists
+                      and their training rows. Sample rollouts from each
+                      specialist on its own domain; compute the cross-KL
+                      matrix and the ratio of residual to quadratic
+                      prediction; merge once with conjugate gradient and
+                      evaluate against the released task-arithmetic, mixed-RL
+                      and MOPD models on the released test sets.
+                    </td>
+                    <td>
+                      The conjugate-gradient merge is at or above task
+                      arithmetic on the mean and recovers part of the
+                      instruction-following gap. If it is clearly below, the
+                      quadratic model does not hold at 300 steps, and
+                      everything rests on meeting earlier.
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <strong>0b</strong>
+                    </td>
+                    <td>
+                      Retrain the five 4B specialists as published, saving
                       checkpoints and batches every 10 steps. Offline, merge
                       the step-<Tex>k</Tex> checkpoints with each operator for{' '}
                       <Tex>k</Tex> from 10 to 300 and evaluate. This is one
@@ -1502,8 +1629,9 @@ export default function OnPolicyMergingPost() {
               merge overhead, which Phase 0 measures. One seed of Stage 1 at
               4B is therefore of the order of 15,000 of those GPU-hours across
               the four arms, with the specialists shared between A2 and A3.
-              Phase 0 needs only the specialists and is the cheapest run that
-              can end the project.
+              Phase 0a needs only inference and a few hundred Fisher-vector
+              products on released models, and is the cheapest run that can
+              end the project.
             </p>
           </div>
 
@@ -1855,6 +1983,14 @@ export default function OnPolicyMergingPost() {
                 (arXiv:2602.02276); MiniMax-M2 (arXiv:2605.26494); Qwen3
                 (arXiv:2505.09388); Solar Open 2 (arXiv:2607.20062);
                 INTELLECT-3 (arXiv:2512.16144).
+              </li>
+              <li id="ref-19">
+                Open RL data and code used in the plan, as found on 4 November
+                2026: Siye01/LLM-Fusion-Train and LLM-Fusion-Test with the
+                Di-viner/LLM-Fusion code and released checkpoints;
+                XiaomiMiMo/MiMo-V2.6-RL-oss; the nvidia/Nemotron-RL datasets
+                and NVIDIA-NeMo/Gym; MiniMaxAI/SynLogic;
+                R2E-Gym/R2E-Gym-Subset; PrimeIntellect/INTELLECT-3-RL.
               </li>
             </ol>
           </div>

@@ -6,7 +6,8 @@ second-order KL barycenter of the trainers' policies, measured on each trainer's
 current rollouts:  theta+ = (sum_i F_i)^-1 sum_i F_i theta_i.
 
 Reuses the environment and exact quantities from merge_toy.py (same directory).
-Usage:  python opm_toy.py <mode> [seeds]      modes: checks h2h rules metric trigger slow mismatch
+Usage:  python opm_toy.py <mode> [seeds]
+        modes: checks h2h practical rules cg metric trigger slow mismatch
 """
 import json
 import os
