@@ -18,6 +18,13 @@ interface BlogPost {
 
 const posts: BlogPost[] = [
   {
+    slug: 'on-policy-merging',
+    title: 'On-Policy Merging: Train Apart, Meet Often',
+    date: '2026-11-04',
+    description:
+      'A training paradigm for multi-task RL: one on-policy trainer per domain, merged at the KL barycenter of their policies whenever one drifts too far. The derivation, what a merge provably preserves, and the experiment against multi-task RL, MOPD and one-shot merging.',
+  },
+  {
     slug: 'multitask-rl-done-right',
     title: "Filtering Doesn't Change Your Mix. Fixing the Mix Does.",
     date: '2026-11-04',
