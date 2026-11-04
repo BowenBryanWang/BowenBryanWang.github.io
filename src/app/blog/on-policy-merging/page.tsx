@@ -972,22 +972,87 @@ export default function OnPolicyMergingPost() {
           <div className="am-prose">
             <p>
               The claim is about multi-task RL post-training, so it has to be
-              tested on the recipe frontier models use. Public reports agree
-              on its shape: start from one post-SFT checkpoint, run GRPO per
-              domain with a domain-specific verifier, then consolidate
-              <Ref n={3} />
-              <Ref n={4} />. They also agree on the core domains: mathematics,
-              code, science or logical reasoning, instruction following, and
-              agentic tool calling, with software engineering added at larger
-              scale.
+              tested on the recipe frontier models use. We read the public
+              reports for which domains they train with RL and how they
+              combine them.
+            </p>
+            <div className="am-table">
+              <table>
+                <thead>
+                  <tr>
+                    <th>RL domain</th>
+                    <th>
+                      Public recipes that train on it
+                      <Ref n={18} />
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Mathematics</td>
+                    <td>DeepSeek, MiMo, Nemotron, GLM, Kimi, Solar Open, INTELLECT-3</td>
+                  </tr>
+                  <tr>
+                    <td>Competitive code</td>
+                    <td>DeepSeek, Nemotron, GLM, Kimi, Solar Open, INTELLECT-3</td>
+                  </tr>
+                  <tr>
+                    <td>Software-engineering agent</td>
+                    <td>DeepSeek, MiMo, Nemotron Ultra, GLM, Kimi, MiniMax, Solar Open, INTELLECT-3</td>
+                  </tr>
+                  <tr>
+                    <td>Science questions</td>
+                    <td>Nemotron, GLM, Kimi, Solar Open, INTELLECT-3</td>
+                  </tr>
+                  <tr>
+                    <td>Logic and puzzles</td>
+                    <td>DeepSeek-V3.2, Kimi K2, INTELLECT-3</td>
+                  </tr>
+                  <tr>
+                    <td>Instruction following</td>
+                    <td>DeepSeek-V4, Nemotron, GLM-4.5, Kimi K2, Qwen3, Solar Open</td>
+                  </tr>
+                  <tr>
+                    <td>Tool and function calling</td>
+                    <td>MiMo, Nemotron, GLM-4.5, Qwen3, Solar Open</td>
+                  </tr>
+                  <tr>
+                    <td>Search and deep research</td>
+                    <td>DeepSeek-V3.2, MiMo, Nemotron Ultra, GLM, MiniMax, Solar Open, INTELLECT-3</td>
+                  </tr>
+                  <tr>
+                    <td>Safety</td>
+                    <td>MiMo, Kimi K2, Nemotron Ultra, Solar Open</td>
+                  </tr>
+                  <tr>
+                    <td>Long context</td>
+                    <td>Nemotron</td>
+                  </tr>
+                  <tr>
+                    <td>Computer use</td>
+                    <td>None found as an RL domain in a public recipe</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <p>
+              The recipes also agree on the procedure. Until 2025 the
+              domains were trained in one mixed or staged GRPO run. The 2026
+              reports train ten to twelve specialists, each with supervised
+              warm-up and then GRPO with sixteen rollouts per prompt, and fuse
+              them by multi-teacher on-policy distillation with a reverse KL
+              <Ref n={4} />
+              <Ref n={18} />.
             </p>
             <p>
               Two public studies already compare three of the four paradigms
-              on Qwen3 with open data
+              on Qwen3 with open data, one built on slime and one on verl
               <Ref n={5} />. We take the second one’s setting without
               change, so that the three baselines are reproductions of
               published arms with published numbers, and OPM is the only new
-              arm.
+              arm. Its five domains are the common core of the table above,
+              its training data, evaluation sets and checkpoints are
+              released, and it needs no SFT stage.
             </p>
 
             <h3>Stage 1: the public five-domain setting</h3>
@@ -1199,8 +1264,9 @@ export default function OnPolicyMergingPost() {
                       <strong>More domains</strong>
                     </td>
                     <td>
-                      Five to ten: add logic puzzles, long-context reading,
-                      search, safety, software engineering
+                      Five to ten: add logic puzzles, structured outputs,
+                      search, safety, and a software-engineering agent with
+                      rollouts of up to 50 turns
                     </td>
                     <td>
                       Frontier recipes use more than ten specialists
@@ -1215,7 +1281,9 @@ export default function OnPolicyMergingPost() {
                     </td>
                     <td>
                       Qwen3-30B-A3B with math, instruction-following and
-                      software-engineering teachers
+                      software-engineering teachers, using the published
+                      teacher settings (GRPO, 8 rollouts per prompt, responses
+                      up to 32k tokens, 64k for software engineering)
                     </td>
                     <td>
                       The setting in which task arithmetic was reported at
@@ -1777,6 +1845,16 @@ export default function OnPolicyMergingPost() {
                 Issues and pull requests on environment imbalance in mixed
                 batches: tinker-cookbook #822, prime-rl #2072, miles #3947,
                 verl #8466.
+              </li>
+              <li id="ref-18">
+                Recipes surveyed for RL domains: DeepSeek-V3.2
+                (arXiv:2512.02556) and V4 (arXiv:2606.19348); MiMo-V2-Flash
+                (arXiv:2601.02780); Nemotron 3 Nano (arXiv:2512.20848) and
+                Ultra (arXiv:2606.15007); GLM-4.5 (arXiv:2508.06471) and
+                GLM-5 (arXiv:2602.15763); Kimi K2 (arXiv:2507.20534) and K2.5
+                (arXiv:2602.02276); MiniMax-M2 (arXiv:2605.26494); Qwen3
+                (arXiv:2505.09388); Solar Open 2 (arXiv:2607.20062);
+                INTELLECT-3 (arXiv:2512.16144).
               </li>
             </ol>
           </div>
