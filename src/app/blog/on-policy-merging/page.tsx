@@ -24,14 +24,14 @@ export const metadata: Metadata = {
 const POST = {
   title: 'On-Policy Merging: Train Apart, Meet Often',
   subtitle:
-    'A training paradigm for multi-task RL post-training. Each domain gets its own on-policy trainer. Whenever a trainer drifts a fixed number of nats from the shared anchor, all trainers meet at the KL barycenter of their policies, measured on the rollouts they have just collected, and continue from there. We derive the merge rule, prove what it preserves, show that multi-task RL, one-shot merging and MOPD are its limits, and lay out the experiment that decides it: one Qwen model trained on the domains that frontier recipes use, with all four paradigms at matched budget.',
+    'A training paradigm for multi-task RL post-training. Each domain gets its own on-policy trainer, held within a KL trust region of a shared anchor. When that budget is spent, all trainers meet at the KL barycenter of their policies, measured on the rollouts they have just collected, and continue from there. We derive the merge rule, prove what it preserves, show that multi-task RL, cascade RL, one-shot merging and MOPD are its limits, and lay out the experiment that decides it: one Qwen model trained on the domains that frontier recipes use, with all five paradigms at matched budget.',
   author: 'Bowen Wang',
   date: 'November 4, 2026',
   reading: 'Method proposal · 30 min read',
 }
 
 const TOC = [
-  { label: 'Three baselines, three mismatches', href: '#baselines' },
+  { label: 'Four baselines, four mismatches', href: '#baselines' },
   { label: 'The paradigm', href: '#paradigm' },
   { label: 'Deriving the merge', href: '#derivation' },
   { label: 'What a rendezvous preserves', href: '#guarantees' },
@@ -126,9 +126,10 @@ export default function OnPolicyMergingPost() {
           <figure>
             <ParadigmFigure />
             <figcaption>
-              <strong>Figure 1.</strong> Four ways to get one model out of
+              <strong>Figure 1.</strong> Five ways to get one model out of
               several RL domains. Multi-task RL couples every domain in every
-              step. One-shot merging and MOPD let specialists run free
+              step. Cascade RL trains them one after another and relies on the
+              earlier ones not being forgotten. One-shot merging and MOPD let specialists run free
               and pay for it afterwards: the merged point is far from every
               policy that produced data, so merging loses what was learned and
               MOPD has to collect fresh student rollouts to recover it.{' '}
@@ -149,7 +150,7 @@ export default function OnPolicyMergingPost() {
               tool calling, software engineering and more. Each domain is an
               environment in the RL sense, a task distribution with its own
               verifier, and they differ widely in reward rate, rollout length
-              and latency. There are three established ways to end up with one
+              and latency. There are four established ways to end up with one
               model, and each has a specific mismatch.
             </p>
             <ul>
@@ -159,6 +160,13 @@ export default function OnPolicyMergingPost() {
                 the domains interfere through a shared optimizer and a shared
                 batch, and a domain with small gradients or slow rollouts
                 loses its share.
+              </li>
+              <li>
+                <strong>Cascade RL</strong> trains the domains one after
+                another on a single model
+                <Ref n={20} />. Each stage is on-policy and uses reward, but
+                while one domain trains nothing holds the others, and the
+                result depends on the order.
               </li>
               <li>
                 <strong>One-shot merging</strong> trains specialists and
@@ -177,7 +185,7 @@ export default function OnPolicyMergingPost() {
               </li>
             </ul>
             <p>
-              This post proposes a fourth, which we call{' '}
+              This post proposes a fifth, which we call{' '}
               <strong>On-Policy Merging</strong>. The claims:
             </p>
             <ol>
@@ -208,12 +216,21 @@ export default function OnPolicyMergingPost() {
                 updates does not have this property.
               </li>
               <li>
-                <strong>The three baselines are limits of it.</strong> With
+                <strong>The baselines are limits of it.</strong> With
                 natural-gradient trainers the merge is exactly a natural
                 policy gradient step on the summed objective. Merging every
-                step without a metric is multi-task RL. Merging once without a
-                metric is task arithmetic. Merging once with the metric
-                re-measured on student rollouts is MOPD.
+                step without a metric is multi-task RL. Letting one trainer
+                run at a time without a metric is cascade RL. Merging once
+                without a metric is task arithmetic. Merging once with the
+                metric re-measured on student rollouts is MOPD.
+              </li>
+              <li>
+                <strong>The reference KL does the anchoring.</strong> With the
+                anchor as GRPO’s reference policy, each trainer’s
+                round is a trust-region step whose drift is at most{' '}
+                <Tex tail=",">{T`\operatorname{Var}(R_i)/2\beta^2`}</Tex>{' '}
+                whatever the optimizer. The same quantity is the signal for
+                when to meet.
               </li>
               <li>
                 <strong>A slow environment is protected, not starved.</strong>{' '}
@@ -227,15 +244,15 @@ export default function OnPolicyMergingPost() {
               favour and also shows where the cheap approximations fail. There
               are no LLM results. The second half of the post is the plan for
               the experiment that counts: one Qwen model trained on the same
-              domains as the public frontier recipes, against the three
-              baselines at matched budget.
+              domains as the public frontier recipes, against four baselines
+              at matched budget.
             </p>
           </div>
 
           <TableOfContents />
 
           {/* ------------------------------------------------------------ */}
-          <SectionTitle label="Three baselines, three mismatches" id="baselines" />
+          <SectionTitle label="Four baselines, four mismatches" id="baselines" />
           <div className="am-prose">
             <p>
               The four paradigms differ in two choices: how often the
@@ -271,7 +288,9 @@ export default function OnPolicyMergingPost() {
               </table>
             </div>
             <p>
-              Each existing cell has a mismatch that the other axis would fix.
+              Cascade RL sits outside this table. It separates the domains in
+              time instead of in space, on one model, with nothing exchanged
+              at the hand-over. Each existing approach has a mismatch.
             </p>
             <div className="am-table">
               <table>
@@ -295,6 +314,18 @@ export default function OnPolicyMergingPost() {
                       batch. Environments with large gradients dominate; slow
                       environments stall the batch or lose their share
                       <Ref n={17} />.
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <strong>Cascade RL</strong>
+                    </td>
+                    <td>Its own, on-policy, one domain at a time</td>
+                    <td>Yes</td>
+                    <td>
+                      <strong>Forgetting mismatch.</strong> While one domain
+                      trains, its updates are free to move the policy on the
+                      others. The outcome depends on the order of the stages.
                     </td>
                   </tr>
                   <tr>
@@ -368,27 +399,35 @@ export default function OnPolicyMergingPost() {
                   and its own hyperparameters.
                 </li>
                 <li>
-                  Each trainer runs ordinary on-policy RL: sample rollouts
-                  with its current weights <Tex tail=",">{T`\theta_i`}</Tex>{' '}
-                  take a policy-gradient step, repeat.
+                  Each trainer runs on-policy GRPO with the anchor as its
+                  reference policy: sample rollouts with its current weights{' '}
+                  <Tex tail=",">{T`\theta_i`}</Tex> and step on the usual
+                  objective minus <Tex>{T`\beta`}</Tex> times the KL to the
+                  anchor on those rollouts.
                 </li>
                 <li>
-                  After each step, estimate the trainer’s drift on its
-                  own batch:{' '}
+                  The same reference pass gives the trainer’s drift:{' '}
                   <Tex tail=".">{T`\mathrm{KL}_i=\mathbb{E}_{\xi\sim\theta_i}\big[\sum_t\log\pi_{\theta_i}(a_t\mid h_t)-\log\pi_{\bar\theta}(a_t\mid h_t)\big]`}</Tex>
                 </li>
                 <li>
-                  When any <Tex>{T`\mathrm{KL}_i\ge\delta`}</Tex> all trainers{' '}
+                  When the drift has stopped growing, or any{' '}
+                  <Tex>{T`\mathrm{KL}_i`}</Tex> reaches a ceiling{' '}
+                  <Tex tail=",">{T`\delta`}</Tex> all trainers{' '}
                   <strong>rendezvous</strong>: each sends its weights and a
                   subsample of its latest batch, and the anchor moves to{' '}
                   <Tex tail=".">{T`\bar\theta\leftarrow\bar\theta+(\sum_iF_i)^{+}\sum_iF_i(\theta_i-\bar\theta)`}</Tex>
                 </li>
                 <li>
-                  Every trainer reloads the anchor, keeps its optimizer state,
-                  and continues from step 2.
+                  Every trainer reloads the anchor, as weights and as
+                  reference, keeps its optimizer state, and continues from
+                  step 2.
                 </li>
               </ol>
             </div>
+            <p>
+              In one sentence: every domain does a round of trust-region RL
+              around the anchor, and the rounds meet at the KL barycenter.
+            </p>
             <p>The name refers to three things that are on-policy.</p>
             <ul>
               <li>
@@ -688,16 +727,78 @@ export default function OnPolicyMergingPost() {
               trainer that never trains, whose rollouts are ordinary prompts.
             </p>
 
-            <h3>Why the trigger is a KL and not a step count</h3>
+            <div className="am-callout">
+              <div className="am-callout-label">Proposition 6 · the reference KL is a trust region</div>
+              <p>
+                Let trainer <Tex>i</Tex> maximise{' '}
+                <Tex tail=".">{T`J_i(\theta)-\beta\,\mathrm{KL}(P^i_\theta\,\|\,P^i_{\bar\theta})`}</Tex>{' '}
+                To leading order its solution and its drift at the solution
+                are
+              </p>
+              <Tex display>{T`\Delta_i=\frac1\beta F_i^{+}\nabla J_i(\bar\theta),\qquad\mathrm{KL}_i^\star=\frac{\nabla J_i^\top F_i^{+}\nabla J_i}{2\beta^2}\;\le\;\frac{\operatorname{Var}(R_i)}{2\beta^2}.\tag{5}`}</Tex>
+            </div>
             <p>
-              By equation (2) the drift is a sum over the tokens of a
-              rollout. An environment with thousand-token rollouts and one
-              with hundred-thousand-token rollouts reach the same per-token
-              KL at very different distances from the anchor. A fixed interval
-              is therefore too frequent for the short environment or too rare
-              for the long one. The trigger in step 4 of the algorithm is
-              measured in the units of the theorems, and the environment with
-              the longest horizon will usually be the one that fires it.
+              Two things follow. The local solution is the natural-gradient
+              step that Theorem 3 assumes, with step size{' '}
+              <Tex tail=",">{T`1/\beta`}</Tex> so OPM with a reference KL is
+              a trust-region method for the summed objective, carried out by
+              separate trainers with ordinary optimizers. And{' '}
+              <Tex>{T`\beta`}</Tex> bounds how far a trainer can travel in a
+              round, however long it runs. The usual objection to a reference
+              KL is that it ties the model to its starting point. Here the
+              reference is the anchor, and the anchor moves at every
+              rendezvous. A KL penalty toward the shared model has been used
+              in federated policy gradient
+              <Ref n={14} />; what is added here is the moving anchor, the
+              metric at the merge, and the bound.
+            </p>
+
+            <h3>Choosing the interval</h3>
+            <p>
+              The interval is not a number of steps. By equation (2) the drift
+              is a sum over the tokens of a rollout, so domains with long
+              responses drift faster, and every domain drifts fast early in
+              training and slowly later. A fixed interval is too frequent
+              somewhere and too rare somewhere else. The rule has three parts.
+            </p>
+            <ul>
+              <li>
+                <strong>Trigger.</strong> Rendezvous when a trainer’s
+                reference KL has stopped growing, which by Proposition 6 means
+                its round is solved, or when it reaches the ceiling{' '}
+                <Tex tail=".">{T`\delta`}</Tex>
+              </li>
+              <li>
+                <strong>Calibration.</strong>{' '}
+                <Tex>{T`\delta`}</Tex> and <Tex>{T`\beta`}</Tex> are set on
+                a real model, not from theory. Save the specialists every few
+                steps, merge the step-<Tex>k</Tex> checkpoints for every
+                candidate <Tex tail=",">k</Tex> and measure two things: the
+                share of each specialist’s gain that survives, and the
+                locality ratio
+                <Tex display>{T`\kappa_i=\frac{\mathrm{KL}\big(P^i_{\theta_i}\|P^i_{\theta^{+}}\big)}{\tfrac12(\theta^{+}-\theta_i)^\top F_i(\theta^{+}-\theta_i)}.\tag{6}`}</Tex>
+                Take the largest interval at which every domain keeps at least
+                95% of its gain with{' '}
+                <Tex tail=".">{T`\kappa_i\le1.5`}</Tex> The ratio needs no
+                Fisher matrix: move a quarter of the way toward the merged
+                point and check that the KL falls sixteen-fold.
+              </li>
+              <li>
+                <strong>Guards.</strong> A floor on the interval keeps the
+                merge cost below a fixed share of training. A cap forces a
+                rendezvous if nothing triggers. After each merge the residuals
+                are measured; if one exceeds its ceiling, the anchor moves
+                only part of the way and <Tex>{T`\delta`}</Tex> is lowered.
+              </li>
+            </ul>
+            <p>
+              If the floor and the locality condition cannot both be met, OPM
+              is not viable in that setting, and that is a clear signal to
+              stop. Proposition 6 is stated for a KL summed over the rollout
+              and for raw reward. GRPO implementations average the KL over
+              tokens and normalise advantages, so the numerical value of{' '}
+              <Tex>{T`\beta`}</Tex> is calibrated in the same run as{' '}
+              <Tex tail=".">{T`\delta`}</Tex>
             </p>
           </div>
 
@@ -728,6 +829,17 @@ export default function OnPolicyMergingPost() {
                     <td>Merge every step, natural-gradient trainers</td>
                     <td>Natural policy gradient on the summed objective</td>
                     <td>Nothing; this is Theorem 3</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      One trainer active at a time, the others idle, nothing
+                      exchanged at the hand-over
+                    </td>
+                    <td>Cascade RL</td>
+                    <td>
+                      Protection of the idle domains: Proposition 5 needs
+                      their metrics
+                    </td>
                   </tr>
                   <tr>
                     <td>Merge once at the end, identity metric</td>
@@ -761,9 +873,11 @@ export default function OnPolicyMergingPost() {
             <p>
               These limits fix the baselines and the ablations. Against
               multi-task RL the question is whether separate trainers with a
-              metric beat a shared batch. Against one-shot merging and MOPD
-              the question is whether meeting early removes the need for a
-              consolidation stage. Against periodic summing and averaging the
+              metric beat a shared batch. Against cascade RL the question is
+              whether domains trained in parallel and reconciled with a metric
+              forget less than domains trained in sequence. Against one-shot
+              merging and MOPD the question is whether meeting early removes
+              the need for a consolidation stage. Against periodic summing and averaging the
               question is whether the metric earns its cost.
             </p>
           </div>
@@ -838,11 +952,14 @@ export default function OnPolicyMergingPost() {
               dimensions they may do much better than on a toy with sixteen.
             </p>
             <p>
-              <span className="am-runin">The trigger.</span> The drift{' '}
-              <Tex>{T`\mathrm{KL}_i`}</Tex> is the mean over the batch of the
-              summed log-probability difference between the trainer and the
-              anchor on the sampled tokens. It needs one extra forward pass of
-              the frozen anchor on the batch, or on a subsample of it.
+              <span className="am-runin">The reference pass.</span> The drift{' '}
+              <Tex>{T`\mathrm{KL}_i`}</Tex> is the reference KL that GRPO
+              implementations already compute when a reference policy is
+              enabled: the log-probability difference between the trainer and
+              the reference on the sampled tokens. Two changes are needed.
+              The reference weights are reloaded at each rendezvous, and the
+              difference is summed over the tokens of a rollout instead of
+              averaged.
             </p>
             <p>
               <span className="am-runin">Rollouts in flight.</span> A rollout
@@ -1045,14 +1162,15 @@ export default function OnPolicyMergingPost() {
               <Ref n={18} />.
             </p>
             <p>
-              Two public studies already compare three of the four paradigms
+              Two public studies already compare three of the five paradigms
               on Qwen3 with open data, one built on slime and one on verl
               <Ref n={5} />. We take the second one’s setting without
               change, so that the three baselines are reproductions of
               published arms with published numbers, and OPM is the only new
-              arm. Its five domains are the common core of the table above,
-              its training data, evaluation sets and checkpoints are
-              released, and it needs no SFT stage.
+              arm. Cascade RL is added as a fourth baseline. The five domains
+              are the common core of the table above,
+              the training data, evaluation sets and checkpoints are
+              released, and no SFT stage is needed.
             </p>
 
             <h3>Stage 1: the public five-domain setting</h3>
@@ -1207,22 +1325,102 @@ export default function OnPolicyMergingPost() {
                     </td>
                     <td>On-Policy Merging</td>
                     <td>
-                      Five trainers, each running the per-domain recipe
-                      unchanged for 300 local steps, with KL-triggered
-                      rendezvous and ten conjugate-gradient iterations on a
-                      quarter of each batch.
+                      Five trainers, each running the per-domain recipe for
+                      300 local steps with the anchor as reference policy,
+                      KL-triggered rendezvous, and ten conjugate-gradient
+                      iterations on a quarter of each batch.
                     </td>
                   </tr>
                   <tr>
                     <td>
-                      <strong>B1–B5</strong>
+                      <strong>A5</strong>
+                    </td>
+                    <td>Cascade RL</td>
+                    <td>
+                      The five domains in sequence on one model, 300 steps
+                      each with the per-domain recipe, in the order of the
+                      published cascade and in the reverse order. One variant
+                      ends with the MOPD stage of A3.
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <strong>B1–B6</strong>
                     </td>
                     <td>Ablations of A4</td>
                     <td>
                       Summed updates at each rendezvous; averaged updates;
                       layer Grams and K-FAC in place of conjugate gradient;
                       fixed interval in place of the trigger; metric from
-                      rollouts one round stale.
+                      rollouts one round stale; reference KL measured but not
+                      penalised.
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <p>The default configuration of A4, to be revised after Phase 0:</p>
+            <div className="am-table">
+              <table>
+                <tbody>
+                  <tr>
+                    <td>
+                      <strong>Reference policy</strong>
+                    </td>
+                    <td>The anchor, reloaded at every rendezvous.</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <strong>KL coefficient</strong>
+                    </td>
+                    <td>
+                      <Tex>{T`\beta`}</Tex> calibrated in Phase 0b so that the
+                      reference KL of every domain levels off inside a round.
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <strong>Rendezvous rule</strong>
+                    </td>
+                    <td>
+                      Reference KL level for five steps, or above{' '}
+                      <Tex tail=".">{T`\delta`}</Tex> Floor of 10 steps, cap of
+                      100 steps, as initial values.
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <strong>Merge operator</strong>
+                    </td>
+                    <td>
+                      Conjugate gradient, 10 iterations, started from the
+                      summed update, damping at one thousandth of the mean
+                      curvature.
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <strong>Fisher-vector products</strong>
+                    </td>
+                    <td>
+                      On a quarter of the trainer’s latest batch, 512 of
+                      2,048 rollouts, summed over tokens.
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <strong>State kept per trainer</strong>
+                    </td>
+                    <td>Optimizer moments, learning rate, data order.</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <strong>Check after each merge</strong>
+                    </td>
+                    <td>
+                      Residual and locality ratio per domain on the cached
+                      batches; partial step if either is above its ceiling.
                     </td>
                   </tr>
                 </tbody>
@@ -1419,10 +1617,11 @@ export default function OnPolicyMergingPost() {
             <p>
               Two matched comparisons are reported. In the first, every arm
               consumes the same number of rollouts per domain, counting the
-              student rollouts of A3. In the second, every arm gets the same
-              GPU-hours, counting teacher scoring in A3 and merge computation
-              in A4. All arms use the same verl code path, data and
-              verifiers.
+              student rollouts of A3. A5 uses 300 steps per domain, which is
+              the same number of rollouts as five specialists. In the second,
+              every arm gets the same GPU-hours, counting teacher scoring in
+              A3 and merge computation in A4. All arms use the same verl code
+              path, data and verifiers.
             </p>
             <ul>
               <li>
@@ -1438,6 +1637,11 @@ export default function OnPolicyMergingPost() {
                 sample size of the batch under the new anchor, and a quick
                 evaluation of trainer and anchor. These test Theorems 1, 2 and
                 4 directly.
+              </li>
+              <li>
+                For cascade RL: every domain is evaluated after every stage,
+                which gives a forgetting curve, the score of a domain at the
+                end of its own stage against its score at the end of the run.
               </li>
               <li>
                 Drift nobody asked for: response length, reasoning-trace
@@ -1531,6 +1735,22 @@ export default function OnPolicyMergingPost() {
                       residuals.
                     </td>
                   </tr>
+                  <tr>
+                    <td>
+                      <strong>H7</strong>
+                    </td>
+                    <td>
+                      Cascade RL is close to the others in Stage 1 and falls
+                      behind in Stage 2. Its two orders differ by more than
+                      seed noise, and its forgetting curve is steepest for the
+                      domain trained first. A4’s worst domain is ahead
+                      of A5’s in both orders.
+                    </td>
+                    <td>
+                      A5 matches A4 in both orders along every axis of Stage
+                      2.
+                    </td>
+                  </tr>
                 </tbody>
               </table>
             </div>
@@ -1604,8 +1824,11 @@ export default function OnPolicyMergingPost() {
                     <td>
                       <strong>2</strong>
                     </td>
-                    <td>Stage 1 in full at 4B and 8B, three seeds.</td>
-                    <td>H1 to H3 evaluated.</td>
+                    <td>
+                      Stage 1 in full: A1 to A5 at 4B with three seeds, at 8B
+                      with one seed, and the ablations at half length.
+                    </td>
+                    <td>H1 to H3 and H7 evaluated.</td>
                   </tr>
                   <tr>
                     <td>
@@ -1620,24 +1843,221 @@ export default function OnPolicyMergingPost() {
                 </tbody>
               </table>
             </div>
+            <h3>Compute and calendar time</h3>
             <p>
-              <span className="am-runin">Compute.</span> The published study
-              reports, for the 4B model on its GPUs, about 5,200 GPU-hours for
-              the five specialists, 3,000 for the 800-step mixed run and 740
-              for the MOPD stage
-              <Ref n={5} />. A4 costs the specialists’ budget plus the
-              merge overhead, which Phase 0 measures. One seed of Stage 1 at
-              4B is therefore of the order of 15,000 of those GPU-hours across
-              the four arms, with the specialists shared between A2 and A3.
-              Phase 0a needs only inference and a few hundred Fisher-vector
-              products on released models, and is the cheapest run that can
-              end the project.
+              The published study reports its costs in GPU-hours on 32 H20
+              cards: about 5,200 for the five 4B specialists, 3,000 for the
+              800-step mixed run and 740 for the MOPD stage
+              <Ref n={5} />. The table converts these to H100-hours and to
+              days on 24 nodes of eight H100 each.
+            </p>
+            <div className="am-table">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Phase</th>
+                    <th className="am-num">H100-hours</th>
+                    <th className="am-num">On 24 nodes</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>0a, released checkpoints, inference only</td>
+                    <td className="am-num">400</td>
+                    <td className="am-num">2 nodes, 1 to 2 days</td>
+                  </tr>
+                  <tr>
+                    <td>0b, five 4B specialists with dense checkpoints</td>
+                    <td className="am-num">4,500</td>
+                    <td className="am-num">1 day</td>
+                  </tr>
+                  <tr>
+                    <td>1, pilot of the loop on two domains</td>
+                    <td className="am-num">2,200</td>
+                    <td className="am-num">half a day</td>
+                  </tr>
+                  <tr>
+                    <td>Stage 1 main: A1 to A5, 4B, three seeds</td>
+                    <td className="am-num">44,000</td>
+                    <td className="am-num">10 days</td>
+                  </tr>
+                  <tr>
+                    <td>Stage 1 ablations and cascade variants</td>
+                    <td className="am-num">10,000</td>
+                    <td className="am-num">2 days</td>
+                  </tr>
+                  <tr>
+                    <td>Stage 1 at 8B, one seed</td>
+                    <td className="am-num">15,000</td>
+                    <td className="am-num">3 days</td>
+                  </tr>
+                  <tr>
+                    <td>Evaluation</td>
+                    <td className="am-num">2,000</td>
+                    <td className="am-num">interleaved</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <strong>Stage 1 in total</strong>
+                    </td>
+                    <td className="am-num">
+                      <strong>71,000</strong>
+                    </td>
+                    <td className="am-num">
+                      <strong>15 days; plan three weeks</strong>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>Stage 2, longer RL: continue 300 to 1,000 steps</td>
+                    <td className="am-num">37,000</td>
+                    <td className="am-num">8 days</td>
+                  </tr>
+                  <tr>
+                    <td>Stage 2, ten domains</td>
+                    <td className="am-num">32,000</td>
+                    <td className="am-num">7 days</td>
+                  </tr>
+                  <tr>
+                    <td>Stage 2, 30B model and uneven latency</td>
+                    <td className="am-num">not estimated</td>
+                    <td className="am-num">measure first</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <p>
+              One seed of the main comparison at 4B breaks down as 3,650
+              H100-hours for the specialists shared by A2 and A3, 4,000 for
+              mixed RL at 1,500 steps, 520 for MOPD, 4,200 for OPM and 3,650
+              for cascade RL. The longest single run sets the calendar: a
+              specialist on one node takes about four days, and mixed RL on
+              four nodes about five. One seed therefore occupies about twenty
+              nodes for five to six days.
+            </p>
+            <p>
+              These figures rest on three assumptions that Phase 0 replaces
+              with measurements. An H20-hour is taken as 0.7 of an H100-hour;
+              the workload is mostly sampling, where the two cards are close,
+              but the true factor could lie between 0.5 and 1. A node has
+              eight cards. The merge overhead of OPM is taken as 15% of its
+              training cost. The first three phases cost about 7,000
+              H100-hours, a tenth of Stage 1, and decide whether the rest is
+              run.
             </p>
           </div>
 
           {/* ------------------------------------------------------------ */}
           <SectionTitle label="Where it can fail" id="risks" />
           <div className="am-prose">
+            <h3>Why a lab would adopt it, and why it might not</h3>
+            <div className="am-table">
+              <table>
+                <thead>
+                  <tr>
+                    <th></th>
+                    <th>Multi-task RL</th>
+                    <th>Cascade RL</th>
+                    <th>Specialists, then MOPD</th>
+                    <th>OPM</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>
+                      <strong>Final quality</strong>
+                    </td>
+                    <td>Positive transfer; ahead of the specialists at 8B</td>
+                    <td>Reported behind at 30B</td>
+                    <td>Capped at the teachers</td>
+                    <td>Not capped in principle; unmeasured</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <strong>Transfer between domains</strong>
+                    </td>
+                    <td>Every step</td>
+                    <td>Forward only, along the order</td>
+                    <td>None</td>
+                    <td>At each rendezvous</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <strong>Model copies in memory</strong>
+                    </td>
+                    <td>One</td>
+                    <td>One</td>
+                    <td>One per domain, not at the same time</td>
+                    <td>One per domain, at the same time</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <strong>Cost of combining</strong>
+                    </td>
+                    <td>None</td>
+                    <td>None</td>
+                    <td>A distillation stage with new rollouts</td>
+                    <td>About ten Fisher-vector products per rendezvous</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <strong>Engineering</strong>
+                    </td>
+                    <td>Lowest</td>
+                    <td>Low</td>
+                    <td>Medium</td>
+                    <td>Highest: a coordinator and a merge solver</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <strong>Teams in parallel; adding or dropping a domain</strong>
+                    </td>
+                    <td>Hard</td>
+                    <td>Hard</td>
+                    <td>Easy</td>
+                    <td>Easy</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <strong>Uneven rollout latency</strong>
+                    </td>
+                    <td>Handled by engineering</td>
+                    <td>Decoupled</td>
+                    <td>Decoupled</td>
+                    <td>Decoupled</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <p>
+              Labs that train one mixed run have reasons to. Three facts weigh
+              against OPM as a replacement for it. Interference is small in
+              large models: at 4B task arithmetic is within 0.2 points of the
+              specialists, and at 8B mixed RL is 0.8 points ahead of them,
+              which is transfer outweighing interference
+              <Ref n={5} />. OPM costs one model copy per domain and a new
+              coordinator, to remove a problem those labs may not have. And
+              the toy that favours OPM is short of capacity, which probably
+              overstates the effect.
+            </p>
+            <p>
+              The hard advantage is the cost of combining. A round of MOPD
+              needs student rollouts in every domain and a served teacher. A
+              rendezvous needs about ten matrix-vector products on batches
+              that are already in memory. Public recipes are already moving
+              toward combining more than once: two rounds of MOPD
+              <Ref n={18} />, several rounds of teacher and student
+              <Ref n={3} />, alternating RL and distillation
+              <Ref n={9} />. OPM is where that trend ends.
+            </p>
+            <p>
+              So the claim we expect to matter to people who run MOPD is
+              narrower than a new paradigm: <strong>a round of MOPD can be a
+              linear solve</strong>. Phase 0a tests exactly that on released
+              models. It comes first for that reason, and the full loop is not
+              run until it and Phase 0b pass.
+            </p>
+
+            <h3>Strengths and costs of the loop</h3>
             <div className="am-table">
               <table>
                 <thead>
@@ -1777,7 +2197,11 @@ export default function OnPolicyMergingPost() {
               <Ref n={11} />. Federated GRPO with plain averaging did worse
               than centralised training
               <Ref n={12} />, which is what the averaging row of the toy
-              predicts.
+              predicts. Cascade RL trains the domains in sequence and reports
+              little forgetting
+              <Ref n={20} />; a comparison at 30B placed it behind mixed RL
+              and MOPD
+              <Ref n={3} />.
             </p>
             <p>
               <span className="am-runin">The trigger.</span> Synchronising
@@ -1839,7 +2263,7 @@ export default function OnPolicyMergingPost() {
               unknowns are generically solvable.
             </p>
 
-            <h3>D. Theorems 3 and 4</h3>
+            <h3>D. Theorems 3 and 4, Proposition 6</h3>
             <p>
               For Theorem 3 substitute{' '}
               <Tex>{T`\Delta_i=\eta F_i^{+}\nabla J_i`}</Tex> into (3) and use{' '}
@@ -1855,6 +2279,21 @@ export default function OnPolicyMergingPost() {
               and the effective sample size of <Tex>N</Tex> weighted samples
               is{' '}
               <Tex tail=".">{T`N/(1+\operatorname{Var}w)`}</Tex>
+            </p>
+
+            <p>
+              For Proposition 6, to leading order the local objective is{' '}
+              <Tex tail=",">{T`\nabla J_i^\top\Delta-\tfrac\beta2\Delta^\top F_i\Delta`}</Tex>{' '}
+              which is maximised at{' '}
+              <Tex>{T`\Delta=F_i^{+}\nabla J_i/\beta`}</Tex> because the
+              gradient lies in the range of <Tex tail=".">{T`F_i`}</Tex> The
+              KL there is{' '}
+              <Tex tail=".">{T`\tfrac12\Delta^\top F_i\Delta=\nabla J_i^\top F_i^{+}\nabla J_i/2\beta^2`}</Tex>{' '}
+              For any <Tex tail=",">v</Tex>{' '}
+              <Tex>{T`(v^\top\nabla J_i)^2\le\operatorname{Var}(R_i)\,v^\top F_iv`}</Tex>{' '}
+              by Cauchy–Schwarz, and taking{' '}
+              <Tex>{T`v=F_i^{+}\nabla J_i`}</Tex> gives{' '}
+              <Tex tail=".">{T`\nabla J_i^\top F_i^{+}\nabla J_i\le\operatorname{Var}(R_i)`}</Tex>
             </p>
 
             <h3>E. System sketch</h3>
@@ -1890,6 +2329,70 @@ export default function OnPolicyMergingPost() {
                 one buffer in place of three.
               </li>
             </ul>
+
+            <h3>F. Run sheet</h3>
+            <p>
+              <span className="am-runin">Phase 0a, no training.</span>
+            </p>
+            <ol>
+              <li>
+                Download the released 4B and 8B specialists, the released
+                task-arithmetic, mixed-RL and MOPD models, and the training
+                and test sets
+                <Ref n={19} />.
+              </li>
+              <li>
+                For each specialist, sample 512 rollouts on its own
+                domain’s training prompts with the training settings,
+                and store tokens and log-probabilities.
+              </li>
+              <li>
+                Cross-KL matrix: for every ordered pair, the summed
+                log-probability difference on specialist{' '}
+                <Tex>j</Tex>’s rollouts between specialist{' '}
+                <Tex>j</Tex> and specialist <Tex>j</Tex> shifted by task
+                vector <Tex tail=".">i</Tex> Compare with the cosine matrix.
+              </li>
+              <li>
+                Merge with ten conjugate-gradient iterations, starting from
+                the task-arithmetic point. Record the residual and the
+                locality ratio for each domain.
+              </li>
+              <li>
+                Evaluate base, specialists, the three released fusions and the
+                new merge on the eight benchmarks with the published protocol.
+              </li>
+            </ol>
+            <p>
+              <span className="am-runin">Phase 0b, specialists with dense checkpoints.</span>
+            </p>
+            <ol>
+              <li>
+                Launch the five 4B specialists with the published
+                configuration, saving weights and a 512-rollout subsample of
+                the batch every 10 steps.
+              </li>
+              <li>
+                Offline, for <Tex>k</Tex> in 10, 25, 50, 100, 200 and 300,
+                merge the five step-<Tex>k</Tex> checkpoints by summing, by
+                averaging and by conjugate gradient, and run a reduced
+                evaluation with four samples per prompt.
+              </li>
+              <li>
+                Report, per interval and operator: the share of each
+                specialist’s gain that is kept, the locality ratio, the
+                drift per step in each domain, and the measured cost of one
+                merge. These fix <Tex tail=",">{T`\delta`}</Tex>{' '}
+                <Tex tail=",">{T`\beta`}</Tex> the floor and the cap.
+              </li>
+            </ol>
+            <p>
+              <span className="am-runin">Nodes for one seed of Stage 1.</span>{' '}
+              Five nodes for the specialists, five for the OPM trainers and
+              one for merging, four for mixed RL, four for cascade RL. MOPD
+              takes two of the specialists’ nodes when they finish. The
+              rest run evaluation.
+            </p>
           </div>
 
           {/* ------------------------------------------------------------ */}
@@ -1991,6 +2494,10 @@ export default function OnPolicyMergingPost() {
                 XiaomiMiMo/MiMo-V2.6-RL-oss; the nvidia/Nemotron-RL datasets
                 and NVIDIA-NeMo/Gym; MiniMaxAI/SynLogic;
                 R2E-Gym/R2E-Gym-Subset; PrimeIntellect/INTELLECT-3-RL.
+              </li>
+              <li id="ref-20">
+                Nemotron-Cascade, NVIDIA, 2025, and Nemotron-Cascade 2,
+                arXiv:2603.19220.
               </li>
             </ol>
           </div>

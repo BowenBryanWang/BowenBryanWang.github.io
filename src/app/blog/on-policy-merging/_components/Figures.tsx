@@ -284,10 +284,10 @@ export function GeometryFigure() {
   )
 }
 
-/* Figure 1 (schematic): the four ways to get one model out of several environments. */
+/* Figure 1 (schematic): five ways to get one model out of several RL domains. */
 export function ParadigmFigure() {
   const W = 760
-  const H = 418
+  const H = 500
   const X0 = 250
   const X1 = 736
   const lanes = ['am-fig-forest-stroke', 'am-fig-indigo-stroke', 'am-fig-ochre-stroke']
@@ -298,6 +298,7 @@ export function ParadigmFigure() {
     { y: 152, name: 'Specialists, merged once', sub: 'weight arithmetic at the end' },
     { y: 242, name: 'Specialists, then MOPD', sub: 'a student imitates the teachers' },
     { y: 338, name: 'On-Policy Merging', sub: 'train apart, meet often' },
+    { y: 426, name: 'Cascade RL', sub: 'one domain after another' },
   ]
   // a lane that leaves the centre line at x0 and returns to it at x1
   const bulge = (x0: number, x1: number, y: number, off: number) =>
@@ -308,7 +309,7 @@ export function ParadigmFigure() {
   const meets = [X0, 292, 340, 402, 486, 598, X1]
 
   return (
-    <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label="Four ways to train one model on several domains">
+    <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label="Five ways to train one model on several domains">
       <text x={24} y={22} className="am-fig-accent" fontSize="10.5" fontWeight="600">
         SCHEMATIC
       </text>
@@ -371,6 +372,27 @@ export function ParadigmFigure() {
       ))}
       <text x={X1} y={rows[3].y - 32} textAnchor="end" className="am-fig-text" fontSize="11">
         rendezvous when a trainer drifts δ nats from the anchor
+      </text>
+
+      {/* Row 5: cascade RL (drawn last, listed as a baseline) */}
+      {[0, 1, 2].map((i) => {
+        const w = (X1 - X0) / 3
+        return (
+          <g key={i}>
+            <line
+              x1={X0 + i * w + (i === 0 ? 0 : 3)}
+              x2={X0 + (i + 1) * w - (i === 2 ? 0 : 3)}
+              y1={rows[4].y}
+              y2={rows[4].y}
+              className={lanes[i]}
+              strokeWidth="3.2"
+            />
+            {i > 0 && <line x1={X0 + i * w} x2={X0 + i * w} y1={rows[4].y - 9} y2={rows[4].y + 9} className="am-fig-axis" strokeWidth="1.2" />}
+          </g>
+        )
+      })}
+      <text x={X1} y={rows[4].y - 16} textAnchor="end" className="am-fig-text" fontSize="11">
+        each stage starts from the last; nothing holds the earlier domains
       </text>
 
       {/* legend + axis */}
