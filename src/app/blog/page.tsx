@@ -18,6 +18,13 @@ interface BlogPost {
 
 const posts: BlogPost[] = [
   {
+    slug: 'multitask-rl-done-right',
+    title: "Filtering Doesn't Change Your Mix. Fixing the Mix Does.",
+    date: '2026-11-04',
+    description:
+      'Multi-task RL done right, part one. In multi-environment RL, zero-advantage filtering leaves environment weights intact; holding the post-filter mix multiplies them by one over the acceptance rate, and per-sequence normalization reweights environments by inverse length. A pre-registered plan with a ledger rule and a free log check.',
+  },
+  {
     slug: 'anticausal-masks',
     title: 'Every Loss Mask Is a Reward',
     date: '2026-11-03',
