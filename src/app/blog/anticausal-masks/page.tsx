@@ -22,7 +22,7 @@ export const metadata: Metadata = {
 const POST = {
   title: 'Every Loss Mask Is a Reward',
   subtitle:
-    'A pre-registered research plan. Loss-masking truncated, over-turn, or late rollouts in agentic RL adds a reward-free term to the policy gradient that pays excluded trajectories the mean reward. We derive the term, separate the regimes in which it merely rescales the gradient from those in which it can reverse it, and lay out the diagnostics, experiments and ablations that would confirm or kill the claim.',
+    'A pre-registered research plan. Loss-masking truncated, over-turn, or late rollouts in agentic RL adds a reward-free term to the policy gradient that pays excluded trajectories the mean reward. We derive the term, separate the regimes in which it merely rescales the gradient from those in which it can reverse it, give each mask an unbiased replacement (a prefix-conditioned baseline for budget failures; never-drop or randomized protection for infrastructure drops), and lay out the experiments that would show the replacements win at matched compute, or not.',
   author: 'Bowen Wang',
   date: 'November 3, 2026',
   reading: 'Research plan · 25 min read',
@@ -221,6 +221,18 @@ export default function AnticausalMasksPost() {
                 symptom along one axis; the identity separates three (mask
                 timing, baseline population, budget semantics), and that is the
                 part we claim.
+              </li>
+              <li>
+                <strong>Each mask has an unbiased replacement.</strong> In the
+                budget regime, what the mask removes is not noise but the
+                signal &ldquo;do not hit the cap&rdquo;; the variance it buys
+                can be bought legitimately with a baseline conditioned on the
+                turn index reached, which is prefix-measurable and therefore
+                unbiased. In the infrastructure regime the replacements are
+                not dropping, or dropping with a known probability and
+                reweighting. The experiments test whether these replacements
+                match or beat masking at matched compute; if they do not, the
+                paper reports a diagnosis and nothing more.
               </li>
             </ul>
           </div>
@@ -799,7 +811,67 @@ export default function AnticausalMasksPost() {
               variance or effective step size, and MicroCoder reports a
               conditional mask beating both full masking and no masking in its
               setting<Ref n={5} />. Which one trains better is what the
-              experiments are for.
+              experiments are for. But the identity also says <em>why</em>{' '}
+              masking can look helpful, and that points at the replacement.
+            </p>
+            <h3>What masking removes in the budget regime is signal, not noise</h3>
+            <p>
+              In Regime A the contribution of the excluded trajectories to the
+              unmasked estimator is
+            </p>
+            <Tex display>
+              {String.raw`\mathbb{E}\big[\mathbb{1}\{\neg X\}\,(0-b)\,S\big]=-\,b\,\nabla P(\text{cap}),`}
+            </Tex>
+            <p>
+              whose mean is not zero. It is the gradient that teaches the
+              policy not to hit the cap. Masking deletes it, and in doing so
+              also deletes the variance of a <Tex>-b</Tex> advantage spread over
+              the thousands of tokens of a long failed trajectory. So the
+              variance benefit of masking and its bias are the same term;
+              there is no version of outcome-dependent masking that keeps one
+              and drops the other. The legitimate way to buy that variance
+              reduction is a better baseline.
+            </p>
+            <h3>The replacement: a baseline conditioned on the turn reached</h3>
+            <p>
+              &ldquo;This trajectory is already long&rdquo; is information that
+              exists in the prefix. Let <Tex>{String.raw`\ell_t`}</Tex> be the turn
+              index of token <Tex tail=",">t</Tex> and define
+            </p>
+            <Tex display>
+              {String.raw`b_t=\hat{\mathbb{E}}\big[R\mid \text{reached turn }\ell_t\big]
+              =\frac{\sum_{j\ne i}\mathbb{1}\{\text{len}_j\ge\ell_t\}\,R_j}{\sum_{j\ne i}\mathbb{1}\{\text{len}_j\ge\ell_t\}}
+              \;\;\text{(leave-one-out over the group, shrunk toward the group mean when the count is small)}.`}
+            </Tex>
+            <p>
+              Because <Tex>b_t</Tex> depends only on <Tex>h_t</Tex> (the event
+              &ldquo;this rollout reached turn <Tex>{String.raw`\ell_t`}</Tex>&rdquo;)
+              and on other, independent rollouts,{' '}
+              <Tex>{String.raw`\mathbb{E}[b_t\,s_t]=0`}</Tex> and the estimator stays
+              unbiased for <Tex tail=".">{String.raw`\nabla J`}</Tex> Its effect is
+              exactly the one masking was reaching for: among rollouts that
+              reached a late turn, most end at the cap with <Tex tail=",">R=0</Tex>{' '}
+              so <Tex>b_t</Tex> is small there and a long failed trajectory&rsquo;s
+              advantage <Tex>{String.raw`0-b_t`}</Tex> is small too. The comparison
+              with masking is one line: masking sets that advantage to{' '}
+              <Tex>0</Tex> (biased); the baseline sets it to{' '}
+              <Tex>{String.raw`R-\mathbb{E}[R\mid\ell_t]`}</Tex> (unbiased). The
+              variance it removes is <Tex>{String.raw`\mathrm{Var}(\mathbb{E}[R\mid\ell])`}</Tex>
+              , which is measurable offline from logged rollouts before any
+              training; a conditional leave-one-out baseline is only better
+              than the group mean when that explained variance exceeds roughly
+              one over the bucket count, which is why the shrinkage is part of
+              the definition and not an option.
+            </p>
+            <p>
+              Two things this replacement is not. It is not a process reward:
+              it changes no optimum, so the agent cannot game it by changing
+              its length. And it is not new machinery: it is the
+              state-dependent baseline of textbook REINFORCE with the cheapest
+              possible state feature. If it matches masking on success and
+              removes the cap-hit drift at matched compute, the recommendation
+              is a one-line default: <strong>never mask budget failures; score
+              them zero and baseline on the turn reached.</strong>
             </p>
             <div className="am-table">
             <table>
@@ -818,9 +890,11 @@ export default function AnticausalMasksPost() {
                   </td>
                   <td>Solve within budget</td>
                   <td>
-                    <strong>Do not mask; assign <Tex tail=".">R=0</Tex></strong> The
-                    advantage <Tex>-b</Tex> is the signal consistent with this
-                    objective; it is not a wrong label.
+                    <strong>Do not mask; assign <Tex>R=0</Tex> and baseline on
+                    the turn reached.</strong> The advantage{' '}
+                    <Tex>{String.raw`-b_t`}</Tex> is the signal consistent with
+                    this objective, with the variance masking was buying
+                    recovered without bias.
                   </td>
                 </tr>
                 <tr>
@@ -843,23 +917,30 @@ export default function AnticausalMasksPost() {
                   </td>
                   <td>Solve eventually (budget-free)</td>
                   <td>
-                    <strong>Impute a value</strong>{' '}
-                    <Tex>{String.raw`\hat V(h_T)`}</Tex> instead of masking.
-                    Unbiased for that objective only if{' '}
-                    <Tex>{String.raw`\hat V`}</Tex> is the continuation value;
-                    say so.
+                    <strong>Extend and score.</strong> Continue a capped
+                    rollout for <Tex>k</Tex> more turns with probability{' '}
+                    <Tex tail=",">p</Tex> score the result, weight by{' '}
+                    <Tex tail=";">1/p</Tex> this is randomized protection
+                    applied to the budget rather than to the scheduler, and it
+                    is unbiased for the extended-budget objective. Imputing a
+                    value <Tex>{String.raw`\hat V(h_T)`}</Tex> is the cheaper,
+                    biased alternative.
                   </td>
                 </tr>
               </tbody>
             </table>
             </div>
             <p>
-              The first row is a one-line change in every framework we
-              checked. The second is a scheduler change; Miles&rsquo; async
-              buffer already holds whole groups and has a single{' '}
-              <code>_drop_stale</code> branch where a coin flip and a weight
-              would go. The third is a reward-path change that must be
-              labelled as optimizing a different objective.
+              The first row is a few lines in the advantage function of every
+              framework we checked. The second is a scheduler change;
+              Miles&rsquo; async buffer already holds whole groups and has a
+              single <code>_drop_stale</code> branch where a coin flip and a
+              weight would go. The third is a rollout-time change that must be
+              labelled as optimizing a different objective. In all three, the
+              design principle is the same: to discard, decide before
+              sampling; to reduce variance, change the baseline; to change the
+              objective, change the reward and say so. None of the three needs
+              an outcome-dependent mask.
             </p>
           </div>
 
@@ -906,10 +987,15 @@ export default function AnticausalMasksPost() {
               under: (a) no mask, <Tex>R=0</Tex> on cap (the reference); (b)
               mask with baseline over all <Tex tail=";">G</Tex> (c) mask with baseline
               over survivors; (d) mask only a random fraction{' '}
-              <Tex>{String.raw`\rho\in\{0.3,0.6,1.0\}`}</Tex> of capped rollouts.
-              All statistics (mean, std, denominators) are computed once from
-              the unmasked batch and frozen, so that the arms differ only in
-              the mask. For each, the full-batch policy gradient at the fixed{' '}
+              <Tex>{String.raw`\rho\in\{0.3,0.6,1.0\}`}</Tex> of capped rollouts;
+              (e) no mask, <Tex>R=0</Tex> with the turn-reached baseline. All
+              statistics (mean, std, denominators) are computed once from the
+              unmasked batch and frozen, so that the arms differ only in the
+              mask or baseline. Arm (e) also yields the offline number that
+              decides whether the replacement can work at all: the per-token
+              advantage variance under (a) versus (e), which should drop by{' '}
+              <Tex>{String.raw`\mathrm{Var}(\mathbb{E}[R\mid\ell])/\mathrm{Var}(R)`}</Tex>
+              . For each, the full-batch policy gradient at the fixed{' '}
               <Tex tail=",">{String.raw`\theta`}</Tex> flattened after backward on a
               single device to avoid tensor-parallel gathers.
             </p>
@@ -967,12 +1053,17 @@ export default function AnticausalMasksPost() {
               normalization<Ref n={8} /> (<code>norm_adv_by_std_in_grpo=False</code>,{' '}
               <code>loss_agg_mode=seq-mean-token-sum-norm</code>) to remove the
               length-normalization bias as a confound; (v) mask with
-              survivor-only baseline.
+              survivor-only baseline; (vi) <em>the proposed replacement</em>:{' '}
+              <Tex>R=0</Tex> on cap with the turn-reached baseline. Arm (vi) is
+              the one the paper stands or falls on: it must match or beat (ii)
+              on success at matched compute while behaving like (i) on cap-hit
+              rate and length.
             </p>
             <p>
               <span className="am-runin">Measurements.</span> Cap-hit rate,
               submitted-failure rate and episode length per iteration; success
-              rate; clip ratio; update norm; the running value of{' '}
+              rate; clip ratio; update norm; per-token advantage variance; the
+              running value of{' '}
               <Tex tail=",">b</Tex> so that we can plot the rate of change of the
               cap-hit rate against <Tex>b</Tex> rather than against steps; on
               ALFWorld, gradient share by difficulty bucket.
@@ -1166,9 +1257,12 @@ export default function AnticausalMasksPost() {
                 to fall like <Tex tail=",">R=0</Tex> not to drift: if it drifts too,
                 the effect is step size, not direction. The Dr.&nbsp;GRPO
                 control is predicted to keep the sign of the drift with a
-                smaller slope. In the two-outcome ALFWorld control no drift is
-                predicted; the mask arm should track <Tex>R=0</Tex> with a
-                smaller effective step.
+                smaller slope. The proposed replacement (<Tex>R=0</Tex> with the
+                turn-reached baseline, not drawn) is predicted to follow the{' '}
+                <Tex>R=0</Tex> curve on cap-hit rate while matching the mask
+                arm&rsquo;s early success. In the two-outcome ALFWorld control
+                no drift is predicted; the mask arm should track{' '}
+                <Tex>R=0</Tex> with a smaller effective step.
               </figcaption>
             </figure>
             <ol>
@@ -1224,6 +1318,19 @@ export default function AnticausalMasksPost() {
                 and at <Tex>a=0.1</Tex> it does not, because the variance
                 inflation dominates. <em>Falsified if</em> never-drop is
                 cheaper or if no <Tex>a&lt;1</Tex> matches it.
+              </li>
+              <li>
+                <strong>P7 (the replacement, Q2).</strong> Offline, the
+                turn-reached baseline cuts per-token advantage variance by at
+                least 20% relative to the group mean on three-outcome data.
+                Online, arm (vi) matches or beats the mask arm on final success
+                at matched compute, with a cap-hit rate and episode length
+                that track the <Tex>R=0</Tex> arm. <em>Falsified if</em> the
+                offline variance reduction is below 10% (then the fix has no
+                lever and we fall back to reporting the diagnosis), or if the
+                mask arm beats arm (vi) on success by more than seed noise at
+                matched update magnitude (then masking&rsquo;s benefit is not
+                the variance we modelled, which is itself the finding).
               </li>
             </ol>
             <p>
@@ -1346,13 +1453,15 @@ export default function AnticausalMasksPost() {
               rather than masks, in which case this is a cleanup of open-source
               defaults rather than a change to frontier practice. We think
               that is still worth doing: the defaults are what most agentic RL
-              runs use. Finally, none of the remedies is a free lunch in the
-              sense of being guaranteed better: not masking budget failures is
-              consistent with the budget objective but may lose on variance;
+              runs use. Finally, none of the remedies is guaranteed better by
+              the algebra alone: the turn-reached baseline is unbiased but
+              only helps if turn index explains enough reward variance;
               predictable masks still reweight states; keeping stale groups
               costs off-policy risk and trainer time; randomized protection
-              trades bias for variance and cost. The work is a diagnosis and a
-              taxonomy first, and a recipe only where the experiments earn it.
+              trades bias for variance and cost. The deliverable is the
+              replacement rule and the matched-compute evidence for it (P7,
+              P5, P6); the diagnosis is what makes the rule principled, not
+              the product.
             </p>
           </div>
 
@@ -1407,18 +1516,21 @@ export default function AnticausalMasksPost() {
                   </td>
                   <td>
                     Q2 on single-turn RLVR with a length cap and on WebShop:
-                    five arms &times; three seeds, then ablations; ALFWorld as
+                    six arms &times; three seeds, then ablations; ALFWorld as
                     the two-outcome control
                   </td>
                   <td>
                     Slope of cap-hit rate against <Tex tail=";">b</Tex> whether
-                    the matched-update control reproduces it
+                    the matched-update control reproduces it; whether the
+                    turn-reached baseline arm matches the mask arm on success
                   </td>
                   <td>
                     Mask and <Tex>R=0</Tex> indistinguishable at matched{' '}
                     <Tex tail=",">b</Tex> or matched-update control drifts too
                     &rarr; no direction effect; the project becomes a
-                    diagnosis of step-size effects and stops before Phase 3
+                    diagnosis of step-size effects and stops before Phase 3.
+                    Baseline arm loses to mask on success &rarr; the
+                    replacement rule is withdrawn and the finding is reported
                   </td>
                 </tr>
                 <tr>
@@ -1473,10 +1585,20 @@ export default function AnticausalMasksPost() {
               the mask arm&rsquo;s learning rate by the ratio of the{' '}
               <Tex>R=0</Tex> arm&rsquo;s update norm to its own, measured on the
               same batch; (d) the survivor-baseline arm filters before the mean
-              inside <code>compute_grpo_outcome_advantage</code>. For offline
-              replays all statistics are computed once from the unmasked batch
-              and frozen. Controls: <code>norm_adv_by_std_in_grpo=False</code>{' '}
-              and <code>loss_agg_mode=seq-mean-token-sum-norm</code>.
+              inside <code>compute_grpo_outcome_advantage</code>; (e) the
+              turn-reached baseline: for each rollout <Tex>i</Tex> and turn{' '}
+              <Tex tail=",">{String.raw`\ell`}</Tex> compute the leave-one-out mean of{' '}
+              <Tex>R_j</Tex> over group members <Tex>{String.raw`j\ne i`}</Tex> with{' '}
+              <Tex tail=",">{String.raw`\text{len}_j\ge\ell`}</Tex> shrink it toward the
+              group mean with weight <Tex>{String.raw`n_\ell/(n_\ell+\kappa)`}</Tex>{' '}
+              (<Tex tail="),">{String.raw`\kappa=2`}</Tex> and broadcast{' '}
+              <Tex>{String.raw`R_i-b_{i,\ell}`}</Tex> to the tokens of turn{' '}
+              <Tex tail=";">{String.raw`\ell`}</Tex> about fifteen lines in the
+              advantage function, using the per-token turn index verl-agent
+              already carries. For offline replays all statistics are computed
+              once from the unmasked batch and frozen. Controls:{' '}
+              <code>norm_adv_by_std_in_grpo=False</code> and{' '}
+              <code>loss_agg_mode=seq-mean-token-sum-norm</code>.
             </p>
             <p>
               <span className="am-runin">Phases 2&ndash;3, Miles (SWE-smith).</span>{' '}
@@ -1538,24 +1660,24 @@ export default function AnticausalMasksPost() {
                   <td>high</td>
                 </tr>
                 <tr>
-                  <td>Phase 1 single-turn RLVR with length cap: 5 arms &times; 3 seeds</td>
+                  <td>Phase 1 single-turn RLVR with length cap: 6 arms &times; 3 seeds</td>
                   <td>1 GPU &times; ~8 h &asymp; 8</td>
-                  <td className="am-num">15</td>
-                  <td className="am-num">120</td>
+                  <td className="am-num">18</td>
+                  <td className="am-num">~150</td>
                   <td>medium</td>
                 </tr>
                 <tr>
-                  <td>Phase 1 WebShop: 5 arms &times; 3 seeds</td>
+                  <td>Phase 1 WebShop: 6 arms &times; 3 seeds</td>
                   <td>2 GPUs &times; ~15 h &asymp; 30</td>
-                  <td className="am-num">15</td>
-                  <td className="am-num">450</td>
+                  <td className="am-num">18</td>
+                  <td className="am-num">540</td>
                   <td>medium</td>
                 </tr>
                 <tr>
-                  <td>Phase 1 ALFWorld control: 5 arms &times; 3 seeds</td>
+                  <td>Phase 1 ALFWorld control: 6 arms &times; 3 seeds</td>
                   <td>2 GPUs &times; 15.1 h &asymp; 30 (363 s/iter &times; 150)</td>
-                  <td className="am-num">15</td>
-                  <td className="am-num">450</td>
+                  <td className="am-num">18</td>
+                  <td className="am-num">540</td>
                   <td>high</td>
                 </tr>
                 <tr>
@@ -1618,13 +1740,16 @@ export default function AnticausalMasksPost() {
             </p>
             <p>
               <span className="am-runin">Totals.</span> Phases 0&ndash;1 alone
-              (the diagnostic round that decides whether anything else runs):
-              about <strong>1,100 H100-hours</strong>, or six days on one
-              8&times;H100 node. Adding the SWE pilot, the offline replay and
-              Phase 3 with drop / never-drop / <Tex>a=0.5</Tex> at two seeds:
-              about <strong>2,400 H100-hours</strong>. Full version (all
-              ablations, three seeds, the <Tex>a</Tex> sweep): about{' '}
-              <strong>4,400 H100-hours</strong>. The SWE items are projections
+              (the round that tests the replacement rule in the budget regime
+              and decides whether Phase 3 runs): about{' '}
+              <strong>1,850 H100-hours</strong>, or ten days on one
+              8&times;H100 node; the single-turn arms alone, which already
+              test P3 and P7, are about 150 and fit on one GPU in a week.
+              Adding the SWE pilot, the offline replay and Phase 3 with drop /
+              never-drop / <Tex>a=0.5</Tex> at two seeds: about{' '}
+              <strong>3,700 H100-hours</strong>. Full version (all ablations,
+              three seeds, the <Tex>a</Tex> sweep): about{' '}
+              <strong>4,600 H100-hours</strong>. The SWE items are projections
               and are re-budgeted after the pilot.
             </p>
 
@@ -1653,7 +1778,7 @@ export default function AnticausalMasksPost() {
                   <td>half a day</td>
                 </tr>
                 <tr>
-                  <td>1. Single-turn, WebShop, ALFWorld control, ablations (~75 runs)</td>
+                  <td>1. Single-turn, WebShop, ALFWorld control, ablations (~85 runs)</td>
                   <td>1&ndash;2 GPUs per run, 4&ndash;8 runs per node, 15 nodes in one wave</td>
                   <td>about 15 hours (bounded by the 2-GPU runs)</td>
                 </tr>
