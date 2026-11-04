@@ -97,7 +97,7 @@ export function CausalFigure() {
     <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label="Causal versus anticausal masks">
       {/* Row A: causal (per-token staleness) */}
       <text x={x0} y={rowA - 32} className="am-fig-ink" fontSize="13" fontWeight="600">
-        Causal mask (per-token staleness): decided before the token is sampled
+        Predictable mask: decided before the token is sampled (e.g. a sampling-time staleness rule)
       </text>
       <line x1={x0} x2={x1} y1={rowA} y2={rowA} className="am-fig-axis" strokeWidth="1" />
       {Array.from({ length: n }).map((_, i) => (
@@ -123,12 +123,12 @@ export function CausalFigure() {
         weight sync; later tokens carry a newer version
       </text>
       <text x={x0} y={rowA + 34} className="am-fig-text" fontSize="12">
-        inclusion of token t is a function of h_t  ⇒  E[∇log π(a_t | h_t) · mask_t] = 0  ⇒  no subsidy
+        E[mask_t | h_t, a_t] = E[mask_t | h_t]  ⇒  baseline term vanishes; states are reweighted, signal may be lost
       </text>
 
       {/* Row B: anticausal (truncation / stale drop) */}
       <text x={x0} y={rowB - 32} className="am-fig-ink" fontSize="13" fontWeight="600">
-        Anticausal mask (truncation, turn cap, late drop): decided after the trajectory ends
+        Outcome-dependent mask (truncation, turn cap, late drop): decided after the trajectory ends
       </text>
       <line x1={x0} x2={x1} y1={rowB} y2={rowB} className="am-fig-axis" strokeWidth="1" />
       {Array.from({ length: n }).map((_, i) => (
@@ -155,7 +155,7 @@ export function CausalFigure() {
         every earlier token is masked retroactively
       </text>
       <text x={x0} y={rowB + 76} className="am-fig-text" fontSize="12">
-        inclusion depends on a_t and the future  ⇒  E[Σ_t ∇log π · mask] = ∇P(kept) ≠ 0  ⇒  subsidy b·∇P(excluded)
+        mask correlated with a_t given h_t  ⇒  E[Σ_t ∇log π · mask] = ∇P(kept) ≠ 0  ⇒  subsidy b·∇P(excluded)
       </text>
     </svg>
   )
@@ -181,7 +181,7 @@ export function PredictedCurvesFigure() {
 
   const r0 = (t: number) => 0.9 * Math.exp(-3.2 * t) + 0.08 // R = 0: decays
   const mask = (t: number) => 0.9 - 0.45 * (1 - Math.exp(-2.2 * t)) + 0.25 * t // dips then drifts up
-  const impute = (t: number) => mask(t) + 0.012 * Math.sin(9 * t) // overlaps mask
+  const impute = (t: number) => r0(t) + 0.04 * (1 - Math.exp(-3 * t)) // matched-update control: tracks R = 0
   const drg = (t: number) => mask(t) - 0.08 * t // Dr.GRPO control: same direction, smaller slope
 
   return (
@@ -226,7 +226,7 @@ export function PredictedCurvesFigure() {
         </text>
         <line x1="330" x2="356" y1="6" y2="6" className="am-fig-accent-stroke" strokeWidth="2" strokeDasharray="6 5" />
         <text x="362" y="10" className="am-fig-text" fontSize="12">
-          R := b̄ imputed (predicted to trace the mask arm)
+          mask, learning rate rescaled to match the R = 0 update norm
         </text>
         <line x1="330" x2="356" y1="28" y2="28" className="am-fig-axis" strokeWidth="1.8" strokeDasharray="2 4" />
         <text x="362" y="32" className="am-fig-text" fontSize="12">

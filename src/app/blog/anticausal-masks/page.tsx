@@ -16,13 +16,13 @@ import {
 export const metadata: Metadata = {
   title: 'Every Loss Mask Is a Reward',
   description:
-    'A pre-registered research plan: masking truncated or dropped rollouts in agentic RL pays them the mean reward. We derive the term, show when it reverses the gradient, and lay out the experiments that would confirm or kill the claim.',
+    'A pre-registered research plan: loss-masking truncated or dropped rollouts in agentic RL turns the baseline into a reward for being excluded. We derive the term, separate the regimes in which it rescales, reweights, or reverses the gradient, and lay out the diagnostics and experiments that would confirm or kill the claim.',
 }
 
 const POST = {
   title: 'Every Loss Mask Is a Reward',
   subtitle:
-    'A pre-registered research plan. Loss-masking truncated, over-turn, or late rollouts in agentic RL adds a reward-free term to the policy gradient that pays excluded trajectories the mean reward. We derive the term, show when it flips the gradient, and lay out the experiments and ablations that would confirm or kill the claim.',
+    'A pre-registered research plan. Loss-masking truncated, over-turn, or late rollouts in agentic RL adds a reward-free term to the policy gradient that pays excluded trajectories the mean reward. We derive the term, separate the regimes in which it merely rescales the gradient from those in which it can reverse it, and lay out the diagnostics, experiments and ablations that would confirm or kill the claim.',
   author: 'Bowen Wang',
   date: 'November 3, 2026',
   reading: 'Research plan · 25 min read',
@@ -151,8 +151,12 @@ export default function AnticausalMasksPost() {
               arrive too stale to be worth training on. The stated rationale is
               usually noise control: a truncated attempt might have been about
               to succeed, so scoring it as a failure injects a wrong label.
-              This reasoning is intuitive, widely implemented, and, we will
-              argue, wrong in a precise way.
+              This reasoning is intuitive and widely available as a switch. We
+              will argue that it changes the objective in a precise way, and
+              that whether the change is harmful depends on three things the
+              rationale never mentions: which outcomes the environment has,
+              over whom the baseline is computed, and whether the task&rsquo;s
+              budget is part of the objective.
             </p>
             <p>
               The purpose of this post is to lay out a research plan before
@@ -175,17 +179,27 @@ export default function AnticausalMasksPost() {
                 size <Tex>b</Tex> for being excluded.
               </li>
               <li>
-                <strong>The sign is decided by causality.</strong> A mask that
-                is a function of the prefix before a token was sampled adds no
-                bias. A mask that depends on how the trajectory ends always
-                does. Truncation, turn caps, format failures, and staleness
-                drops are all of the second kind.
+                <strong>The baseline term is decided by predictability.</strong>{' '}
+                A mask that is predictable from the prefix, in the sense{' '}
+                <Tex tail=",">{String.raw`\mathbb{E}[m_t\mid h_t,a_t]=\mathbb{E}[m_t\mid h_t]`}</Tex>{' '}
+                keeps the baseline zero-mean; it still reweights which states
+                are trained, and that is not free. A mask that depends on how
+                the trajectory ends makes the baseline a reward. Truncation,
+                turn caps, format failures, and staleness drops are all of the
+                second kind.
               </li>
               <li>
-                <strong>It can reverse the gradient.</strong> In a two-strategy
-                construction where thorough attempts succeed more often but
-                finish later, the surviving data asks for <em>fewer</em>{' '}
-                thorough attempts while the true objective asks for more.
+                <strong>It can rescale, reweight, or reverse.</strong> In an
+                environment with only two outcomes (solved, or capped) the
+                masked update is{' '}
+                <Tex tail=":">{String.raw`\sum_x (1-J_x)\nabla J_x`}</Tex> a
+                per-prompt rescaling toward hard prompts, with no change of
+                direction. With a third outcome, a submitted failure, the
+                subsidy competes with the failure penalty. And when the
+                excluded trajectories include unobserved successes, a
+                two-strategy construction reverses the sign: the surviving data
+                asks for <em>fewer</em> thorough attempts while the true
+                objective asks for more.
               </li>
               <li>
                 <strong>Reweighting cannot repair it.</strong> Truncation is
@@ -195,18 +209,37 @@ export default function AnticausalMasksPost() {
                 randomize the exclusion so a probability exists.
               </li>
               <li>
-                <strong>It is already visible.</strong> Length drifting toward
-                the cap under overlong filtering<Ref n={4} />
-                <Ref n={5} />
-                <Ref n={6} />, environment steps rising through DeepSWE
-                training<Ref n={3} />, and the short-response bias of staleness
-                thresholds<Ref n={11} /> are all consistent with the term. None
-                of these reports names the mechanism.
+                <strong>It is partly already visible.</strong> Skywork-OR1
+                decomposed overall and non-truncated success rates, compared
+                advantage masks, saw truncation and clip ratio rise under the
+                mask, and chose not to mask<Ref n={4} />. MicroCoder found
+                length growth increasing with the masking rate, and also that
+                a conditional mask beat both full masking and no masking in
+                its setting<Ref n={5} />. Environment steps rise through DeepSWE
+                training<Ref n={3} />, and staleness thresholds bias toward
+                short responses<Ref n={11} />. Each of these measures the
+                symptom along one axis; the identity separates three (mask
+                timing, baseline population, budget semantics), and that is the
+                part we claim.
               </li>
             </ul>
           </div>
 
           <TableOfContents />
+
+          <div className="am-prose">
+            <p>
+              <em>Revision note.</em> A first draft of this plan predicted a
+              drift toward the cap on ALFWorld. In a two-outcome environment
+              the identity predicts only a rescaling (see the caution in the
+              reversal section), so that prediction was inconsistent with our
+              own math. This revision separates the regimes, weakens the
+              &ldquo;causal masks are free&rdquo; claim to what the algebra
+              supports, replaces the imputation arm with a matched-update
+              control, adds a three-outcome environment, and corrects the
+              compute budget. We record the change rather than hide it.
+            </p>
+          </div>
 
           {/* ------------------------------------------------------------ */}
           <hr className="am-hr" />
@@ -215,10 +248,11 @@ export default function AnticausalMasksPost() {
             <p>
               Before any math, it is worth being concrete about how common
               this is, because the identity below is only interesting if the
-              switch it describes is on by default somewhere. We read the
-              current main branches of the frameworks we might run on. The
-              population over which the baseline is computed matters, and it
-              differs across implementations, so we record it.
+              switch it describes is on somewhere. We read the current main
+              branches of the frameworks we might run on. Two things matter and
+              differ across implementations: whether the switch is a default or
+              an opt-in, and the population over which the baseline is
+              computed.
             </p>
             <div className="am-table">
             <table>
@@ -226,6 +260,7 @@ export default function AnticausalMasksPost() {
                 <tr>
                   <th>Framework</th>
                   <th>Switch</th>
+                  <th>Default?</th>
                   <th>Baseline computed over</th>
                   <th>Kind</th>
                 </tr>
@@ -239,11 +274,12 @@ export default function AnticausalMasksPost() {
                     <code>compact_filtering.*</code> (max turns, max length,
                     timeout, error)
                   </td>
+                  <td>On in the DeepSWE recipe</td>
                   <td>
                     Survivors only: masked episodes are removed{' '}
                     <em>before</em> grouping
                   </td>
-                  <td>anticausal</td>
+                  <td>outcome-dependent</td>
                 </tr>
                 <tr>
                   <td>
@@ -252,8 +288,9 @@ export default function AnticausalMasksPost() {
                   <td>
                     <code>mask_truncated_completions</code>
                   </td>
+                  <td>Off (<code>False</code>)</td>
                   <td>All <Tex>G</Tex> members</td>
-                  <td>anticausal</td>
+                  <td>outcome-dependent</td>
                 </tr>
                 <tr>
                   <td>
@@ -263,10 +300,11 @@ export default function AnticausalMasksPost() {
                     <code>overlong_filtering</code> (sets{' '}
                     <code>loss_multiplier = 0</code>)
                   </td>
+                  <td>Opt-in; on in the DAPO guide</td>
                   <td>
                     Flag: <code>masked_reward_policy include | exclude</code>
                   </td>
-                  <td>anticausal</td>
+                  <td>outcome-dependent</td>
                 </tr>
                 <tr>
                   <td>
@@ -276,17 +314,19 @@ export default function AnticausalMasksPost() {
                     <code>mask_truncated_zero_reward</code> sample filter;{' '}
                     <code>--max-weight-staleness</code> with <code>drop</code>
                   </td>
+                  <td>Filter opt-in; stale handler defaults to drop</td>
                   <td>All <Tex>G</Tex> (&ldquo;removed samples still count
                   toward normalization&rdquo;)</td>
-                  <td>anticausal</td>
+                  <td>outcome-dependent</td>
                 </tr>
                 <tr>
                   <td>
                     <strong>ROLL</strong>
                   </td>
                   <td>Group queue drops groups older than the async ratio</td>
+                  <td>On in async mode</td>
                   <td>n/a (whole group gone)</td>
-                  <td>anticausal</td>
+                  <td>outcome-dependent</td>
                 </tr>
                 <tr>
                   <td>
@@ -295,9 +335,11 @@ export default function AnticausalMasksPost() {
                   <td>
                     <code>mask_stale_tokens</code> by per-token weight version
                   </td>
+                  <td>On (<code>max_staleness</code> default 8)</td>
                   <td>All <Tex>G</Tex></td>
                   <td>
-                    <strong>causal</strong> (decided before the token)
+                    <strong>mixed</strong>: version fixed at sampling, but the
+                    freshness threshold is taken at consumption time
                   </td>
                 </tr>
                 <tr>
@@ -307,9 +349,10 @@ export default function AnticausalMasksPost() {
                   <td>
                     <code>filter_groups</code> (DAPO dynamic sampling)
                   </td>
+                  <td>Opt-in</td>
                   <td>n/a</td>
                   <td>
-                    anticausal but <strong>harmless</strong> (
+                    outcome-dependent but <strong>harmless</strong> (
                     <Tex tail=")">R_i - b = 0</Tex>
                   </td>
                 </tr>
@@ -317,16 +360,21 @@ export default function AnticausalMasksPost() {
             </table>
             </div>
             <p>
-              Two rows deserve a note. The rLLM row is the DeepSWE recipe, and
-              it removes masked episodes before the group statistics are
+              Three rows deserve a note. The rLLM row is the DeepSWE recipe,
+              and it removes masked episodes before the group statistics are
               computed, which puts it in the amplified regime of Corollary 2
-              below. The prime-rl row is the one existing implementation we
-              found whose mask is decided from information available before
-              each token was sampled; it serves as a natural control. And the
-              caps bind: in a recent SWE-smith run with an 80-turn budget, 84%
-              of trajectories hit the turn cap<Ref n={14} />. Whatever the
-              convention does to capped rollouts, it does to most of the
-              batch.
+              below. The prime-rl row is the closest thing to a mask decided
+              before each token is sampled, but it is not quite that: the
+              token&rsquo;s weight version is fixed at sampling, while whether
+              it counts as stale depends on the training step at which the
+              trajectory is consumed, which depends on how long the trajectory
+              ran. We found no implementation that is purely predictable in
+              the sense of Corollary 3. And the caps bind: in a recent SWE-smith
+              run with an 80-turn budget, 84% of trajectories hit the turn cap
+              <Ref n={14} />, although the same report notes that successful
+              trajectories had a median of 8 turns and that tightening the
+              length cap did not affect successful runs. In that run the long
+              tail was mostly failures; we return to this in the discussion.
             </p>
           </div>
 
@@ -398,9 +446,18 @@ export default function AnticausalMasksPost() {
               Both terms are REINFORCE identities,{' '}
               <Tex>{String.raw`\mathbb{E}[f(\tau)S(\tau)]=\nabla\mathbb{E}[f(\tau)]`}</Tex>
               , applied to <Tex>{String.raw`f=R\,\mathbb{1}\{X\}`}</Tex> and{' '}
-              <Tex tail=".">{String.raw`f=\mathbb{1}\{X\}`}</Tex> Now use the convention
-              that motivates masking in the first place: an excluded trajectory
-              would have been scored <Tex tail=".">R=0</Tex> Then{' '}
+              <Tex tail=".">{String.raw`f=\mathbb{1}\{X\}`}</Tex> The identity holds
+              for any on-policy sample, any inclusion rule without its own
+              parameter dependence, and any baseline that does not depend on
+              the trajectory being scored. What it means depends on what the
+              excluded trajectories would have scored, and there are two
+              regimes.
+            </p>
+            <p>
+              <span className="am-runin">Regime A: budget failure, reward
+              known.</span> This is the convention that motivates masking in
+              the first place: an excluded trajectory would have been scored{' '}
+              <Tex tail=".">R=0</Tex> Then{' '}
               <Tex>{String.raw`R\,\mathbb{1}\{X\}=R`}</Tex> almost surely, the
               first term is <Tex tail=",">{String.raw`\nabla J`}</Tex> and
             </p>
@@ -418,7 +475,27 @@ export default function AnticausalMasksPost() {
               to assigning it <Tex>R:=b</Tex></strong>. We find this phrasing
               more useful than the gradient one because it says what the
               policy is being taught: an excluded attempt is worth exactly an
-              average attempt.
+              average attempt. The equivalence is exact only with the baseline
+              and every other statistic (mean, std, loss denominator,
+              regularizers) held at the values they take under masking; if one
+              imputes <Tex>b</Tex> into the reward path and recomputes the group
+              mean, the imputed sample regains a nonzero advantage and the two
+              are no longer the same computation.
+            </p>
+            <p>
+              <span className="am-runin">Regime B: outcome never observed.</span>{' '}
+              When the infrastructure cancels or discards a rollout before its
+              result exists, or discards a finished one, the excluded set
+              contains successes and <Tex>{String.raw`\mathbb{E}[R\,\mathbb{1}\{X\}]\ne J`}</Tex>
+              . The masked estimator is then the exact gradient of the
+              survivors&rsquo; objective: with <Tex>b</Tex> set to the
+              survivors&rsquo; mean, it is{' '}
+              <Tex>{String.raw`\nabla\big(\mathbb{E}[R\,\mathbb{1}\{X\}]/\mathbb{E}[\mathbb{1}\{X\}]\big)`}</Tex>{' '}
+              up to scale: the success rate <em>among surviving attempts</em>.
+              This regime does not need the <Tex>R=0</Tex> convention, and it
+              is where the sign reversal below lives. The two regimes share
+              the identity but not the ground truth, so we keep them apart in
+              the experiments.
             </p>
             <details>
               <summary>More on the derivation and its assumptions</summary>
@@ -426,11 +503,13 @@ export default function AnticausalMasksPost() {
                 <p>
                   The identity requires only that <Tex>b</Tex> does not depend
                   on the trajectory being scored and that the expectation is
-                  over the sampling policy. With a leave-one-out group mean
+                  over the sampling policy. With the self-inclusive group mean
                   over all <Tex>G</Tex> members (TRL&rsquo;s convention), the
                   expectation is <Tex>{String.raw`(1-1/G)\,[\nabla J + J\,\nabla P(\neg X)]`}</Tex>
                   : the effective subsidy is exactly the population mean{' '}
-                  <Tex tail=",">J</Tex> with no extra term. With per-token
+                  <Tex tail=",">J</Tex> with no extra term; with a true
+                  leave-one-out baseline the <Tex>{String.raw`(1-1/G)`}</Tex>{' '}
+                  factor disappears. With per-token
                   normalization by a <Tex>{String.raw`\theta`}</Tex>-free weight{' '}
                   <Tex>{String.raw`w(\tau)`}</Tex> the term becomes{' '}
                   <Tex>{String.raw`b\,\nabla\mathbb{E}[w\,\mathbb{1}\{\neg X\}]`}</Tex>
@@ -486,13 +565,19 @@ export default function AnticausalMasksPost() {
               of <Tex tail=",">G</Tex> the expected update becomes{' '}
               <Tex>{String.raw`\kappa\,\nabla J+\beta\,\nabla P(\neg X)`}</Tex>{' '}
               with <Tex>{String.raw`\beta/\kappa\to J/P(X)=\mathbb{E}[R\mid X]`}</Tex>{' '}
-              for large <Tex tail=".">G</Tex> The subsidy becomes
+              for large <Tex tail=".">G</Tex> So the total coefficient on{' '}
+              <Tex>{String.raw`\nabla P(\neg X)`}</Tex> is the survivors&rsquo; mean
+              reward, and relative to the all-population baseline the{' '}
+              <em>extra</em> term is
             </p>
             <Tex display>
-              {String.raw`\text{subsidy}_{\text{survivor}}\;\approx\;\frac{J\,P(\neg X)}{P(X)}\;\nabla P(\neg X),`}
+              {String.raw`\text{extra subsidy}_{\text{survivor}}\;\approx\;\frac{J\,P(\neg X)}{P(X)}\;\nabla P(\neg X),`}
             </Tex>
             <p>
-              which grows with the exclusion rate itself. Under
+              which grows with the exclusion rate itself. In a two-outcome
+              environment this coefficient is degenerate: every survivor has{' '}
+              <Tex tail=",">R=1</Tex> the survivors&rsquo; advantage is zero, and the
+              signal vanishes rather than drifting. Under
               std-normalized advantages with binary rewards the per-prompt
               subsidy is{' '}
               <Tex tail=",">{String.raw`b/\sigma=\sqrt{p/(1-p)}`}</Tex> largest on
@@ -500,38 +585,50 @@ export default function AnticausalMasksPost() {
               measured; the ablation on baseline population below is designed
               to separate them.
             </p>
-            <h3>Corollary 3: causal masks are free, anticausal masks are rewards</h3>
+            <h3>Corollary 3: predictable masks keep the baseline neutral; outcome-dependent masks do not</h3>
             <figure>
               <CausalFigure />
               <figcaption>
-                <strong>Figure 2.</strong> The sign of the bias is decided by
-                when the mask is decided. <strong>Top:</strong> a per-token
-                staleness mask (prime-rl) is a function of the prefix: the
-                weight version used to sample token <Tex>t</Tex> is fixed
-                before <Tex>a_t</Tex> is drawn, so{' '}
-                <Tex>{String.raw`\mathbb{E}[m_t\,\nabla\log\pi(a_t\mid h_t)]=m_t\,\mathbb{E}[\nabla\log\pi\mid h_t]=0`}</Tex>
-                . The surviving update is the on-policy gradient restricted to
-                fresh positions: a reweighting of states, not a reward.{' '}
-                <strong>Bottom:</strong> a truncation or late-drop mask is
-                decided at the end and applied to every earlier token. The
-                indicator is correlated with the actions, the score identity
-                fails, and every token inherits the subsidy.
+                <strong>Figure 2.</strong> Whether the baseline term survives
+                is decided by when the mask is decided. <strong>Top:</strong> a
+                mask fixed before token <Tex>t</Tex> is sampled (a per-token
+                staleness mask with a sampling-time threshold would be one)
+                satisfies{' '}
+                <Tex tail=",">{String.raw`\mathbb{E}[m_t\,b\,\nabla\log\pi(a_t\mid h_t)]=0`}</Tex>{' '}
+                so the baseline stays a control variate. The surviving update
+                is the gradient restricted to unmasked positions: a
+                reweighting of states. That keeps the baseline neutral but can
+                still remove signal, and under shared parameters a reweighted
+                gradient is not guaranteed to be an ascent direction for the
+                original objective. <strong>Bottom:</strong> a truncation or
+                late-drop mask is decided at the end and applied to every
+                earlier token. The indicator is correlated with the actions,
+                the baseline term survives, and every token inherits the
+                subsidy.
               </figcaption>
             </figure>
             <p>
               Formally, let <Tex>m_t</Tex> be the inclusion indicator for token{' '}
-              <Tex tail=".">t</Tex> If <Tex>m_t</Tex> is measurable with respect to{' '}
-              <Tex>h_t</Tex> (and any randomness independent of{' '}
-              <Tex tail="),">a_t</Tex> then{' '}
-              <Tex>{String.raw`\mathbb{E}[\sum_t m_t\,(R-b)\,s_t]=\sum_t\mathbb{E}[m_t\,Q_t\,s_t]`}</Tex>
-              , which is a valid ascent direction for a behavior-weighted
-              objective in the sense of off-policy actor&ndash;critic
-              <Ref n={18} />. If <Tex>m_t</Tex> depends on the future, the
-              baseline term survives. This gives a one-line design rule for
-              infrastructure: <strong>mask only on information that existed
-              before the token was sampled</strong>. DAPO&rsquo;s dynamic
-              sampling passes this test for a different reason: it excludes
-              whole groups whose advantages are already zero.
+              <Tex tail=".">t</Tex> The precise condition is on conditional
+              expectations, not on causality as such: if{' '}
+              <Tex tail=",">{String.raw`\mathbb{E}[m_t\mid h_t,a_t]=\mathbb{E}[m_t\mid h_t]`}</Tex>{' '}
+              then <Tex>{String.raw`\mathbb{E}[m_t\,b\,s_t]=0`}</Tex> and{' '}
+              <Tex tail=",">{String.raw`\mathbb{E}[\sum_t m_t\,(R-b)\,s_t]=\sum_t\mathbb{E}[m_t\,Q_t\,s_t]`}</Tex>{' '}
+              the policy gradient reweighted by <Tex tail=".">m_t</Tex> In the
+              tabular case this is an ascent direction for a behavior-weighted
+              objective<Ref n={18} />; with shared parameters, reweighting
+              states can lower <Tex tail=",">J</Tex> and the mask can delete the
+              signal from exactly the states that matter. A mask that depends
+              on the future is not automatically biased either: what matters
+              is whether it is correlated with the action given the prefix.
+              Truncation, turn caps, and duration-based drops plainly are,
+              because the action affects the length. So the design rule is
+              weaker than &ldquo;causal masks are free&rdquo;:{' '}
+              <strong>predictable masks cost signal but not bias;
+              outcome-dependent masks cost both.</strong> DAPO&rsquo;s dynamic
+              sampling is outcome-dependent and harmless for a different
+              reason: it excludes whole groups whose advantages are already
+              zero.
             </p>
           </div>
 
@@ -543,8 +640,10 @@ export default function AnticausalMasksPost() {
               A bias of size <Tex>b</Tex> on a direction that is unrelated to
               reward sounds like a nuisance. It is worth showing that it can
               flip the sign of the update in a setting that is not exotic. The
-              construction is a two-strategy coding agent under an asynchronous
-              trainer that drops rollouts older than a staleness threshold.
+              construction lives in Regime B: a two-strategy coding agent under
+              an asynchronous trainer that drops rollouts older than a
+              staleness threshold, so that the excluded set contains
+              successes.
             </p>
             <div className="am-table">
             <table>
@@ -608,14 +707,43 @@ export default function AnticausalMasksPost() {
             </p>
             <p>
               The same identity has a second, quieter prediction for
-              truncation masks. A failing attempt that is masked when it runs
-              out the clock receives advantage 0; one that submits receives{' '}
-              <Tex tail=".">-b</Tex> So on tasks the agent is going to fail anyway, the
-              trained behavior is to keep going. <strong>Succeed fast, fail
-              slow</strong> is the implied reward schedule, and it is the
-              signature we will look for in turn-count distributions
-              conditioned on outcome.
+              truncation masks in Regime A, <em>provided the environment has
+              a third outcome</em>. A failing attempt that is masked when it
+              runs out the clock receives advantage 0; one that submits a wrong
+              answer receives <Tex tail=".">-b</Tex> So on tasks the agent is going
+              to fail anyway, the trained behavior is to keep going rather than
+              to submit. <strong>Succeed fast, fail slow</strong> is the implied
+              reward schedule, and it is the signature we will look for in
+              turn-count distributions conditioned on outcome.
             </p>
+            <div className="am-callout forest">
+              <div className="am-callout-label">A caution in the other direction</div>
+              <div className="am-prose">
+                <p>
+                  If the environment has only two outcomes, every failure is a
+                  cap hit, so per prompt <Tex>{String.raw`P_x(\text{cap})=1-J_x`}</Tex>{' '}
+                  and the masked update is
+                </p>
+                <Tex display>
+                  {String.raw`\sum_x\big[\nabla J_x+J_x\nabla(1-J_x)\big]=\sum_x(1-J_x)\,\nabla J_x .`}
+                </Tex>
+                <p>
+                  Masking then rescales each prompt&rsquo;s gradient by{' '}
+                  <Tex>{String.raw`1-J_x`}</Tex> and shifts weight toward hard
+                  prompts; it does not change direction within a prompt, and a
+                  small gradient step still raises success. With a
+                  survivor-only baseline every survivor has <Tex>R=1</Tex> and
+                  the signal is zero. ALFWorld is such an environment: episodes
+                  end only on success or on the cap. It can show the rescaling,
+                  the difficulty reweighting, and the survivor-baseline
+                  collapse, but it cannot show &ldquo;fail slow&rdquo;, and we
+                  do not predict a drift toward the cap there. The direction
+                  claim needs a submitted-failure outcome: single-turn RLVR
+                  with a length cap (truncated / wrong / right) and WebShop
+                  (bought wrong / bought right / stepped out) have one.
+                </p>
+              </div>
+            </div>
           </div>
 
           {/* ------------------------------------------------------------ */}
@@ -626,8 +754,7 @@ export default function AnticausalMasksPost() {
               The natural instinct is importance weighting: if a trajectory
               survives with probability <Tex tail=",">c(\tau)</Tex> weight it by{' '}
               <Tex tail=".">1/c</Tex> Horvitz&ndash;Thompson corrections of this kind
-              exist for token subsampling<Ref n={10} /> and for latency-based
-              selection in asynchronous pipelines<Ref n={12} />. They need{' '}
+              exist for randomized token subsampling<Ref n={10} />. They need{' '}
               <Tex>{String.raw`c(\tau)>0`}</Tex> and known. Truncation is
               deterministic censoring: a trajectory that reaches the cap is
               excluded with probability one, and a trajectory that does not is
@@ -665,8 +792,14 @@ export default function AnticausalMasksPost() {
           <div className="am-prose">
             <p>
               None of the remedies is new machinery. Each is the choice that
-              the identity says is consistent with a stated objective. What is
-              new is the claim that masking is consistent with none of them.
+              the identity says is consistent with a stated objective, and the
+              identity says that masking is consistent with none of them. That
+              is a statement about objectives, not about training curves: a
+              consistent estimator can still lose to an inconsistent one on
+              variance or effective step size, and MicroCoder reports a
+              conditional mask beating both full masking and no masking in its
+              setting<Ref n={5} />. Which one trains better is what the
+              experiments are for.
             </p>
             <div className="am-table">
             <table>
@@ -686,7 +819,8 @@ export default function AnticausalMasksPost() {
                   <td>Solve within budget</td>
                   <td>
                     <strong>Do not mask; assign <Tex tail=".">R=0</Tex></strong> The
-                    advantage <Tex>-b</Tex> is the correct signal.
+                    advantage <Tex>-b</Tex> is the signal consistent with this
+                    objective; it is not a wrong label.
                   </td>
                 </tr>
                 <tr>
@@ -756,66 +890,92 @@ export default function AnticausalMasksPost() {
               second environment.
             </p>
             <p>
+              <span className="am-runin">Outcome census first.</span> Before
+              any gradient, count what the rollouts actually are: solved,
+              submitted and failed, budget failure (cap or context limit), and
+              infrastructure no-result (cancelled, timed out, dropped). The
+              census decides which regime dominates in a realistic
+              configuration, and therefore which ground truth applies. If
+              budget failures are 80% of the non-solved mass and
+              infrastructure no-results are 2%, Regime A is the story and the
+              asynchronous experiments are secondary; if the reverse, the
+              Fast/Thorough construction is the one to chase.
+            </p>
+            <p>
               <span className="am-runin">Arms.</span> Advantages recomputed
               under: (a) no mask, <Tex>R=0</Tex> on cap (the reference); (b)
               mask with baseline over all <Tex tail=";">G</Tex> (c) mask with baseline
-              over survivors; (d) explicit imputation{' '}
-              <Tex tail=";">{String.raw`R:=\bar b`}</Tex> (e) mask only a random fraction{' '}
+              over survivors; (d) mask only a random fraction{' '}
               <Tex>{String.raw`\rho\in\{0.3,0.6,1.0\}`}</Tex> of capped rollouts.
-              For each, the full-batch policy gradient at the fixed{' '}
+              All statistics (mean, std, denominators) are computed once from
+              the unmasked batch and frozen, so that the arms differ only in
+              the mask. For each, the full-batch policy gradient at the fixed{' '}
               <Tex tail=",">{String.raw`\theta`}</Tex> flattened after backward on a
               single device to avoid tensor-parallel gathers.
             </p>
             <p>
               <span className="am-runin">Measurements.</span> Cosine between
-              each arm and the reference; the projection of the difference
-              onto the estimated <Tex tail=",">{String.raw`\nabla P(\text{cap})`}</Tex>
-              obtained by REINFORCE on the cap indicator from the same
-              rollouts; the same quantities bucketed by turn index, to see
-              whether the subsidy is concentrated late (where capped and
-              uncapped trajectories diverge) or spread evenly.
+              each arm and the reference; the ratio of norms; the projection
+              of the difference onto the estimated{' '}
+              <Tex tail=",">{String.raw`\nabla P(\text{cap})`}</Tex> obtained by
+              REINFORCE on the cap indicator from the same rollouts; the same
+              quantities bucketed by turn index and by prompt difficulty. On
+              two-outcome data (ALFWorld) the algebra fixes the answer in
+              advance: per prompt the masked gradient must be{' '}
+              <Tex>{String.raw`(1-J_x)`}</Tex> times the reference and the
+              survivor-baseline variant must be zero; we use this as a
+              correctness check of the replay pipeline, not as a finding.
             </p>
             <p>
-              <span className="am-runin">What we learn.</span> If (b) and (d)
-              are numerically identical, the identity is confirmed at the
-              estimator level, which it should be, since they are the same
-              computation. The informative numbers are the cosine gap between
-              (a) and (b) and the fraction of that gap explained by the{' '}
-              <Tex>{String.raw`\nabla P(\text{cap})`}</Tex> direction. If the gap
-              is within the seed-to-seed noise of (a), the effect is real but
-              small at this checkpoint and we stop here.
+              <span className="am-runin">What we learn.</span> The identity is
+              algebra and is not what is being tested. The informative numbers
+              are, on three-outcome data, the cosine gap between (a) and (b)
+              after removing the norm rescaling, and the fraction of that gap
+              explained by the <Tex>{String.raw`\nabla P(\text{cap})`}</Tex>{' '}
+              direction. If the direction gap is within the seed-to-seed noise
+              of (a), the effect at this checkpoint is a rescaling and
+              reweighting, not a distortion, and we say so before spending
+              anything on Phase 3.
             </p>
 
             <h3>Question 2: Does the term move behavior?</h3>
             <p>
-              <span className="am-runin">Experiment setup.</span> The cheapest
-              recipe where the cap binds at a high and changing rate is the
-              verl-agent GiGPO configuration on ALFWorld<Ref n={15} />:
-              Qwen2.5-1.5B-Instruct, 50-step cap, group size 8, 150
-              iterations on two H100s, about 15 GPU-hours per run, with public
-              training curves. ALFWorld episodes end only on success or on the
-              cap, so the cap-hit rate starts near 96% and falls to roughly
-              13% under GRPO; this gives the subsidy a large dynamic range to
-              act on. The default convention there is <Tex tail=",">R=0</Tex> so the
-              other arms are one-line edits to the reward and mask. WebShop,
-              with a 15-step cap, is the second environment.
+              <span className="am-runin">Experiment setup.</span> The
+              direction claim needs a third outcome, so the main environments
+              are three-outcome ones. The cheapest is single-turn RLVR with a
+              length cap (Qwen3-1.7B on GSM8K/MATH with the cap chosen so that
+              20&ndash;40% of responses are truncated at initialization), which
+              is exactly the setting of<Ref n={4} /> and<Ref n={5} /> and gives
+              truncated / wrong / right. The agentic one is WebShop in
+              verl-agent<Ref n={15} /> with its 15-step cap, which gives bought
+              wrong / bought right / stepped out. ALFWorld (Qwen2.5-1.5B,
+              50-step cap, 150 iterations on two H100s, public curves) is kept
+              as a <em>two-outcome control</em>: there the identity predicts a
+              per-prompt rescaling by <Tex>{String.raw`1-J_x`}</Tex> and a shift
+              of gradient share toward hard prompts, and the survivor-baseline
+              arm should lose its signal. The default convention in all three
+              is <Tex tail=",">R=0</Tex> so the other arms are one-line edits to
+              the reward and mask.
             </p>
             <p>
               <span className="am-runin">Arms (3 seeds each).</span> (i){' '}
-              <Tex>R=0</Tex> on cap, no mask; (ii) loss-mask on cap; (iii)
-              explicit <Tex>{String.raw`R:=\bar b`}</Tex> imputation, which should
-              trace (ii); (iv) mask with Dr.&nbsp;GRPO constant normalization
-              <Ref n={8} /> (<code>norm_adv_by_std_in_grpo=False</code>,{' '}
+              <Tex>R=0</Tex> on cap, no mask; (ii) loss-mask on cap; (iii){' '}
+              <em>matched-update control</em>: the mask arm with its learning
+              rate rescaled each step so that its update norm matches arm
+              (i)&rsquo;s, which separates a change of direction from a change
+              of effective step size; (iv) mask with Dr.&nbsp;GRPO constant
+              normalization<Ref n={8} /> (<code>norm_adv_by_std_in_grpo=False</code>,{' '}
               <code>loss_agg_mode=seq-mean-token-sum-norm</code>) to remove the
               length-normalization bias as a confound; (v) mask with
               survivor-only baseline.
             </p>
             <p>
-              <span className="am-runin">Measurements.</span> Cap-hit rate and
-              episode length per iteration; success rate; clip ratio; the
-              running value of <Tex tail=",">b</Tex> so that we can plot the rate of
-              change of the cap-hit rate against <Tex>b</Tex> rather than
-              against steps.
+              <span className="am-runin">Measurements.</span> Cap-hit rate,
+              submitted-failure rate and episode length per iteration; success
+              rate; clip ratio; update norm; the running value of{' '}
+              <Tex tail=",">b</Tex> so that we can plot the rate of change of the
+              cap-hit rate against <Tex>b</Tex> rather than against steps; on
+              ALFWorld, gradient share by difficulty bucket.
             </p>
 
             <h3>Question 3: Does it suppress slow successes under asynchronous drops?</h3>
@@ -827,18 +987,29 @@ export default function AnticausalMasksPost() {
               and the buffer holds complete groups, so the first experiment
               uses groups that are finished but stale: their rewards exist,
               and the only question is whether they enter the loss and with
-              what weight. We will choose a task subset with success rate
-              between 0.2 and 0.5 so that <Tex>b</Tex> is large enough for the
-              subsidy to be visible.
+              what weight. This prototype tests the selection mechanism only.
+              Its rollout and sandbox costs are already paid, so it cannot
+              show a saving in straggler waiting or sandbox time; those claims
+              belong to the in-flight variant, which protects a group before
+              it is cancelled and is a separate, harder experiment. We will
+              choose a task subset with success rate between 0.2 and 0.5 so
+              that <Tex>b</Tex> is large enough for the subsidy to be visible.
             </p>
             <p>
               <span className="am-runin">Arms.</span> (i) drop stale groups
-              (default); (ii) never drop, train stale groups with per-token
-              truncated importance ratios and score centering<Ref n={1} />;
-              (iii) randomized protection with{' '}
-              <Tex>{String.raw`a\in\{0.25,0.5\}`}</Tex> and weight{' '}
-              <Tex tail=";">1/a</Tex> (iv) synchronous reference at matched prompts,
-              used only as the gradient-direction oracle.
+              (default); (ii) never drop; (iii) randomized protection with{' '}
+              <Tex>{String.raw`a\in\{0.25,0.5\}`}</Tex> and the weight{' '}
+              <Tex>1/a</Tex> applied as a loss weight on the whole group, with
+              one coin per group memoized by group id so that a group that
+              passes through the drop branch more than once is not re-drawn;
+              (iv) a gradient oracle computed on the same cohort of rollouts
+              and the same learner checkpoint with every group included, not a
+              separately generated synchronous run. All arms use the same
+              off-policy correction (per-token truncated importance ratios
+              plus score centering<Ref n={1} />), so that differences are due
+              to selection and not to the correction. An unbiased gradient is
+              not an unbiased Adam step; we report both the gradient cosine
+              and the training outcome.
             </p>
             <p>
               <span className="am-runin">Measurements.</span> Turn-count
@@ -904,9 +1075,9 @@ export default function AnticausalMasksPost() {
                 </tr>
                 <tr>
                   <td>Cap tightness</td>
-                  <td>ALFWorld 30 / 50 / 80 steps</td>
+                  <td>Length cap at 3 truncation rates (three-outcome task); ALFWorld 30 / 50 / 80 steps (control)</td>
                   <td>Whether the effect is cap-specific</td>
-                  <td>Final episode length tracks the cap under masking, not under <Tex>R=0</Tex></td>
+                  <td>Three-outcome: final length tracks the cap under masking, not under <Tex tail=";">R=0</Tex> ALFWorld: only the <Tex>{String.raw`(1-J_x)`}</Tex> rescaling changes</td>
                 </tr>
                 <tr>
                   <td>Group size</td>
@@ -956,8 +1127,11 @@ export default function AnticausalMasksPost() {
                     gradient gap is below seed noise, we report that and stop.
                   </li>
                   <li>
-                    Arms (ii) and (iii) in Q2 are the same computation. If
-                    their curves separate, there is a bug, not a finding.
+                    No claim about direction is made from a two-outcome
+                    environment. ALFWorld results are reported as rescaling
+                    and reweighting only; direction comes from the
+                    three-outcome environments, and only if the matched-update
+                    control does not reproduce it.
                   </li>
                   <li>
                     Every online arm reports <Tex>b</Tex> over time, so that
@@ -982,24 +1156,30 @@ export default function AnticausalMasksPost() {
               <PredictedCurvesFigure />
               <figcaption>
                 <strong>Figure 3 (schematic, not data).</strong> Predicted
-                cap-hit rate during Q2 training on ALFWorld. Under{' '}
-                <Tex>R=0</Tex> the rate falls monotonically as the policy
+                cap-hit rate during Q2 training in a <em>three-outcome</em>{' '}
+                environment (single-turn RLVR with a length cap, or WebShop).
+                Under <Tex>R=0</Tex> the rate falls monotonically as the policy
                 learns to finish. Under masking we expect an initial fall,
                 because masking does remove genuine label noise while{' '}
                 <Tex>b</Tex> is small, followed by a drift back toward the cap
-                as <Tex>b</Tex> grows. The imputation arm is predicted to trace
-                the mask arm to within seed noise. The Dr.&nbsp;GRPO control is
-                predicted to keep the sign of the drift with a smaller slope.
+                as <Tex>b</Tex> grows. The matched-update control is predicted
+                to fall like <Tex tail=",">R=0</Tex> not to drift: if it drifts too,
+                the effect is step size, not direction. The Dr.&nbsp;GRPO
+                control is predicted to keep the sign of the drift with a
+                smaller slope. In the two-outcome ALFWorld control no drift is
+                predicted; the mask arm should track <Tex>R=0</Tex> with a
+                smaller effective step.
               </figcaption>
             </figure>
             <ol>
               <li>
-                <strong>P1 (identity, Q1).</strong> Mask and explicit{' '}
-                <Tex>{String.raw`R:=\bar b`}</Tex> imputation give the same
-                gradient to numerical precision. <em>Falsified if</em> they
-                differ beyond floating-point tolerance; that would mean the
-                baseline or denominator is computed in a way we have not
-                modelled, which is itself worth reporting.
+                <strong>P1 (algebra check, Q1).</strong> On two-outcome
+                ALFWorld data with frozen statistics, the masked gradient
+                equals <Tex>{String.raw`(1-J_x)`}</Tex> times the reference per
+                prompt to numerical precision, and the survivor-baseline
+                variant is zero. <em>Falsified if</em> not; that would mean a
+                statistic is not frozen or the implementation differs from the
+                model, which must be fixed before anything else is run.
               </li>
               <li>
                 <strong>P2 (direction, Q1).</strong> The difference between the
@@ -1011,13 +1191,15 @@ export default function AnticausalMasksPost() {
                 flat in <Tex tail=".">b</Tex>
               </li>
               <li>
-                <strong>P3 (drift, Q2).</strong> The cap-hit rate under masking
-                stops falling, or rises, once <Tex>b</Tex> exceeds roughly 0.3,
-                while under <Tex>R=0</Tex> it keeps falling. The slope of the
-                cap-hit rate against <Tex>b</Tex> is positive under masking and
-                negative under <Tex tail=".">R=0</Tex> <em>Falsified if</em> the two
-                arms are indistinguishable in cap-hit rate at matched{' '}
-                <Tex>b</Tex> across three seeds.
+                <strong>P3 (drift, Q2, three-outcome environments).</strong>{' '}
+                The cap-hit rate under masking stops falling, or rises, once{' '}
+                <Tex>b</Tex> exceeds roughly 0.3, while under <Tex>R=0</Tex> and
+                under the matched-update control it keeps falling; the
+                submitted-failure rate under masking falls faster than under{' '}
+                <Tex tail=".">R=0</Tex> <em>Falsified if</em> the mask and{' '}
+                <Tex>R=0</Tex> arms are indistinguishable in cap-hit rate at
+                matched <Tex>b</Tex> across three seeds, or if the matched-update
+                control reproduces the drift.
               </li>
               <li>
                 <strong>P4 (amplification, Q2 ablation).</strong> The
@@ -1050,10 +1232,12 @@ export default function AnticausalMasksPost() {
               training, when <Tex>b</Tex> is small and the label noise removed
               by masking is real. Reports that found overlong filtering helpful
               at short caps and unhelpful at long ones<Ref n={6} /> are
-              consistent with the crossover we would predict. If the mask arm
-              wins throughout, the identity is still true but the noise
-              benefit dominates the subsidy at these scales, and the honest
-              headline is narrower.
+              consistent with the crossover we would predict, and
+              MicroCoder&rsquo;s conditional mask<Ref n={5} /> shows that a
+              partial mask can beat both ends. If the mask arm wins throughout
+              at matched update magnitude, the identity is still true but the
+              noise benefit dominates the subsidy at these scales, and the
+              honest headline is narrower: a diagnosis, not a fix.
             </p>
             <div className="am-callout">
               <div className="am-callout-label">Stopping conditions</div>
@@ -1089,26 +1273,44 @@ export default function AnticausalMasksPost() {
               being a cheap direction for the policy to move along. For
               length and turn count it plainly is; for format failures it may
               not be. We also note that masking removes real noise early, so
-              the net effect over a run can be positive for a while. The claim
-              is that it cannot stay positive, because the subsidy grows with
-              the thing being optimized.
+              the net effect over a run can be positive for a while, and the
+              identity does not say that it must turn negative: the extra term
+              grows with <Tex tail=",">b</Tex> but its effect also depends on{' '}
+              <Tex tail=",">{String.raw`\|\nabla P(\text{excluded})\|`}</Tex> on its angle
+              with the task gradient, on the variance removed, and on the
+              optimizer. The identity fixes the sign of the extra term, not
+              the sign of the net effect.
             </p>
             <p>
               <strong>Relation to prior observations.</strong> Skywork-OR1
-              reported a steadily rising clip ratio with an advantage mask on
-              truncated samples and called it reward hacking<Ref n={4} />.
-              A later study found that a higher masking rate accelerates length
-              growth with a roughly dose-dependent effect<Ref n={5} />. The
+              §3.2.3 is the closest prior work<Ref n={4} />: it decomposed
+              overall and non-truncated success rates, compared advantage
+              masks on truncated samples, observed a steadily rising clip
+              ratio and more truncation under the mask, and chose not to mask.
+              MicroCoder found that a higher masking rate accelerates length
+              growth with a roughly dose-dependent effect, and that a
+              conditional mask outperformed both ends<Ref n={5} />. The
               overlong-filtering ablation in<Ref n={6} /> found gains at short
               caps that vanish at long ones. DeepSWE&rsquo;s report shows
               environment steps rising through training under compact
               filtering<Ref n={3} />. Applied Compute documented the
-              short-response bias of staleness thresholds<Ref n={11} />, and a
-              NeurIPS 2026 paper characterizes latency-conditioned selection
-              with a selection-probability weighting fix<Ref n={12} />. Our
-              reading is that these are one mechanism seen from five angles;
-              the experiments above are designed to test whether that reading
-              is right.
+              short-response bias of staleness thresholds<Ref n={11} />. Our
+              reading is that these are one mechanism seen from several
+              angles, each along one axis; what we add is the separation of
+              mask timing, baseline population and budget semantics, and
+              predictions in a multi-turn agent that no single prior report
+              makes. The experiments above are designed to test whether that
+              reading is right.
+            </p>
+            <p>
+              <strong>Counter-evidence we carry with us.</strong> The SWE-smith
+              run with 84% cap hits<Ref n={14} /> also reports that successful
+              trajectories had a median of 8 turns and that tightening the
+              length cap did not affect successful runs. That is evidence for
+              Regime A (the long tail is failures) and against the idea that
+              slow successes were being deleted in that configuration. The
+              outcome census in Q1 exists to settle this before Phase 3 is
+              funded.
             </p>
             <p>
               <strong>Relation to score centering.</strong> The two terms are
@@ -1126,21 +1328,31 @@ export default function AnticausalMasksPost() {
               follow, and the practical consequence is small. If P3 fails
               under constant normalization, the length drift reported in the
               literature is the normalization bias of<Ref n={9} />, not ours.
+              If the matched-update control reproduces the drift, the effect is
+              effective step size, not direction, and the right framing is
+              &ldquo;masking is an uncontrolled learning-rate schedule&rdquo;.
               If P5 fails, the asynchronous story reduces to the known
               short-response bias with nothing new added. We would publish any
               of these as the result.
             </p>
             <p>
               <strong>Scope limits we accept going in.</strong> ALFWorld has
-              no tests and no notion of thoroughness; it can show the subsidy
-              but not the reversal. Small SWE models may have success rates so
+              two outcomes, no tests and no notion of thoroughness; it can show
+              the rescaling and the reweighting, not the direction change,
+              which is why it is a control. Small SWE models may have success rates so
               low that <Tex tail=",">b</Tex> and with it the effect, is negligible,
               which is why Q3 restricts to a mid-difficulty subset. And
               frontier training stacks may already use penalties or bootstraps
               rather than masks, in which case this is a cleanup of open-source
               defaults rather than a change to frontier practice. We think
               that is still worth doing: the defaults are what most agentic RL
-              runs use.
+              runs use. Finally, none of the remedies is a free lunch in the
+              sense of being guaranteed better: not masking budget failures is
+              consistent with the budget objective but may lose on variance;
+              predictable masks still reweight states; keeping stale groups
+              costs off-policy risk and trainer time; randomized protection
+              trades bias for variance and cost. The work is a diagnosis and a
+              taxonomy first, and a recipe only where the experiments earn it.
             </p>
           </div>
 
@@ -1172,29 +1384,41 @@ export default function AnticausalMasksPost() {
               <tbody>
                 <tr>
                   <td>
-                    <strong>0. Identity check</strong> (2&ndash;3 days)
+                    <strong>0. Algebra and census</strong> (2&ndash;3 days)
                   </td>
                   <td>
-                    Fixed checkpoint; one batch of rollouts; advantages
-                    recomputed under mask and under{' '}
-                    <Tex tail=";">{String.raw`R:=\bar b`}</Tex> gradients
-                    compared element-wise and against <Tex>R=0</Tex>
+                    Fixed checkpoint; one batch of rollouts with frozen
+                    statistics; masked vs. <Tex>R=0</Tex> gradients on
+                    two-outcome data must differ by exactly{' '}
+                    <Tex>{String.raw`(1-J_x)`}</Tex> per prompt; outcome census
+                    (solved / submitted failure / budget failure / infra
+                    no-result) on real SWE rollouts
                   </td>
-                  <td>Equality to numerical tolerance; cosine to the reference</td>
+                  <td>Pipeline correctness; which regime dominates</td>
                   <td>
-                    Not equal &rarr; find the baseline or denominator
-                    discrepancy before anything else
+                    Ratio not <Tex>{String.raw`(1-J_x)`}</Tex> &rarr; a statistic
+                    is not frozen; fix before anything else. Census says
+                    Regime A dominates &rarr; Phase 3 becomes secondary
                   </td>
                 </tr>
                 <tr>
                   <td>
-                    <strong>1. ALFWorld online</strong> (1 week)
+                    <strong>1. Three-outcome online</strong> (1 week)
                   </td>
-                  <td>Q2: five arms &times; three seeds, then ablations</td>
-                  <td>Slope of cap-hit rate against <Tex>b</Tex></td>
+                  <td>
+                    Q2 on single-turn RLVR with a length cap and on WebShop:
+                    five arms &times; three seeds, then ablations; ALFWorld as
+                    the two-outcome control
+                  </td>
+                  <td>
+                    Slope of cap-hit rate against <Tex tail=";">b</Tex> whether
+                    the matched-update control reproduces it
+                  </td>
                   <td>
                     Mask and <Tex>R=0</Tex> indistinguishable at matched{' '}
-                    <Tex>b</Tex> &rarr; effect too small; reduce investment
+                    <Tex tail=",">b</Tex> or matched-update control drifts too
+                    &rarr; no direction effect; the project becomes a
+                    diagnosis of step-size effects and stops before Phase 3
                   </td>
                 </tr>
                 <tr>
@@ -1224,6 +1448,8 @@ export default function AnticausalMasksPost() {
                     synchronous reference; cost per unit reward
                   </td>
                   <td>
+                    Phase 3 starts only if Phases 0&ndash;1 show a direction
+                    distortion beyond seed noise in a realistic configuration.
                     Never-drop already removes the effect at no cost &rarr;
                     randomized protection unnecessary; report that
                   </td>
@@ -1234,19 +1460,23 @@ export default function AnticausalMasksPost() {
 
             <h3>B. Engineering checklist</h3>
             <p>
-              <span className="am-runin">Phases 0&ndash;1, verl-agent (ALFWorld,
-              WebShop).</span> Recipe: Qwen2.5-1.5B-Instruct,{' '}
-              <code>env.max_steps=50</code>, group 8 &times; 16 groups, 150
-              iterations, two H100s. Three code touches: (a) the reward the
-              environment wrapper assigns on a cap hit (already{' '}
-              <Tex tail=");">R=0</Tex> (b) zeroing <code>response_mask</code> for
-              cap-hit episodes to obtain the mask arm; (c) an arm that sets the
-              cap-hit reward to the current group mean{' '}
-              <Tex tail=".">{String.raw`\bar b`}</Tex> The survivor-baseline arm
-              filters before the mean inside{' '}
-              <code>compute_grpo_outcome_advantage</code>. Controls:{' '}
-              <code>norm_adv_by_std_in_grpo=False</code> and{' '}
-              <code>loss_agg_mode=seq-mean-token-sum-norm</code>.
+              <span className="am-runin">Phases 0&ndash;1, verl-agent (WebShop,
+              ALFWorld) and a single-turn RLVR recipe.</span> ALFWorld recipe:
+              Qwen2.5-1.5B-Instruct, <code>env.max_steps=50</code>, group 8
+              &times; 16 groups, 150 iterations, two H100s; WebShop with the
+              15-step cap from the same repository; single-turn: Qwen3-1.7B on
+              GSM8K/MATH with the length cap set so that 20&ndash;40% of
+              initial responses truncate. Code touches: (a) the reward on a
+              cap hit (already <Tex tail=");">R=0</Tex> (b) zeroing{' '}
+              <code>response_mask</code> for cap-hit episodes to obtain the mask
+              arm; (c) the matched-update control: after each backward, scale
+              the mask arm&rsquo;s learning rate by the ratio of the{' '}
+              <Tex>R=0</Tex> arm&rsquo;s update norm to its own, measured on the
+              same batch; (d) the survivor-baseline arm filters before the mean
+              inside <code>compute_grpo_outcome_advantage</code>. For offline
+              replays all statistics are computed once from the unmasked batch
+              and frozen. Controls: <code>norm_adv_by_std_in_grpo=False</code>{' '}
+              and <code>loss_agg_mode=seq-mean-token-sum-norm</code>.
             </p>
             <p>
               <span className="am-runin">Phases 2&ndash;3, Miles (SWE-smith).</span>{' '}
@@ -1260,28 +1490,33 @@ export default function AnticausalMasksPost() {
               omitting it gives <Tex tail=";">R=0</Tex> (b) the RESCUE hook
               replaces the else-branch of{' '}
               <code>fully_async_data_buffer.py::_drop_stale</code> with a
-              Bernoulli(<Tex>a</Tex>) keep and multiplies that group&rsquo;s
-              rewards by <Tex>1/a</Tex> after <code>_post_process_rewards</code>;
-              (c) never-drop raises <code>--max-weight-staleness</code> and
-              enables truncated importance sampling plus score centering; (d)
-              offline replay uses <code>--save-debug-rollout-data</code> and{' '}
+              Bernoulli(<Tex>a</Tex>) keep, drawn once per group id and
+              memoized, and attaches <Tex>1/a</Tex> as a loss weight on the whole
+              group (not a reward multiplier, which later normalization could
+              undo); (c) never-drop raises <code>--max-weight-staleness</code>;
+              all three async arms enable the same truncated importance
+              sampling plus score centering; (d) offline replay uses{' '}
+              <code>--save-debug-rollout-data</code> and{' '}
               <code>--load-debug-rollout-data --debug-train-only</code>, with a
               post-backward hook that flattens the gradient for the cosine
-              computation.
+              computation; the Q3 oracle is the same cohort replayed with every
+              group included at the same checkpoint.
             </p>
             <p>
               <span className="am-runin">Logging contract.</span> Every online
-              run logs per step: cap-hit rate, mean and outcome-conditioned
-              turn counts, success rate, clip ratio, the realized baseline{' '}
-              <Tex tail=",">b</Tex> staleness statistics where applicable, and
-              wall-clock. All rate-of-change claims are plotted against{' '}
-              <Tex>b</Tex> as well as against steps.
+              run logs per step: the outcome census (solved / submitted failure
+              / budget failure / infra no-result), cap-hit rate, mean and
+              outcome-conditioned turn counts, success rate, clip ratio, update
+              norm, the realized baseline <Tex tail=",">b</Tex> staleness
+              statistics where applicable, and wall-clock. All rate-of-change
+              claims are plotted against <Tex>b</Tex> as well as against steps.
             </p>
 
             <h3>C. Compute budget</h3>
             <p>
-              Units are H100-hours; B200 is taken as roughly twice the
-              throughput, so halve the numbers for a B200 cluster.
+              Units are H100-hours. For a B200 cluster, halve only the
+              LLM-bound items (Phases 0&ndash;1, the offline replay); the SWE
+              items are sandbox-bound and do not shrink with the accelerator.
             </p>
             <div className="am-table">
             <table>
@@ -1296,24 +1531,31 @@ export default function AnticausalMasksPost() {
               </thead>
               <tbody>
                 <tr>
-                  <td>Phase 0 identity check</td>
+                  <td>Phase 0 algebra check and outcome census</td>
                   <td>&mdash;</td>
                   <td className="am-num">&mdash;</td>
                   <td className="am-num">~20</td>
                   <td>high</td>
                 </tr>
                 <tr>
-                  <td>Phase 1 ALFWorld main: 5 arms &times; 3 seeds</td>
-                  <td>2 GPUs &times; 7.5 h &asymp; 15</td>
+                  <td>Phase 1 single-turn RLVR with length cap: 5 arms &times; 3 seeds</td>
+                  <td>1 GPU &times; ~8 h &asymp; 8</td>
                   <td className="am-num">15</td>
-                  <td className="am-num">225</td>
-                  <td>high (363 s/iter published)</td>
+                  <td className="am-num">120</td>
+                  <td>medium</td>
                 </tr>
                 <tr>
-                  <td>Phase 1 WebShop replication</td>
-                  <td>&asymp; 15</td>
+                  <td>Phase 1 WebShop: 5 arms &times; 3 seeds</td>
+                  <td>2 GPUs &times; ~15 h &asymp; 30</td>
                   <td className="am-num">15</td>
-                  <td className="am-num">225</td>
+                  <td className="am-num">450</td>
+                  <td>medium</td>
+                </tr>
+                <tr>
+                  <td>Phase 1 ALFWorld control: 5 arms &times; 3 seeds</td>
+                  <td>2 GPUs &times; 15.1 h &asymp; 30 (363 s/iter &times; 150)</td>
+                  <td className="am-num">15</td>
+                  <td className="am-num">450</td>
                   <td>high</td>
                 </tr>
                 <tr>
@@ -1321,10 +1563,10 @@ export default function AnticausalMasksPost() {
                     Phase 1 ablations: cap tightness, group size, std, mask
                     dose
                   </td>
-                  <td>&asymp; 15</td>
+                  <td>&asymp; 8&ndash;30</td>
                   <td className="am-num">~30</td>
-                  <td className="am-num">450</td>
-                  <td>high</td>
+                  <td className="am-num">~600</td>
+                  <td>medium</td>
                 </tr>
                 <tr>
                   <td>Phase 2 SWE pilot: 8B, 100 steps, one node</td>
@@ -1375,20 +1617,25 @@ export default function AnticausalMasksPost() {
               the measured seconds per step.
             </p>
             <p>
-              <span className="am-runin">Totals.</span> Minimum publishable
-              version (Phases 0, 1 main, 2, and Phase 3 with drop / never-drop /{' '}
-              <Tex>a=0.5</Tex> at two seeds): about <strong>1,100 H100-hours</strong>,
-              roughly 550 B200-hours, or six days on one 8&times;H100 node.
-              Full version (WebShop, all ablations, three seeds, the{' '}
-              <Tex>a</Tex> sweep): about <strong>3,500 H100-hours</strong>,
-              roughly 1,800 B200-hours.
+              <span className="am-runin">Totals.</span> Phases 0&ndash;1 alone
+              (the diagnostic round that decides whether anything else runs):
+              about <strong>1,100 H100-hours</strong>, or six days on one
+              8&times;H100 node. Adding the SWE pilot, the offline replay and
+              Phase 3 with drop / never-drop / <Tex>a=0.5</Tex> at two seeds:
+              about <strong>2,400 H100-hours</strong>. Full version (all
+              ablations, three seeds, the <Tex>a</Tex> sweep): about{' '}
+              <strong>4,400 H100-hours</strong>. The SWE items are projections
+              and are re-budgeted after the pilot.
             </p>
 
             <h3>D. Allocation on a 24-node H100 cluster</h3>
             <p>
-              With 192 GPUs the full program is about 18 hours of saturated
+              With 192 GPUs the full program is about a day of saturated
               compute, so GPU time stops being the constraint. The plan below
-              spends the surplus on confidence rather than on more arms.
+              spends the surplus on confidence rather than on more arms, and
+              it keeps the gate: Phase 3 is scheduled only after Phases
+              0&ndash;1 show a direction effect that the matched-update
+              control does not reproduce.
             </p>
             <div className="am-table">
             <table>
@@ -1401,14 +1648,14 @@ export default function AnticausalMasksPost() {
               </thead>
               <tbody>
                 <tr>
-                  <td>0. Identity check</td>
+                  <td>0. Algebra check and outcome census</td>
                   <td>1 node</td>
                   <td>half a day</td>
                 </tr>
                 <tr>
-                  <td>1. ALFWorld + WebShop, all ~60 runs including ablations</td>
-                  <td>2 GPUs per run, 4 runs per node, 15 nodes in one wave</td>
-                  <td>about 8 hours</td>
+                  <td>1. Single-turn, WebShop, ALFWorld control, ablations (~75 runs)</td>
+                  <td>1&ndash;2 GPUs per run, 4&ndash;8 runs per node, 15 nodes in one wave</td>
+                  <td>about 15 hours (bounded by the 2-GPU runs)</td>
                 </tr>
                 <tr>
                   <td>2. SWE pilot</td>
@@ -1511,8 +1758,8 @@ export default function AnticausalMasksPost() {
               2025. §3.2.3, advantage mask on truncated samples.
             </li>
             <li id="ref-5">
-              [5] <em>Breaking Training Bottlenecks: masking rate and output
-              length growth.</em>{' '}
+              [5] <em>MicroCoder / Breaking Training Bottlenecks</em> §2.3:
+              masking rate vs. output-length growth, and conditional masking.{' '}
               <a href="https://arxiv.org/abs/2603.07777">arXiv:2603.07777</a>,
               2026.
             </li>
@@ -1554,12 +1801,10 @@ export default function AnticausalMasksPost() {
               , 2026.
             </li>
             <li id="ref-12">
-              [12] <em>Latency-Conditioned Selection Bias in Asynchronous
-              RL.</em> NeurIPS 2026.{' '}
-              <a href="https://neurips.cc/virtual/2026/loc/sydney/poster/148493">
-                poster
-              </a>
-              .
+              [12] Withdrawn in revision. An earlier draft cited a NeurIPS 2026
+              poster on latency-conditioned selection bias that we could not
+              verify; [11] documents the short-response bias of staleness
+              thresholds.
             </li>
             <li id="ref-13">
               [13] <em>STOPD: Stochastic Truncation for On-Policy
