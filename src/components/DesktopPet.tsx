@@ -1,5 +1,6 @@
 'use client'
 
+import { usePathname } from 'next/navigation'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
 const FRAME_W = 192
@@ -46,7 +47,18 @@ const ONE_SHOT_REPEATS: Partial<Record<PetState, number>> = {
 const DISPLAY_SCALE = 0.5
 const BOTTOM_PX = 16
 
+/** The pet stays off blog pages and small screens so it never covers text. */
 export function DesktopPet() {
+  const pathname = usePathname()
+  if (pathname?.startsWith('/blog')) return null
+  return (
+    <div className="hidden md:block">
+      <PetSprite />
+    </div>
+  )
+}
+
+function PetSprite() {
   const [mounted, setMounted] = useState(false)
   const [state, setState] = useState<PetState>('idle')
   const [frame, setFrame] = useState(0)

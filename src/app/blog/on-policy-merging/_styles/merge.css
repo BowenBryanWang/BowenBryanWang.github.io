@@ -529,7 +529,6 @@
 }
 .am-scope .am-ls-0 {
   fill: var(--surf-hi);
-  fill: color-mix(in srgb, var(--surf-lo) 0%, var(--surf-hi));
 }
 .am-scope .am-ls-1 {
   fill: var(--surf-hi);
@@ -572,8 +571,7 @@
   fill: color-mix(in srgb, var(--surf-lo) 91%, var(--surf-hi));
 }
 .am-scope .am-ls-11 {
-  fill: var(--surf-hi);
-  fill: color-mix(in srgb, var(--surf-lo) 100%, var(--surf-hi));
+  fill: var(--surf-lo);
 }
 .am-scope .am-ls-label {
   paint-order: stroke;
