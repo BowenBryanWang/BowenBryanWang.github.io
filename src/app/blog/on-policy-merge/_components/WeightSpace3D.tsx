@@ -1,4 +1,4 @@
-// Figure 3: one round in a 2D slice of weight space, seen from a fixed camera.
+// Figure 2: one round in a 2D slice of weight space, seen from a fixed camera.
 // Height is the summed second-order KL residual of the two domains,
 // sum_i (n_i . (theta - X))^2 : each domain is a flat-bottomed trough (the null
 // space of its Fisher) and the two troughs cross at the lossless point X.

@@ -11,7 +11,6 @@ import Tex from './_components/Tex'
 import SectionTitle from './_components/SectionTitle'
 import { ParadigmFigure } from './_components/Figures'
 import WeightSpace3D from './_components/WeightSpace3D'
-import UnificationMap from './_components/UnificationMap'
 import ResidualChart from './_components/ResidualChart'
 import Landscape3D from './_components/Landscape3D'
 import { Cite, CiteT } from './_components/Cite'
@@ -228,22 +227,11 @@ export default function OnPolicyMergingPost() {
           <div className="am-prose">
             <p>
               Every method for combining RL domains makes two choices: how often
-              the domains’ progress is combined, and in which geometry. Placing
-              the methods on those two axes shows what each one gives up.
+              the domains’ progress is combined, and by what rule. Figure 1
+              shows the first choice; this section is about the second, and
+              Table 1 sets both side by side.
             </p>
           </div>
-
-          <figure>
-            <UnificationMap />
-            <figcaption>
-              <strong>Figure 2.</strong> Methods for combining RL domains,
-              by when they combine them (columns) and how: adding up parameter
-              updates, or matching each domain’s behaviour in KL (rows). On-Policy
-              Merge keeps the timing of multi-task RL and the geometry of MOPD,
-              and is the only method that combines during training in the KL
-              geometry without distillation.
-            </figcaption>
-          </figure>
 
           <div className="am-prose">
             <p>
@@ -259,7 +247,7 @@ export default function OnPolicyMergingPost() {
               arithmetic, TIES and DARE{' '}
               <Cite k={['ilharco2023', 'yadav2023', 'yu2024']} />. Cascade RL
               trains the domains one after another{' '}
-              <Cite k={['wang2025', 'yang2026']} />. On this map it is
+              <Cite k={['wang2025', 'yang2026']} />. In these terms it is
               multi-task RL with every share but one set to zero, which is why
               nothing holds the other domains in place while one trains.
             </p>
@@ -274,10 +262,10 @@ export default function OnPolicyMergingPost() {
               <Cite k={['teh2017', 'ghosh2018']} />.
             </p>
             <p>
-              <strong>OPM</strong> takes the remaining corner. It combines
+              <strong>OPM</strong> takes the remaining combination. It combines
               during training, as often as a KL budget demands, in KL geometry,
               with the Fisher measured on each trainer’s own states. Table 1
-              lists what each point on the map pays.
+              lists what each method pays.
             </p>
             <div className="am-table">
               <table>
@@ -359,7 +347,7 @@ export default function OnPolicyMergingPost() {
               </table>
             </div>
             <p>
-              The relations on the map are exact, not analogies (Appendix A,
+              The rules are related exactly, not by analogy (Appendix A,
               Table A2). Summing is OPM when the domains’ Fishers are mutually
               orthogonal. Averaging is OPM when they are all equal. With one
               natural-gradient step per trainer, the OPM merge is a natural
@@ -367,7 +355,7 @@ export default function OnPolicyMergingPost() {
               <Cite k="kakade2001" />. Task arithmetic with a coefficient
               between <Tex>{T`1/n`}</Tex> and 1 interpolates between the first
               two presumptions. OPM measures, direction by direction, which one
-              holds.
+              holds; Figure 2 shows what that looks like in weight space.
             </p>
           </div>
 
@@ -568,7 +556,7 @@ export default function OnPolicyMergingPost() {
             <figure>
               <WeightSpace3D />
               <figcaption>
-                <strong>Figure 3.</strong> One round in a two-dimensional slice
+                <strong>Figure 2.</strong> One round in a two-dimensional slice
                 of weight space. Height is the second-order KL
                 residual summed over both domains. Each domain is a
                 flat-bottomed trough, the set of weights with the same policy on
@@ -892,7 +880,7 @@ export default function OnPolicyMergingPost() {
           <figure>
             <ResidualChart />
             <figcaption>
-              <strong>Figure 4.</strong> Held-out KL residual of the guarded
+              <strong>Figure 3.</strong> Held-out KL residual of the guarded
               merge after one to ten CG iterations, for three damping factors{' '}
               <Tex>{T`\gamma`}</Tex> along the path from the summed update (data
               of Table 2). Dashed lines mark the sum (13.35 nats) and the
@@ -1281,11 +1269,11 @@ export default function OnPolicyMergingPost() {
               predicts at LLM scale is open.
             </p>
           </div>
-          <Placeholder label="Table 6 and Figure 5" status="pending main runs">
+          <Placeholder label="Table 6 and Figure 4" status="pending main runs">
             <p>
               Table 6: per-domain score of each arm normalised to that domain’s
               specialist (above 1 means the domain benefits from the others),
-              A1–A4, 3 seeds. Figure 5: at every rendezvous of A4, the estimated{' '}
+              A1–A4, 3 seeds. Figure 4: at every rendezvous of A4, the estimated{' '}
               <Tex>{T`T_j`}</Tex> against the realised held-out reward gap
               between the summed update and the OPM merge, one point per domain
               and rendezvous; sign agreement reported in the caption.
@@ -1297,7 +1285,7 @@ export default function OnPolicyMergingPost() {
           <div className="am-prose">
             <p>
               The rendezvous frequency is the one knob that moves OPM along the
-              map, from merge-after (a single rendezvous at the end) toward
+              frequency axis, from merge-after (a single rendezvous at the end) toward
               multi-task RL. The theory says what frequency does and does not
               do. It keeps every round local, so the quadratic model holds and
               rollouts in flight stay usable. It keeps the Fisher weights
@@ -1350,7 +1338,7 @@ export default function OnPolicyMergingPost() {
             </div>
           </div>
           <Placeholder
-            label="Figure 6 and Table 7"
+            label="Figure 5 and Table 7"
             status="pending experiment E"
           >
             <p>
@@ -1390,7 +1378,7 @@ export default function OnPolicyMergingPost() {
               range is independent of theirs.
             </p>
           </div>
-          <Placeholder label="Figure 7 and Table 8" status="pending demo B">
+          <Placeholder label="Figure 6 and Table 8" status="pending demo B">
             <p>
               Code score against rollouts after the branch point for A1 and A4,
               with the code specialist as a reference line; below it, the
@@ -1416,7 +1404,7 @@ export default function OnPolicyMergingPost() {
               them per round.
             </p>
           </div>
-          <Placeholder label="Figure 8 and Table 9" status="pending demo C">
+          <Placeholder label="Figure 7 and Table 9" status="pending demo C">
             <p>
               Per-domain scores over training for A1 and A4 with the fault
               window shaded, plus tool-call validity and response length. Table

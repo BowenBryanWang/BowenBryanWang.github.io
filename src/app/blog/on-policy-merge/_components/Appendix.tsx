@@ -1906,7 +1906,7 @@ export default function Appendix() {
             conflicting regime outside the merge: trained alone, the IF specialist
             lowers BFCL from 63.9 to 54.1, and the agent and code specialists lose
             about 2 points on AIME25 <Cite k="wu2026" />. Which regime each pair
-            of the eight main domains is in is what Table 6 and Figure 5 measure.
+            of the eight main domains is in is what Table 6 and Figure 4 measure.
           </p>
           <p>
             <span className="am-runin">The stale metric ties at one shot.</span> A

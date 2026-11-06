@@ -1,4 +1,4 @@
-// Figure 4: held-out KL residual of the guarded merge against CG iterations (data of Table 2).
+// Figure 3: held-out KL residual of the guarded merge against CG iterations (data of Table 2).
 // Static server-rendered SVG; native <title> tooltips on every point.
 
 const ITERS = [1, 2, 3, 5, 10]
