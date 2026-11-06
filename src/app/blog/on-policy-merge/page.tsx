@@ -208,9 +208,9 @@ export default function OnPolicyMergingPost() {
               takes about ten minutes and needs no environment interaction.
               Merging five released 4B RL specialists once with the OPM rule,
               with no training and no student rollouts, beats task arithmetic
-              by 1.7 points and the released MOPD model by 1.1 points on an
-              eight-benchmark mean. At the same bf16 precision, plain
-              summation still wins by 0.9, as the theory predicts for math,
+              by 1.3 points and the released MOPD model by 0.8 points on a
+              domain-balanced benchmark mean. At the same bf16 precision, plain
+              summation still wins by 0.6, as the theory predicts for math,
               science and code, which help each other.
             </p>
             <p>
@@ -944,127 +944,107 @@ export default function OnPolicyMergingPost() {
                 <thead>
                   <tr>
                     <th>Model</th>
-                    <th className="am-num">AIME25</th>
-                    <th className="am-num">AIME26</th>
+                    <th className="am-num">AIME 25+26</th>
                     <th className="am-num">GPQA</th>
-                    <th className="am-num">LCB v5</th>
                     <th className="am-num">LCB v6</th>
                     <th className="am-num">IFEval</th>
                     <th className="am-num">IFBench</th>
-                    <th className="am-num">BFCL</th>
+                    <th className="am-num">BFCL v3</th>
                     <th className="am-num">Mean</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr>
                     <td>Base</td>
-                    <td className="am-num">45.9</td>
-                    <td className="am-num">52.9</td>
+                    <td className="am-num">49.4</td>
                     <td className="am-num">57.4</td>
-                    <td className="am-num">58.6</td>
                     <td className="am-num">59.9</td>
                     <td className="am-num">83.7</td>
                     <td className="am-num">30.7</td>
                     <td className="am-num">63.8</td>
-                    <td className="am-num">56.62</td>
+                    <td className="am-num">57.54</td>
                   </tr>
                   <tr>
                     <td>Specialist, own domain</td>
-                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.00 }}>50.3</td>
-                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.00 }}>58.6</td>
+                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.00 }}>54.5</td>
                     <td className="am-num am-heat" style={{ ['--h' as string]: 0.03 }}>61.7</td>
-                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.00 }}>63.3</td>
                     <td className="am-num am-heat" style={{ ['--h' as string]: 0.00 }}>63.7</td>
                     <td className="am-num am-heat" style={{ ['--h' as string]: 0.89 }}>89.6</td>
                     <td className="am-num am-heat" style={{ ['--h' as string]: 0.74 }}>48.9</td>
                     <td className="am-num am-heat" style={{ ['--h' as string]: 0.44 }}>72.4</td>
-                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.26 }}>63.56</td>
+                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.29 }}>64.30</td>
                   </tr>
                   <tr>
                     <td>Task arithmetic, λ = 0.6</td>
-                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.67 }}>53.9</td>
-                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.39 }}>60.2</td>
+                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.55 }}>57.1</td>
                     <td className="am-num am-heat" style={{ ['--h' as string]: 0.79 }}>63.9</td>
-                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.13 }}>64.0</td>
                     <td className="am-num am-heat" style={{ ['--h' as string]: 0.03 }}>63.8</td>
                     <td className="am-num am-heat" style={{ ['--h' as string]: 0.51 }}>88.2</td>
                     <td className="am-num am-heat" style={{ ['--h' as string]: 0.02 }}>40.4</td>
                     <td className="am-num am-heat" style={{ ['--h' as string]: 0.00 }}>71.7</td>
-                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.18 }}>63.26</td>
+                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.24 }}>64.15</td>
                   </tr>
                   <tr>
                     <td>Mixed RL (released)</td>
-                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.44 }}>52.7</td>
-                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.34 }}>60.0</td>
+                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.40 }}>56.4</td>
                     <td className="am-num am-heat" style={{ ['--h' as string]: 0.00 }}>61.6</td>
-                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.14 }}>64.1</td>
                     <td className="am-num am-heat" style={{ ['--h' as string]: 0.16 }}>64.2</td>
                     <td className="am-num am-heat" style={{ ['--h' as string]: 0.00 }}>86.3</td>
                     <td className="am-num am-heat" style={{ ['--h' as string]: 0.00 }}>40.2</td>
                     <td className="am-num am-heat" style={{ ['--h' as string]: 0.00 }}>71.7</td>
-                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.00 }}>62.60</td>
+                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.00 }}>63.42</td>
                   </tr>
                   <tr>
                     <td>MOPD (released)</td>
-                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.31 }}>52.0</td>
-                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.27 }}>59.7</td>
+                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.30 }}>55.9</td>
                     <td className="am-num am-heat" style={{ ['--h' as string]: 0.45 }}>62.9</td>
-                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.11 }}>63.9</td>
                     <td className="am-num am-heat" style={{ ['--h' as string]: 0.06 }}>63.9</td>
                     <td className="am-num am-heat" style={{ ['--h' as string]: 0.76 }}>89.1</td>
                     <td className="am-num am-heat" style={{ ['--h' as string]: 0.55 }}>46.7</td>
                     <td className="am-num am-heat" style={{ ['--h' as string]: 0.56 }}>72.6</td>
-                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.34 }}>63.84</td>
+                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.40 }}>64.63</td>
                   </tr>
                   <tr>
                     <td>Sum, λ = 1</td>
-                    <td className="am-num am-heat" style={{ ['--h' as string]: 1.00 }}><strong>55.7</strong></td>
-                    <td className="am-num am-heat" style={{ ['--h' as string]: 1.00 }}><strong>62.7</strong></td>
+                    <td className="am-num am-heat" style={{ ['--h' as string]: 1.00 }}><strong>59.2</strong></td>
                     <td className="am-num am-heat" style={{ ['--h' as string]: 1.00 }}><strong>64.5</strong></td>
-                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.84 }}>68.0</td>
                     <td className="am-num am-heat" style={{ ['--h' as string]: 0.23 }}>64.4</td>
                     <td className="am-num am-heat" style={{ ['--h' as string]: 0.89 }}>89.6</td>
                     <td className="am-num am-heat" style={{ ['--h' as string]: 0.77 }}>49.3</td>
                     <td className="am-num am-heat" style={{ ['--h' as string]: 0.44 }}>72.4</td>
-                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.89 }}>65.84</td>
+                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.85 }}>65.99</td>
                   </tr>
                   <tr>
                     <td>
                       <strong>OPM merge</strong>, 10 CG iterations
                     </td>
-                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.13 }}>51.0</td>
-                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.17 }}>59.3</td>
+                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.15 }}>55.2</td>
                     <td className="am-num am-heat" style={{ ['--h' as string]: 0.48 }}>63.0</td>
-                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.71 }}>67.3</td>
                     <td className="am-num am-heat" style={{ ['--h' as string]: 0.61 }}>65.6</td>
                     <td className="am-num am-heat" style={{ ['--h' as string]: 0.86 }}>89.5</td>
                     <td className="am-num am-heat" style={{ ['--h' as string]: 0.87 }}>50.5</td>
                     <td className="am-num am-heat" style={{ ['--h' as string]: 1.00 }}><strong>73.3</strong></td>
-                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.64 }}>64.94</td>
+                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.66 }}>65.41</td>
                   </tr>
                   <tr>
                     <td>OPM merge, 30 CG iterations</td>
-                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.67 }}>53.9</td>
-                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.29 }}>59.8</td>
+                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.51 }}>56.9</td>
                     <td className="am-num am-heat" style={{ ['--h' as string]: 0.41 }}>62.8</td>
-                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.61 }}>66.7</td>
                     <td className="am-num am-heat" style={{ ['--h' as string]: 0.94 }}>66.6</td>
                     <td className="am-num am-heat" style={{ ['--h' as string]: 0.73 }}>89.0</td>
                     <td className="am-num am-heat" style={{ ['--h' as string]: 0.90 }}>50.8</td>
                     <td className="am-num am-heat" style={{ ['--h' as string]: 0.81 }}>73.0</td>
-                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.75 }}>65.32</td>
+                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.80 }}>65.83</td>
                   </tr>
                   <tr>
                     <td>OPM merge, 10 iterations, deployed in fp32</td>
-                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.56 }}>53.3</td>
-                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.90 }}>62.3</td>
+                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.70 }}>57.8</td>
                     <td className="am-num am-heat" style={{ ['--h' as string]: 0.86 }}>64.1</td>
-                    <td className="am-num am-heat" style={{ ['--h' as string]: 1.00 }}><strong>68.9</strong></td>
                     <td className="am-num am-heat" style={{ ['--h' as string]: 1.00 }}><strong>66.8</strong></td>
                     <td className="am-num am-heat" style={{ ['--h' as string]: 1.00 }}><strong>90.0</strong></td>
                     <td className="am-num am-heat" style={{ ['--h' as string]: 1.00 }}><strong>52.0</strong></td>
                     <td className="am-num am-heat" style={{ ['--h' as string]: 0.50 }}>72.5</td>
-                    <td className="am-num am-heat" style={{ ['--h' as string]: 1.00 }}><strong>66.24</strong></td>
+                    <td className="am-num am-heat" style={{ ['--h' as string]: 1.00 }}><strong>66.44</strong></td>
                   </tr>
                 </tbody>
               </table>
@@ -1072,32 +1052,41 @@ export default function OnPolicyMergingPost() {
             <p style={{ fontSize: '14px' }}>
               <strong>Table 3.</strong> One-shot merges of the five released
               Qwen3-4B specialists of <CiteT k="wu2026" />, mean over 32 samples
-              per prompt, in percent. Within each column, darker shading is a
+              per prompt, in percent. AIME pools the 2025 and 2026 problems (60
+              in all), and LiveCodeBench is v6. The mean weights the five
+              domains equally: math (AIME), science (GPQA-Diamond), code (LCB
+              v6), instruction following (the average of IFEval and IFBench)
+              and tool use (BFCL v3). Within each column, darker shading is a
               higher score and bold is the highest; the base model is left
               unshaded as the reference. All merged models are deployed in bf16
               except the last row. The specialist row takes each benchmark from
               its own domain’s specialist. Run-to-run noise, measured by
               evaluating a bit-identical model twice, is about 0.3 points on the
-              mean.
+              eight-benchmark mean of <CiteT k="wu2026" />.
             </p>
             <p>
               On benchmarks (Table 3) the one-shot OPM merge beats task
-              arithmetic by 1.68 ± 0.42 points on the eight-benchmark mean,
-              paired over prompts, and the released MOPD model by 1.11 ± 0.40.
+              arithmetic by 1.26 points on the domain-balanced mean and the
+              released MOPD model by 0.78. Paired intervals for this mean are{' '}
+              <Pending>being recomputed</Pending>; on the eight-benchmark mean
+              of <CiteT k="wu2026" />, which counts AIME and LiveCodeBench twice,
+              the same gaps are 1.68 ± 0.42 and 1.11 ± 0.40, paired over
+              prompts, and every ± below is on that mean.
               It uses no rollouts beyond the 256 per domain behind the Fisher.
               On IFBench it scores 50.5, against 40.4 for task arithmetic and
               48.9 for the instruction-following specialist itself, so it
               recovers 119% of the gap that task arithmetic leaves. Deployed in
-              fp32 instead of bf16, the same merge gains another 1.30 ± 0.34
-              points. Its 66.24 is above the bf16 sum’s 65.84, but that is not a
+              fp32 instead of bf16, the same merge gains another 1.03 points
+              (1.30 ± 0.34). Its 66.44 is above the bf16 sum’s 65.99, but that is not a
               like-for-like comparison: we have not deployed the sum in fp32, so
               the comparisons below are all at bf16.
             </p>
             <p>
               <strong>Plain summation is the best one-shot merge at equal precision.</strong>{' '}
               Both deployed in bf16, the sum (<Tex tail=")">{T`\lambda=1`}</Tex>{' '}
-              beats the OPM merge by 0.89 ± 0.36 points, mostly on AIME, even though its KL residual is
-              almost four times larger. This is Theorem 1 at work, not a failure
+              beats the OPM merge by 0.58 points (0.89 ± 0.36), mostly on AIME,
+              even though its KL residual is almost four times larger; with 30
+              CG iterations the gap is 0.16. This is Theorem 1 at work, not a failure
               of the metric. Math, science and code help each other, and the
               merged reasoning scores exceed every individual specialist. The
               OPM merge pulls each specialist back toward its own behaviour and
@@ -1461,7 +1450,8 @@ export default function OnPolicyMergingPost() {
               <span className="am-runin">There is a bf16 floor.</span> Casting
               an fp32 specialist to bf16 moves its policy by 25–40% of its whole
               RL drift, measured in KL on its own rollouts. The same merged
-              model scores 1.30 ± 0.34 points higher deployed in fp32 than in
+              model scores 1.0 points higher (1.30 ± 0.34 on the eight-benchmark
+              mean) deployed in fp32 than in
               bf16. Any merge, trigger or residual threshold has to sit above
               this floor, and scoring has to run in true fp32.
             </p>

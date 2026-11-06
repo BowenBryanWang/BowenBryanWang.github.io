@@ -1344,7 +1344,10 @@ export default function Appendix() {
             0.95, responses up to 16,384 tokens, non-thinking mode, their scorers
             for each benchmark, and a local sandbox for LiveCodeBench. Our base,
             MOPD and IF-specialist IFBench scores (30.7 / 46.7 / 48.9) reproduce
-            the published 30.3 / 47.3 / 49.0. Our task-arithmetic point is
+            the published 30.3 / 47.3 / 49.0. Table 3 reports AIME 2025 and 2026
+            pooled, LiveCodeBench v6 only and a domain-balanced mean; the paired
+            differences quoted with ± in this appendix are on the eight-benchmark
+            mean of Wu et al., which weights AIME and LiveCodeBench twice. Our task-arithmetic point is
             bit-identical to the released merge after the bf16 cast; evaluating
             both gives −0.32 ± 0.22, the run-to-run noise floor. The sum writes
             the longest code answers (about 6,000 tokens against 3,600 for task
@@ -1885,7 +1888,8 @@ export default function Appendix() {
             <span className="am-runin">The bf16 floor.</span> The KL between an
             fp32 specialist and its own bf16 cast, as a fraction of its drift from
             the base: math 0.276, science 0.248, code 0.314, IF 0.247, agent
-            0.403. Deploying the OPM merge in fp32 adds 1.30 ± 0.34 points, mostly
+            0.403. Deploying the OPM merge in fp32 adds 1.30 ± 0.34 points on the
+            eight-benchmark mean (1.03 on the domain-balanced mean), mostly
             on AIME, GPQA and LiveCodeBench. Whether fp32 deployment favours the
             OPM merge specifically is open, because the sum was not evaluated in
             fp32. Merges, residuals and triggers must be computed in true fp32;
