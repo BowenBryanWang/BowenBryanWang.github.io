@@ -1,7 +1,0 @@
-{"type":"thread.started","thread_id":"019e1234-c7a0-75c1-a768-7e4d838edd15"}
-{"type":"turn.started"}
-{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"I’ll start VS Code pointed at `~/Desktop/project` from the shell."}}
-{"type":"item.started","item":{"id":"item_1","type":"command_execution","command":"/bin/bash -lc 'code ~/Desktop/project'","aggregated_output":"","exit_code":null,"status":"in_progress"}}
-{"type":"item.completed","item":{"id":"item_1","type":"command_execution","command":"/bin/bash -lc 'code ~/Desktop/project'","aggregated_output":"","exit_code":0,"status":"completed"}}
-{"type":"item.completed","item":{"id":"item_2","type":"agent_message","text":"VS Code has been started in `~/Desktop/project`."}}
-{"type":"turn.completed","usage":{"input_tokens":53412,"cached_input_tokens":48768,"output_tokens":174,"reasoning_output_tokens":53}}

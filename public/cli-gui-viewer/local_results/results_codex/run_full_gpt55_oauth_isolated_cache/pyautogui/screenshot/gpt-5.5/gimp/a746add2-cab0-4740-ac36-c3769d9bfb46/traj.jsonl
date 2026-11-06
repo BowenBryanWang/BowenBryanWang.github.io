@@ -1,2 +1,0 @@
-{"Error": "gimp/a746add2-cab0-4740-ac36-c3769d9bfb46 - Setup step 1 failed: _download_setup - Failed to download https://huggingface.co/datasets/xlangai/ubuntu_osworld_file_cache/resolve/main/gimp/a746add2-cab0-4740-ac36-c3769d9bfb46/dog_with_background.png. No retries left."}
-{"Error": "gimp/a746add2-cab0-4740-ac36-c3769d9bfb46 - Setup step 1 failed: _download_setup - Failed to download https://hf-mirror.com/datasets/xlangai/ubuntu_osworld_file_cache/resolve/main/gimp/a746add2-cab0-4740-ac36-c3769d9bfb46/dog_with_background.png. No retries left."}

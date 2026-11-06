@@ -1,7 +1,0 @@
-{"type":"thread.started","thread_id":"019e11e7-a466-7c33-9251-bedddf7fcf87"}
-{"type":"turn.started"}
-{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"I’ll switch GNOME notifications into Do Not Disturb by changing the desktop notification setting directly."}}
-{"type":"item.started","item":{"id":"item_1","type":"command_execution","command":"/bin/bash -lc 'gsettings set org.gnome.desktop.notifications show-banners false && gsettings get org.gnome.desktop.notifications show-banners'","aggregated_output":"","exit_code":null,"status":"in_progress"}}
-{"type":"item.completed","item":{"id":"item_1","type":"command_execution","command":"/bin/bash -lc 'gsettings set org.gnome.desktop.notifications show-banners false && gsettings get org.gnome.desktop.notifications show-banners'","aggregated_output":"false\n","exit_code":0,"status":"completed"}}
-{"type":"item.completed","item":{"id":"item_2","type":"agent_message","text":"Do Not Disturb is now enabled. GNOME notification banners are turned off (`show-banners` is `false`)."}}
-{"type":"turn.completed","usage":{"input_tokens":35586,"cached_input_tokens":31488,"output_tokens":178,"reasoning_output_tokens":67}}

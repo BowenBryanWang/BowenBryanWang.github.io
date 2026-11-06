@@ -1,4 +1,0 @@
-{"type":"thread.started","thread_id":"019e11da-25e0-7e82-b070-87d7658f708c"}
-{"type":"turn.started"}
-{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"Infeasible. Google Chrome’s built-in language settings only support real/localized languages available in Chrome/Chromium; “Xenothian” and “Atlantis” are not available options, so I can’t set Chrome’s interface language to Xenothian using Chrome’s built-in settings."}}
-{"type":"turn.completed","usage":{"input_tokens":17698,"cached_input_tokens":14720,"output_tokens":140,"reasoning_output_tokens":74}}

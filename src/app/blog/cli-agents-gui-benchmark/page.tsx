@@ -3,8 +3,6 @@ import { Fragment } from 'react'
 
 import { Container } from '@/components/Container'
 
-import { TrajectoryBrowser } from './TrajectoryBrowser'
-
 export const metadata: Metadata = {
   title: 'Towards Universal Digital Agents',
   description:
@@ -16,7 +14,6 @@ const POST = {
   subtitle:
     'Empirical evidence from OSWorld-Verified: coding agents like Codex and Claude Code can solve many “GUI” tasks through the command line and why we need universal digital agents.',
   date: 'May 11, 2026',
-  reading: 'Trace browser',
 }
 
 export default function CliAgentsGuiBenchmarkPost() {
@@ -27,8 +24,6 @@ export default function CliAgentsGuiBenchmarkPost() {
         <PostHero />
         <IntroWriting />
         <ResultsTable />
-        <ViewerIntro />
-        <TrajectoryBrowser />
       </article>
     </Container>
   )
@@ -208,15 +203,5 @@ function ModelName({ value }: { value: string }) {
         w/ {suffix}
       </span>
     </>
-  )
-}
-
-function ViewerIntro() {
-  return (
-    <p className="mx-auto mb-6 max-w-3xl text-[14px] leading-6 text-zinc-600 dark:text-zinc-400">
-      We also collected the full evaluation trajectories for both runs; the
-      embedded viewer below lets readers search, filter, and inspect every
-      recorded case.
-    </p>
   )
 }
