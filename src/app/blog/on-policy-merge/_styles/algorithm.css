@@ -113,3 +113,48 @@
     display: none;
   }
 }
+
+/* Citation: BibTeX with a copy button (CopyBib.tsx) */
+.am-scope .am-bib-wrap {
+  position: relative;
+}
+.am-scope .am-bib-wrap .am-bib {
+  padding-right: 5.5em;
+}
+.am-scope .am-bib-copy {
+  position: absolute;
+  top: 0.6em;
+  right: 0.6em;
+  font-size: 13px;
+  line-height: 1;
+  padding: 0.45em 0.8em;
+  border: 1px solid var(--rule);
+  border-radius: 5px;
+  background: var(--surf-halo);
+  color: var(--ink-soft);
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+}
+.am-scope .am-bib-copy:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+/* Repeat citations: one short line in the margin (Cite.tsx); full reference when tapped on narrow screens */
+.am-scope .am-sn-short {
+  display: none;
+}
+@media (min-width: 1280px) {
+  .am-scope .am-sn-repeat .am-sn-title,
+  .am-scope .am-sn-repeat .am-sn-by {
+    display: none;
+  }
+  .am-scope .am-sn-repeat .am-sn-short {
+    display: inline;
+    color: var(--ink-soft);
+    text-decoration: none;
+  }
+  .am-scope .am-sn-repeat .am-sn-short:hover {
+    color: var(--accent);
+  }
+}

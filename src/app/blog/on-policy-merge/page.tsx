@@ -16,6 +16,7 @@ import Landscape3D from './_components/Landscape3D'
 import { Cite, CiteT } from './_components/Cite'
 import { Placeholder, Pending } from './_components/Placeholder'
 import Appendix from './_components/Appendix'
+import CopyBib from './_components/CopyBib'
 import { Algorithm, Line, K } from './_components/Algorithm'
 import ReduceMotion from './_components/ReduceMotion'
 import SideToc, { type TocItem } from './_components/SideToc'
@@ -56,10 +57,10 @@ const TOC: TocItem[] = [
   { label: 'Appendices A–H', href: '#appendix' },
 ]
 
-const BIBTEX = `@article{wang2026onpolicymerging,
+const BIBTEX = `@article{wang2026onpolicymerge,
   author  = {Bowen Wang},
   title   = {On-Policy Merge Stabilizes Multi-Task Reinforcement Learning},
-  journal = {bowenbryanwang.github.io},
+  journal = {bowenwang.me},
   year    = {2026},
   month   = nov,
   note    = {https://bowenwang.me/blog/on-policy-merge}
@@ -1553,13 +1554,7 @@ export default function OnPolicyMergingPost() {
           {/* ------------------------------------------------------------ */}
           <SectionTitle label="Citation" id="citation" />
           <div className="am-prose">
-            <p>Please cite this work as:</p>
-            <p>
-              Wang, Bowen. “On-Policy Merge Stabilizes Multi-Task Reinforcement Learning.”
-              bowenbryanwang.github.io, November 2026.
-            </p>
-            <p>Or use the BibTeX citation:</p>
-            <pre className="am-bib">{BIBTEX}</pre>
+            <CopyBib text={BIBTEX} />
           </div>
 
           {/* ------------------------------------------------------------ */}

@@ -3,7 +3,7 @@
 import { useEffect } from 'react'
 
 const WIDE = '(min-width: 1280px)'
-const GAP = 10 // px between stacked notes
+const GAP = 6 // px between stacked notes
 
 /**
  * Progressive enhancement for the CSS sidenotes in Cite.tsx; renders nothing.
@@ -56,6 +56,26 @@ export default function SidenoteLayout() {
         const top = Math.max(it.top, bottom + GAP)
         it.shift = Math.round(top - it.top)
         bottom = top + it.h
+      }
+      // Backward pass: a dense passage can push its notes past the end of the
+      // block it sits in (an appendix, or the article). Keep each note above
+      // its block's bottom and slide the stack up into free margin above.
+      const scopeBottom = scope.getBoundingClientRect().bottom
+      const blockBottom = new Map<Element, number>()
+      let limit = Infinity
+      for (let i = items.length - 1; i >= 0; i--) {
+        const it = items[i]
+        if (it.hidden) continue
+        const block = it.n.closest('details') ?? scope
+        let b = blockBottom.get(block)
+        if (b === undefined) {
+          b = block === scope ? scopeBottom : block.getBoundingClientRect().bottom
+          blockBottom.set(block, b)
+        }
+        limit = Math.min(limit, b)
+        const top = it.top + it.shift
+        if (top + it.h > limit) it.shift = Math.round(limit - it.h - it.top)
+        limit = it.top + it.shift - GAP
       }
       for (const it of items) {
         it.n.dataset.shift = String(it.shift)

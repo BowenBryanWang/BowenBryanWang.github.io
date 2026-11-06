@@ -314,12 +314,12 @@ function entry(k: string): RefEntry {
 // the next number and later citations of the same key reuse it. React's
 // `cache` scopes the registry to one render (one request, or one page at
 // build time).
-type Registry = { order: Map<string, number> }
+type Registry = { order: Map<string, number>; noted: Set<string> }
 const reactCache = (React as unknown as { cache?: <F>(fn: F) => F }).cache
 let fallback: Registry | null = null
 const getRegistry: () => Registry = reactCache
-  ? reactCache(() => ({ order: new Map<string, number>() }))
-  : () => (fallback ??= { order: new Map<string, number>() })
+  ? reactCache(() => ({ order: new Map<string, number>(), noted: new Set<string>() }))
+  : () => (fallback ??= { order: new Map<string, number>(), noted: new Set<string>() })
 
 function numberOf(k: string): number {
   const { order } = getRegistry()
@@ -342,6 +342,12 @@ function numberOf(k: string): number {
 function Sidenote({ k }: { k: string }) {
   const r = entry(k)
   const n = numberOf(k)
+  // The first note for a source carries its title; later ones are one short
+  // line (number, authors, year) so dense passages do not overflow the margin.
+  const { noted } = getRegistry()
+  const repeat = noted.has(k)
+  noted.add(k)
+  const by = `${r.cite.replace(/\.$/, '')}, ${r.year}`
   // The full reference around the title (authors before, venue and year
   // after), shown in the narrow-screen note since there is no list at the end.
   const at = r.text.indexOf(r.title)
@@ -357,16 +363,19 @@ function Sidenote({ k }: { k: string }) {
         aria-label={`Reference ${n}: ${r.title}`}
       />
       <sup className="am-sn-num">{n}</sup>
-      <span className="am-sn-note" role="note">
+      <span className={repeat ? 'am-sn-note am-sn-repeat' : 'am-sn-note'} role="note">
         <span className="am-sn-n">{n}.</span>{' '}
+        {repeat && (
+          <a className="am-sn-short" href={r.url} target="_blank" rel="noreferrer" title={r.title}>
+            {by}
+          </a>
+        )}
         {full && <span className="am-sn-full">{full.before}</span>}
         <a className="am-sn-title" href={r.url} target="_blank" rel="noreferrer">
           {r.title}
         </a>
         {full && <span className="am-sn-full">{full.after}</span>}{' '}
-        <span className="am-sn-by">
-          ({r.cite.replace(/\.$/, '')}, {r.year})
-        </span>
+        <span className="am-sn-by">({by})</span>
       </span>
     </label>
   )
