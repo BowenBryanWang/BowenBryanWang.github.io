@@ -806,3 +806,45 @@
 .am-scope .am-toc-compact a:hover {
   color: var(--accent);
 }
+
+/* Figure 2: the unification map. A wide drawing for desktop and a tall one
+   for phones, so labels stay at reading size on both. */
+.am-scope {
+  --um-chip: #fffdf9;
+}
+.dark .am-scope {
+  --um-chip: #2a2724;
+}
+.am-scope .am-um svg {
+  min-width: 0;
+  width: 100%;
+}
+.am-scope .am-um .am-um-tall {
+  display: none;
+  max-width: 440px;
+  margin: 0 auto;
+}
+@media (max-width: 767px) {
+  .am-scope .am-um .am-um-wide {
+    display: none;
+  }
+  .am-scope .am-um .am-um-tall {
+    display: block;
+  }
+}
+.am-scope .am-um-tile {
+  fill: var(--paper-deep);
+}
+.am-scope .am-um-tile-hi {
+  fill: var(--accent-soft);
+  stroke: var(--accent);
+  stroke-opacity: 0.55;
+}
+.am-scope .am-um-pill {
+  fill: var(--um-chip);
+  stroke: var(--ink-faint);
+}
+.am-scope .am-um-divider {
+  stroke: var(--accent);
+  stroke-opacity: 0.35;
+}

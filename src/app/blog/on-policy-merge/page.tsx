@@ -4,15 +4,20 @@ import type { ReactNode } from 'react'
 import { Container } from '@/components/Container'
 
 import './_styles/merge.css'
+import './_styles/algorithm.css'
+import './_styles/residual.css'
 
 import Tex from './_components/Tex'
 import SectionTitle from './_components/SectionTitle'
 import { ParadigmFigure } from './_components/Figures'
 import WeightSpace3D from './_components/WeightSpace3D'
+import UnificationMap from './_components/UnificationMap'
+import ResidualChart from './_components/ResidualChart'
 import Landscape3D from './_components/Landscape3D'
 import { Cite, CiteT } from './_components/Cite'
 import { Placeholder, Pending } from './_components/Placeholder'
 import Appendix from './_components/Appendix'
+import { Algorithm, Line, K } from './_components/Algorithm'
 import ReduceMotion from './_components/ReduceMotion'
 import SideToc, { type TocItem } from './_components/SideToc'
 import SidenoteLayout from './_components/SidenoteLayout'
@@ -228,24 +233,17 @@ export default function OnPolicyMergingPost() {
             </p>
           </div>
 
-          <Placeholder label="Figure 2" status="author to draw">
-            <p>
-              <strong>The unification map.</strong> Horizontal axis: how often
-              the domains are combined (every optimizer step; every <Tex>K</Tex>{' '}
-              steps; when a KL budget is spent; once, after training). Vertical
-              axis: the geometry of the combination (Euclidean in parameter
-              space; KL in policy space, with the Fisher measured on the
-              student’s states or on each trainer’s own states). Points:
-              multi-task RL (every step, Euclidean, one shared optimizer);
-              periodic sum or average, the local-SGD and DiLoCo family (every{' '}
-              <Tex>K</Tex> steps, Euclidean); task arithmetic, TIES and DARE
-              (once, Euclidean); MOPD (once, KL on student states, plus a second
-              rollout stage); Distral and Divide-and-Conquer RL (KL, reached by
-              distillation); OPM (KL-triggered, KL on trainer states). Cascade
-              RL as an annotation: multi-task RL with one domain active at a
-              time.
-            </p>
-          </Placeholder>
+          <figure>
+            <UnificationMap />
+            <figcaption>
+              <strong>Figure 2.</strong> Methods for combining RL domains,
+              by when they combine them (columns) and how: adding up parameter
+              updates, or matching each domain’s behaviour in KL (rows). On-Policy
+              Merge keeps the timing of multi-task RL and the geometry of MOPD,
+              and is the only method that combines during training in the KL
+              geometry without distillation.
+            </figcaption>
+          </figure>
 
           <div className="am-prose">
             <p>
@@ -376,41 +374,69 @@ export default function OnPolicyMergingPost() {
           {/* ------------------------------------------------------------ */}
           <SectionTitle label="On-Policy Merge" id="method" />
           <div className="am-prose">
-            <div className="am-callout">
-              <div className="am-callout-label">The loop</div>
-              <ol>
-                <li>
-                  All trainers start at the anchor{' '}
-                  <Tex tail=".">{T`\bar\theta`}</Tex> Trainer <Tex>i</Tex> owns
-                  domain <Tex tail=":">i</Tex> its data and verifier, its
-                  rollout workers and sandboxes, its optimizer state and its
-                  hyperparameters.
-                </li>
-                <li>
-                  Each trainer runs ordinary on-policy GRPO{' '}
-                  <Cite k="shao2024" /> on its domain, with no KL penalty.
-                </li>
-                <li>
-                  On a subsample of each batch, the frozen anchor scores the
-                  trainer’s tokens. This gives the trainer’s drift{' '}
-                  <Tex tail=",">{T`D_i=\mathrm{KL}(P^i_{\theta_i}\,\|\,P^i_{\bar\theta})`}</Tex>{' '}
-                  summed over the tokens of a rollout. It is measured, never
-                  penalised.
-                </li>
-                <li>
-                  When any drift reaches its ceiling{' '}
-                  <Tex tail=",">{T`\delta_i`}</Tex> the trainers{' '}
-                  <strong>rendezvous</strong>. Each contributes its weights and
-                  a cached subsample of its latest rollouts, and the anchor
-                  moves to the merge (2).
-                </li>
-                <li>
-                  Every trainer reloads the anchor, keeps its optimizer state,
-                  and continues. Rollouts still in flight are kept with
-                  per-token importance weights.
-                </li>
-              </ol>
-            </div>
+            <Algorithm
+              number={1}
+              title="On-Policy Merge"
+              input={
+                <>
+                  base model <Tex tail=";">{T`\theta_0`}</Tex> for each domain{' '}
+                  <Tex tail=":">i</Tex> its data, verifier, rollout workers and
+                  hyperparameters, and a drift ceiling{' '}
+                  <Tex>{T`\delta_i`}</Tex>
+                </>
+              }
+            >
+              <Line>
+                <Tex>{T`\bar\theta\leftarrow\theta_0`}</Tex>
+              </Line>
+              <Line note="trainer i owns domain i and its optimizer state">
+                <Tex>{T`\theta_i\leftarrow\bar\theta`}</Tex> for every domain{' '}
+                <Tex>i</Tex>
+              </Line>
+              <Line>
+                <K>repeat</K>
+              </Line>
+              <Line indent={1}>
+                <K>for</K> each trainer <Tex>i</Tex> <K>in parallel do</K>
+              </Line>
+              <Line indent={2} note={<>on-policy GRPO <Cite k="shao2024" />, no KL penalty</>}>
+                sample rollouts <Tex tail=";">{T`\xi\sim P^i_{\theta_i}`}</Tex>{' '}
+                <Tex>{T`\theta_i\leftarrow`}</Tex> GRPO step on{' '}
+                <Tex>{T`\xi`}</Tex>
+              </Line>
+              <Line indent={2} note="anchor scores a subsample; measured, never penalised">
+                <Tex>{T`D_i\leftarrow\mathrm{KL}\big(P^i_{\theta_i}\,\|\,P^i_{\bar\theta}\big)`}</Tex>
+              </Line>
+              <Line indent={1} note="rendezvous">
+                <K>if</K> <Tex>{T`D_i\ge\delta_i`}</Tex> for some{' '}
+                <Tex>i</Tex> <K>then</K>
+              </Line>
+              <Line indent={2} note="from each trainer’s cached rollouts">
+                <Tex tail=",">{T`\Delta_i\leftarrow\theta_i-\bar\theta`}</Tex>{' '}
+                <Tex>{T`F_i\leftarrow\mathbb{E}_{\xi\sim P^i_{\theta_i}}\big[\textstyle\sum_ts_ts_t^\top\big]`}</Tex>
+              </Line>
+              <Line
+                indent={2}
+                note={
+                  <>
+                    the merge (2), solved as in{' '}
+                    <a href="#engineering">Making the merge cheap</a>
+                  </>
+                }
+              >
+                <Tex>{T`\bar\theta\leftarrow\bar\theta+\big(\sum_iF_i\big)^{+}\sum_iF_i\Delta_i`}</Tex>
+              </Line>
+              <Line indent={2} note="optimizer states kept; in-flight rollouts reweighted per token">
+                <Tex>{T`\theta_i\leftarrow\bar\theta`}</Tex> for every{' '}
+                <Tex>i</Tex>
+              </Line>
+              <Line>
+                <K>until</K> the training budget is spent
+              </Line>
+              <Line>
+                <K>return</K> <Tex>{T`\bar\theta`}</Tex>
+              </Line>
+            </Algorithm>
             <p>
               <span className="am-runin">The objective.</span> We want one model
               whose behaviour on each domain is as close as possible to that
@@ -506,22 +532,13 @@ export default function OnPolicyMergingPost() {
             <div className="am-callout">
               <div className="am-callout-label">Theorem 1 · decoupling</div>
               <p>
-                In a lossless round, (2) returns such a point, and for every
+                In a lossless round, (2) returns a lossless point and, for every
                 domain <Tex tail=",">j</Tex> to first order in the
                 displacements,
               </p>
               <Tex
                 display
               >{T`J_j(\theta^{+})-J_j(\theta_j)=0,\qquad J_j\Big(\bar\theta+\sum_i\Delta_i\Big)-J_j(\theta^{+})=T_j,\qquad T_j=\nabla J_j(\theta_j)^\top\sum_{i\ne j}\Delta_i .`}</Tex>
-              <p>
-                For log-linear policies whose domains have linearly independent
-                feature spans, this is exact at every interval: after{' '}
-                <Tex>r</Tex> rounds the anchor’s policy on domain <Tex>j</Tex>{' '}
-                equals that of a run that trained domain <Tex>j</Tex> alone for{' '}
-                <Tex>{T`rK`}</Tex> steps. This holds for any trainer optimizer
-                whose update depends only on its own history: gradient descent,
-                momentum, natural gradient, and Adam with persistent state.
-              </p>
             </div>
             <p>
               The second identity is the important one. <Tex>{T`T_j`}</Tex> is
@@ -534,6 +551,16 @@ export default function OnPolicyMergingPost() {
               specialists merged below, parameter cosines are at most 0.022, yet
               the math specialist’s update moves the code specialist’s policy by
               1.78 times the code specialist’s own drift.
+            </p>
+            <p>
+              For log-linear policies whose domains have linearly independent
+              feature spans, the theorem is exact at every interval, not only to
+              first order: after <Tex>r</Tex> rounds the anchor’s policy on
+              domain <Tex>j</Tex> equals that of a run that trained domain{' '}
+              <Tex>j</Tex> alone for <Tex>{T`rK`}</Tex> steps. This holds for any
+              trainer optimizer whose update depends only on its own history,
+              from gradient descent and momentum to natural gradient and Adam
+              with persistent state.
             </p>
           </div>
 
@@ -569,34 +596,31 @@ export default function OnPolicyMergingPost() {
               <ol>
                 <li>
                   <strong>Monotone per domain.</strong> <Tex>{T`J_j`}</Tex>{' '}
-                  decreases only if domain <Tex>j</Tex>’s solo run does,
-                  whatever the other domains do.
+                  decreases only if domain <Tex>j</Tex>’s solo run does.
                 </li>
                 <li>
                   <strong>Invariant to shares.</strong> Domain <Tex>j</Tex>’s
-                  trajectory does not depend on the other domains’ batch shares,
-                  gradient scales or speeds.
+                  trajectory is independent of the other domains’ batch shares,
+                  gradient scales and speeds.
                 </li>
                 <li>
-                  <strong>Idle protection.</strong> A trainer that made no
-                  progress is held in place: the anchor moves inside{' '}
+                  <strong>Idle protection.</strong> If trainer <Tex>j</Tex> makes
+                  no progress, the anchor moves inside{' '}
                   <Tex tail=".">{T`\operatorname{null}F_j`}</Tex>
                 </li>
                 <li>
-                  <strong>The trigger is the trust region.</strong> Whatever the
-                  optimizer, every drift is at most <Tex>{T`\delta`}</Tex> plus
-                  one step <Tex tail=",">{T`\omega`}</Tex> and the exact merge
-                  has total residual{' '}
+                  <strong>The trigger is the trust region.</strong> For any
+                  optimizer, <Tex tail=",">{T`D_i\le\delta+\omega`}</Tex> with{' '}
+                  <Tex>{T`\omega`}</Tex> one step, and the exact merge has
+                  residual{' '}
                   <Tex tail=".">{T`\sum_i\varepsilon_i\le\sum_iD_i\le n(\delta+\omega)`}</Tex>
                 </li>
               </ol>
-              <p>
-                Items 1–3 are exact for log-linear policies and hold per round
-                to first order otherwise. Item 4 needs no lossless point.
-              </p>
             </div>
             <p>
-              Multi-task RL has none of these. One step changes{' '}
+              Items 1–3 are exact for log-linear policies and hold per round to
+              first order otherwise; item 4 needs no lossless point. Multi-task
+              RL has none of these. One step changes{' '}
               <Tex>{T`J_j`}</Tex> by{' '}
               <Tex tail=",">{T`\eta\big(c_j\nabla J_j^\top P\nabla J_j+\sum_{i\ne j}c_i\nabla J_j^\top P\nabla J_i\big)`}</Tex>{' '}
               with <Tex>{T`c_i`}</Tex> the batch shares and <Tex>P</Tex> the
@@ -626,23 +650,24 @@ export default function OnPolicyMergingPost() {
             <div className="am-callout">
               <div className="am-callout-label">Proposition 3 · the price</div>
               <p>
-                Let <Tex>n</Tex> domains share a direction with a common
-                curvature and agreeing objectives, and let each trainer’s round
-                solve a fraction <Tex>x</Tex> of it. OPM moves <Tex>x</Tex> (the
-                average) and the sum moves <Tex tail=".">{T`nx`}</Tex> Along
-                that direction, multi-task RL’s convergence exponent is about{' '}
-                <Tex>n</Tex> times OPM’s. With an interior optimum the sum is
-                better per round iff <Tex>{T`x<2/(n+1)`}</Tex> and diverges iff{' '}
-                <Tex tail=".">{T`x>2/n`}</Tex> With a boundary optimum, such as
-                pushing up an action every domain rewards, the sum is better at
-                every <Tex tail=".">x</Tex> With nonlinear policies OPM also
-                carries an error floor of order <Tex tail=",">{T`\eta K`}</Tex>{' '}
-                set by how far the lossless point lies in parameter space.
+                Let <Tex>n</Tex> domains share a direction with common curvature
+                and agreeing objectives, and let each round solve a fraction{' '}
+                <Tex>x</Tex> of it. Along that direction OPM moves <Tex>x</Tex>,
+                the sum moves <Tex tail=",">{T`nx`}</Tex> and multi-task RL’s
+                convergence exponent is about <Tex>n</Tex> times OPM’s. With an
+                interior optimum the sum is better per round iff{' '}
+                <Tex>{T`x<2/(n+1)`}</Tex> and diverges iff{' '}
+                <Tex tail=";">{T`x>2/n`}</Tex> with a boundary optimum it is
+                better at every <Tex tail=".">x</Tex>
               </p>
             </div>
             <p>
-              So OPM has no general rate advantage over a well-tuned multi-task
-              RL run, and we do not claim one. In KL geometry, positive transfer
+              A boundary optimum is the common case: pushing up an action that
+              every domain rewards. With nonlinear policies OPM also carries an
+              error floor of order <Tex tail=",">{T`\eta K`}</Tex> set by how far
+              the lossless point lies in parameter space. So OPM has no general
+              rate advantage over a well-tuned multi-task RL run, and we do not
+              claim one. In KL geometry, positive transfer
               is extra reward-aligned drift on a domain, in effect a larger
               step, and a larger trainer learning rate recovers part of it.
               Meeting more often does not change this for an exact merge: in
@@ -670,20 +695,23 @@ export default function OnPolicyMergingPost() {
             <div className="am-callout">
               <div className="am-callout-label">Proposition 4 · MOPD</div>
               <p>
-                MOPD’s loss for teacher <Tex>i</Tex> is{' '}
-                <Tex tail=".">{T`L_i(\theta)=\mathrm{KL}(P^i_\theta\|P^i_{\theta_i})`}</Tex>{' '}
-                By Pinsker,{' '}
-                <Tex tail=":">{T`J_i(\theta)\le J_i(\theta_i)+\sqrt{L_i(\theta)/2}`}</Tex>{' '}
-                at its optimum the student equals its teachers, and exceeds them
-                only by not converging or through an added outcome reward. The
-                OPM point is a stationary point of MOPD’s objective to second
-                order (its gradient there is <Tex>{T`O(\|\cdot\|^2)`}</Tex>{' '}
-                against <Tex>{T`O(\|\cdot\|)`}</Tex> for task arithmetic and the
-                sum), and in a lossless round it is MOPD’s global optimum to
-                third order, reached without student rollouts.
+                Let{' '}
+                <Tex>{T`L_i(\theta)=\mathrm{KL}(P^i_\theta\|P^i_{\theta_i})`}</Tex>{' '}
+                be MOPD’s loss for teacher <Tex tail=".">i</Tex> Then{' '}
+                <Tex tail=".">{T`J_i(\theta)\le J_i(\theta_i)+\sqrt{L_i(\theta)/2}`}</Tex>{' '}
+                The OPM point is a stationary point of{' '}
+                <Tex>{T`\sum_iL_i`}</Tex> to second order, with gradient{' '}
+                <Tex>{T`O(\|\cdot\|^2)`}</Tex> against{' '}
+                <Tex>{T`O(\|\cdot\|)`}</Tex> for task arithmetic and the sum,
+                and in a lossless round it is the global minimiser to third
+                order.
               </p>
             </div>
             <p>
+              The bound is Pinsker’s inequality. It means that at its optimum
+              the MOPD student equals its teachers, and can exceed them only by
+              not converging or through an added outcome reward. OPM reaches
+              that optimum without any student rollouts.{' '}
               <CiteT k="liu2026" /> showed that MOPD is Fisher merging to second
               order; what we add is the lossless statement and which Fisher to
               use. OPM has no fixed teacher: each round’s “teacher”{' '}
@@ -861,14 +889,21 @@ export default function OnPolicyMergingPost() {
             </p>
           </div>
 
-          <Placeholder label="Figure 4" status="author to draw from Table 2">
-            <p>
-              Held-out residual against CG iteration, one line per{' '}
-              <Tex tail=",">{T`\gamma`}</Tex> with the sum and the average as
-              horizontal references, and the finite-difference-step-0.3 run as a
-              dashed line off the top of the chart.
-            </p>
-          </Placeholder>
+          <figure>
+            <ResidualChart />
+            <figcaption>
+              <strong>Figure 4.</strong> Held-out KL residual of the guarded
+              merge after one to ten CG iterations, for three damping factors{' '}
+              <Tex>{T`\gamma`}</Tex> along the path from the summed update (data
+              of Table 2). Dashed lines mark the sum (13.35 nats) and the
+              average (30.7); not merging at all leaves 125.3. Every damped step
+              stays below the sum, and the residual is lowest at three
+              iterations with <Tex tail=",">{T`\gamma=\tfrac12`}</Tex> the
+              default. The full step degrades after two iterations, and a
+              finite-difference step of 0.3 pushes two of the three settings off
+              the chart.
+            </figcaption>
+          </figure>
 
           {/* ------------------------------------------------------------ */}
           <SectionTitle
@@ -937,105 +972,101 @@ export default function OnPolicyMergingPost() {
                   </tr>
                   <tr>
                     <td>Specialist, own domain</td>
-                    <td className="am-num">50.3</td>
-                    <td className="am-num">58.6</td>
-                    <td className="am-num">61.7</td>
-                    <td className="am-num">63.3</td>
-                    <td className="am-num">63.7</td>
-                    <td className="am-num">89.6</td>
-                    <td className="am-num">48.9</td>
-                    <td className="am-num">72.4</td>
-                    <td className="am-num">63.56</td>
+                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.00 }}>50.3</td>
+                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.00 }}>58.6</td>
+                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.03 }}>61.7</td>
+                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.00 }}>63.3</td>
+                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.00 }}>63.7</td>
+                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.89 }}>89.6</td>
+                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.74 }}>48.9</td>
+                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.44 }}>72.4</td>
+                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.26 }}>63.56</td>
                   </tr>
                   <tr>
                     <td>Task arithmetic, λ = 0.6</td>
-                    <td className="am-num">53.9</td>
-                    <td className="am-num">60.2</td>
-                    <td className="am-num">63.9</td>
-                    <td className="am-num">64.0</td>
-                    <td className="am-num">63.8</td>
-                    <td className="am-num">88.2</td>
-                    <td className="am-num">40.4</td>
-                    <td className="am-num">71.7</td>
-                    <td className="am-num">63.26</td>
+                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.67 }}>53.9</td>
+                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.39 }}>60.2</td>
+                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.79 }}>63.9</td>
+                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.13 }}>64.0</td>
+                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.03 }}>63.8</td>
+                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.51 }}>88.2</td>
+                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.02 }}>40.4</td>
+                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.00 }}>71.7</td>
+                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.18 }}>63.26</td>
                   </tr>
                   <tr>
                     <td>Mixed RL (released)</td>
-                    <td className="am-num">52.7</td>
-                    <td className="am-num">60.0</td>
-                    <td className="am-num">61.6</td>
-                    <td className="am-num">64.1</td>
-                    <td className="am-num">64.2</td>
-                    <td className="am-num">86.3</td>
-                    <td className="am-num">40.2</td>
-                    <td className="am-num">71.7</td>
-                    <td className="am-num">62.60</td>
+                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.44 }}>52.7</td>
+                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.34 }}>60.0</td>
+                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.00 }}>61.6</td>
+                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.14 }}>64.1</td>
+                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.16 }}>64.2</td>
+                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.00 }}>86.3</td>
+                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.00 }}>40.2</td>
+                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.00 }}>71.7</td>
+                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.00 }}>62.60</td>
                   </tr>
                   <tr>
                     <td>MOPD (released)</td>
-                    <td className="am-num">52.0</td>
-                    <td className="am-num">59.7</td>
-                    <td className="am-num">62.9</td>
-                    <td className="am-num">63.9</td>
-                    <td className="am-num">63.9</td>
-                    <td className="am-num">89.1</td>
-                    <td className="am-num">46.7</td>
-                    <td className="am-num">72.6</td>
-                    <td className="am-num">63.84</td>
+                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.31 }}>52.0</td>
+                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.27 }}>59.7</td>
+                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.45 }}>62.9</td>
+                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.11 }}>63.9</td>
+                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.06 }}>63.9</td>
+                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.76 }}>89.1</td>
+                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.55 }}>46.7</td>
+                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.56 }}>72.6</td>
+                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.34 }}>63.84</td>
                   </tr>
                   <tr>
                     <td>Sum, λ = 1</td>
-                    <td className="am-num">55.7</td>
-                    <td className="am-num">62.7</td>
-                    <td className="am-num">64.5</td>
-                    <td className="am-num">68.0</td>
-                    <td className="am-num">64.4</td>
-                    <td className="am-num">89.6</td>
-                    <td className="am-num">49.3</td>
-                    <td className="am-num">72.4</td>
-                    <td className="am-num">
-                      <strong>65.84</strong>
-                    </td>
+                    <td className="am-num am-heat" style={{ ['--h' as string]: 1.00 }}><strong>55.7</strong></td>
+                    <td className="am-num am-heat" style={{ ['--h' as string]: 1.00 }}><strong>62.7</strong></td>
+                    <td className="am-num am-heat" style={{ ['--h' as string]: 1.00 }}><strong>64.5</strong></td>
+                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.84 }}><strong>68.0</strong></td>
+                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.23 }}>64.4</td>
+                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.89 }}><strong>89.6</strong></td>
+                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.77 }}>49.3</td>
+                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.44 }}>72.4</td>
+                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.89 }}><strong>65.84</strong></td>
                   </tr>
                   <tr>
                     <td>
                       <strong>OPM merge</strong>, 10 CG iterations
                     </td>
-                    <td className="am-num">51.0</td>
-                    <td className="am-num">59.3</td>
-                    <td className="am-num">63.0</td>
-                    <td className="am-num">67.3</td>
-                    <td className="am-num">65.6</td>
-                    <td className="am-num">89.5</td>
-                    <td className="am-num">
-                      <strong>50.5</strong>
-                    </td>
-                    <td className="am-num">73.3</td>
-                    <td className="am-num">64.94</td>
+                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.13 }}>51.0</td>
+                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.17 }}>59.3</td>
+                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.48 }}>63.0</td>
+                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.71 }}>67.3</td>
+                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.61 }}>65.6</td>
+                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.86 }}>89.5</td>
+                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.87 }}>50.5</td>
+                    <td className="am-num am-heat" style={{ ['--h' as string]: 1.00 }}><strong>73.3</strong></td>
+                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.64 }}>64.94</td>
                   </tr>
                   <tr>
                     <td>OPM merge, 30 CG iterations</td>
-                    <td className="am-num">53.9</td>
-                    <td className="am-num">59.8</td>
-                    <td className="am-num">62.8</td>
-                    <td className="am-num">66.7</td>
-                    <td className="am-num">66.6</td>
-                    <td className="am-num">89.0</td>
-                    <td className="am-num">50.8</td>
-                    <td className="am-num">73.0</td>
-                    <td className="am-num">65.32</td>
+                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.67 }}>53.9</td>
+                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.29 }}>59.8</td>
+                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.41 }}>62.8</td>
+                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.61 }}>66.7</td>
+                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.94 }}><strong>66.6</strong></td>
+                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.73 }}>89.0</td>
+                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.90 }}><strong>50.8</strong></td>
+                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.81 }}>73.0</td>
+                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.75 }}>65.32</td>
                   </tr>
                   <tr>
                     <td>OPM merge, 10 iterations, deployed in fp32</td>
-                    <td className="am-num">53.3</td>
-                    <td className="am-num">62.3</td>
-                    <td className="am-num">64.1</td>
-                    <td className="am-num">68.9</td>
-                    <td className="am-num">66.8</td>
-                    <td className="am-num">90.0</td>
-                    <td className="am-num">52.0</td>
-                    <td className="am-num">72.5</td>
-                    <td className="am-num">66.24</td>
+                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.56 }}>53.3</td>
+                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.90 }}>62.3</td>
+                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.86 }}>64.1</td>
+                    <td className="am-num am-heat" style={{ ['--h' as string]: 1.00 }}>68.9</td>
+                    <td className="am-num am-heat" style={{ ['--h' as string]: 1.00 }}>66.8</td>
+                    <td className="am-num am-heat" style={{ ['--h' as string]: 1.00 }}>90.0</td>
+                    <td className="am-num am-heat" style={{ ['--h' as string]: 1.00 }}>52.0</td>
+                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.50 }}>72.5</td>
+                    <td className="am-num am-heat" style={{ ['--h' as string]: 1.00 }}>66.24</td>
                   </tr>
                 </tbody>
               </table>
@@ -1043,7 +1074,10 @@ export default function OnPolicyMergingPost() {
             <p style={{ fontSize: '14px' }}>
               <strong>Table 3.</strong> One-shot merges of the five released
               Qwen3-4B specialists of <CiteT k="wu2026" />, mean over 32 samples
-              per prompt, in percent. All merged models are deployed in bf16
+              per prompt, in percent. Shading runs within each column, from
+              its lowest to its highest score; the base model is left
+              unshaded as the reference. Bold marks the best bf16 merge in each
+              column. All merged models are deployed in bf16
               except the last row. The specialist row takes each benchmark from
               its own domain’s specialist. Run-to-run noise, measured by
               evaluating a bit-identical model twice, is about 0.3 points on the

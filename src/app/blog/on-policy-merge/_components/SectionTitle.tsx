@@ -3,17 +3,16 @@ interface Props {
   id?: string
 }
 
-// Small-caps eyebrow over a thin rule, used as the separator between sections.
+// Section heading: a bold serif title with a faint "#" anchor hanging in the left margin.
 export default function SectionTitle({ label, id }: Props) {
   return (
-    <div id={id} className="mb-7 mt-14 flex scroll-mt-24 items-center gap-4">
-      <span
-        className="font-mono text-[11px] uppercase tracking-widest"
-        style={{ color: 'var(--ink-faint)' }}
-      >
-        {label}
-      </span>
-      <span className="h-px flex-1" style={{ background: 'var(--rule)' }} />
-    </div>
+    <h2 id={id} className="am-h2 scroll-mt-24">
+      {id ? (
+        <a href={`#${id}`} className="am-h2-anchor" aria-label={`Link to section: ${label}`}>
+          #
+        </a>
+      ) : null}
+      {label}
+    </h2>
   )
 }

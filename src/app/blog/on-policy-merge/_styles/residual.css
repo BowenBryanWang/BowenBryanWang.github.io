@@ -1,0 +1,127 @@
+/* Figure 4: residual chart. Series colours validated (light on #fdfbf5, dark on #161412). */
+.am-scope {
+  --res1: #0a879f;
+  --res2: #b5452c;
+  --res3: #8a4a96;
+}
+.dark .am-scope {
+  --res1: #1ea2ba;
+  --res2: #dc664e;
+  --res3: #9c70d8;
+}
+.am-scope .am-res {
+  width: 100%;
+  height: auto;
+  font-family: inherit;
+  overflow: visible;
+}
+.am-scope .am-res-g1 {
+  --c: var(--res1);
+}
+.am-scope .am-res-g2 {
+  --c: var(--res2);
+}
+.am-scope .am-res-g3 {
+  --c: var(--res3);
+}
+.am-scope .am-res-grid {
+  stroke: var(--rule);
+  stroke-width: 1;
+}
+.am-scope .am-res-baseline {
+  stroke: var(--ink-faint);
+  stroke-width: 1;
+}
+.am-scope .am-res-tick {
+  fill: var(--ink-soft);
+  font-size: 15px;
+  font-variant-numeric: tabular-nums;
+}
+.am-scope .am-res-axis-title {
+  fill: var(--ink-soft);
+  font-size: 15px;
+}
+.am-scope .am-res-ref {
+  stroke: var(--ink-faint);
+  stroke-width: 1.5;
+  stroke-dasharray: 6 5;
+}
+.am-scope .am-res-ref-label {
+  fill: var(--ink-soft);
+  font-size: 15px;
+}
+.am-scope .am-res-line {
+  fill: none;
+  stroke: var(--c);
+  stroke-width: 2.25;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+.am-scope .am-res-dot {
+  fill: var(--c);
+  stroke: var(--surf-halo);
+  stroke-width: 2;
+}
+.am-scope .am-res-hollow {
+  fill: var(--surf-halo);
+  stroke: var(--c);
+  stroke-width: 2;
+}
+.am-scope .am-res-leader {
+  stroke: var(--c);
+  stroke-width: 1;
+  opacity: 0.6;
+}
+.am-scope .am-res-label {
+  fill: var(--ink);
+  font-size: 16px;
+  font-weight: 700;
+}
+.am-scope .am-res-fd {
+  stroke: var(--ink-faint);
+  stroke-width: 1.25;
+  stroke-dasharray: 3 4;
+}
+.am-scope .am-res-fd-head {
+  fill: none;
+  stroke: var(--ink-faint);
+  stroke-width: 1.25;
+}
+.am-scope .am-res-fd-label {
+  fill: var(--ink-soft);
+  font-size: 15px;
+  font-variant-numeric: tabular-nums;
+}
+.am-scope .am-res-g1-text {
+  fill: var(--res1);
+  font-weight: 700;
+}
+.am-scope .am-res-g2-text {
+  fill: var(--res2);
+  font-weight: 700;
+}
+.am-scope .am-res-g3-text {
+  fill: var(--res3);
+  font-weight: 700;
+}
+.am-scope .am-res-pick {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 1.5;
+}
+.am-scope .am-res-pick-label {
+  fill: var(--ink);
+  font-size: 15px;
+  font-weight: 700;
+}
+
+/* Table 3: per-column shading, darker = higher score within the column (one hue) */
+.am-scope {
+  --heat-rgb: 19, 120, 138;
+}
+.dark .am-scope {
+  --heat-rgb: 124, 207, 220;
+}
+.am-scope td.am-heat {
+  background-color: rgba(var(--heat-rgb), calc(0.04 + var(--h) * 0.36));
+}

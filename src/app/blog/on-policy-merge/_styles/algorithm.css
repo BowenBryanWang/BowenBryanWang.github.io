@@ -1,0 +1,115 @@
+/* Algorithm 1: paper-style pseudocode. Uses the colour tokens from merge.css. */
+.am-scope .am-algo {
+  margin: 1.6em 0 2em;
+  border-top: 2px solid var(--ink);
+  border-bottom: 2px solid var(--ink);
+  font-size: 0.96em;
+  line-height: 1.6;
+}
+.am-scope .am-algo-head {
+  padding: 0.45em 0;
+  border-bottom: 1px solid var(--ink);
+}
+.am-scope .am-algo-io {
+  padding: 0.5em 0 0.2em;
+  color: var(--ink);
+}
+.am-scope .am-algo-kw {
+  font-weight: 700;
+}
+.am-scope .am-algo-body {
+  list-style: none;
+  margin: 0;
+  padding: 0.3em 0 0.6em;
+  counter-reset: am-algo-line;
+}
+.am-scope .am-algo-body > li {
+  counter-increment: am-algo-line;
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: 1.2em;
+  margin: 0.12em 0;
+  padding-left: calc(2.1em + var(--ind, 0) * 1.4em);
+}
+.am-scope .am-algo-body > li::before {
+  content: counter(am-algo-line);
+  position: absolute;
+  left: 0;
+  width: 1.3em;
+  text-align: right;
+  font-size: 0.85em;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-faint);
+}
+.am-scope .am-algo-code {
+  flex: 1 1 auto;
+  color: var(--ink);
+}
+.am-scope .am-algo-note {
+  margin-left: auto;
+  color: var(--ink-soft);
+  font-style: italic;
+  text-align: right;
+}
+.am-scope .am-algo-note a {
+  color: inherit;
+}
+@media (max-width: 640px) {
+  .am-scope .am-algo {
+    font-size: 0.92em;
+  }
+  .am-scope .am-algo-body > li {
+    padding-left: calc(1.8em + var(--ind, 0) * 0.9em);
+  }
+  .am-scope .am-algo-note {
+    flex-basis: 100%;
+    text-align: left;
+    margin-left: 0;
+    font-size: 0.9em;
+    line-height: 1.45;
+  }
+}
+
+/* Theorem / proposition blocks: statement only, a little wider than the text */
+@media (min-width: 768px) {
+  .am-scope .am-prose .am-callout {
+    margin-left: -1.5rem;
+    margin-right: -1.5rem;
+    padding: 1.1em 1.5em;
+  }
+}
+
+/* Section headings (SectionTitle.tsx) */
+.am-scope .am-h2 {
+  position: relative;
+  margin: 3.6rem 0 1.1rem;
+  font-size: 1.75rem;
+  line-height: 1.25;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+.am-scope .am-h2-anchor {
+  position: absolute;
+  right: 100%;
+  padding-right: 0.45em;
+  font-weight: 400;
+  color: var(--rule);
+  text-decoration: none;
+  transition: color 0.15s;
+}
+.am-scope .am-h2:hover .am-h2-anchor,
+.am-scope .am-h2-anchor:focus-visible {
+  color: var(--ink-faint);
+}
+@media (max-width: 640px) {
+  .am-scope .am-h2 {
+    margin-top: 2.8rem;
+    font-size: 1.45rem;
+  }
+  .am-scope .am-h2-anchor {
+    display: none;
+  }
+}
