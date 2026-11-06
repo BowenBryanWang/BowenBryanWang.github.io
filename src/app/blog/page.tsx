@@ -18,7 +18,7 @@ interface BlogPost {
 
 const posts: BlogPost[] = [
   {
-    slug: 'on-policy-merging',
+    slug: 'on-policy-merge',
     title: 'On-Policy Merge Stabilizes Multi-Task Reinforcement Learning',
     date: '2026-11-05',
     description:

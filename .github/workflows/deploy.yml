@@ -92,3 +92,6 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+        with:
+          # the site is ~560 MB (cli-gui-viewer); syncing it can exceed the 10-minute default
+          timeout: 1800000
