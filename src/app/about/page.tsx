@@ -12,7 +12,10 @@ import {
 } from '@/components/SocialIcons'
 import portraitImage from '@/images/portrait.jpg'
 
+import Apple from '@/images/logos/apple.svg'
 import HKU from '@/images/logos/hku.jpg'
+import MoonShot from '@/images/logos/moonshot.jpeg'
+import Qwen from '@/images/logos/qwen.png'
 import THU from '@/images/logos/thu.jpg'
 import image1 from '@/images/photos/image-1.jpg'
 import image2 from '@/images/photos/image-2.jpg'
@@ -26,7 +29,7 @@ import {
   technicalReports,
 } from '@/lib/articles'
 import { formatDate } from '@/lib/formatDate'
-import { use } from 'react'
+import { Fragment, use } from 'react'
 import MyTypewriter from './TypeWritter'
 
 function SocialLink({
@@ -134,50 +137,32 @@ function Role({ role }: { role: Role }) {
   let endDate = typeof role.end === 'string' ? role.end : role.end.dateTime
 
   return (
-    <li className="flex gap-4">
-      <div className="relative mt-1 flex h-12 w-12 flex-none items-center justify-center">
+    <li className="group relative pb-8 pl-14 last:pb-0">
+      {/* connector down to the next node; hidden on the last entry */}
+      <span
+        aria-hidden="true"
+        className="absolute bottom-2 left-5 top-12 w-px -translate-x-1/2 bg-rule group-last:hidden dark:bg-zinc-700"
+      />
+      <div className="absolute left-0 top-0 flex h-10 w-10 items-center justify-center">
         {role.logo ? (
           <Image
             src={role.logo}
             alt=""
             className={clsx(
-              'h-10 w-10 object-contain',
+              // multiply drops the white backgrounds baked into the jpg/png logos
+              'h-9 w-9 object-contain mix-blend-multiply dark:mix-blend-normal',
               role.logoClassName,
             )}
             unoptimized
           />
         ) : (
-          <BriefcaseIcon className="h-6 w-6 text-zinc-400 dark:text-zinc-500" />
+          <BriefcaseIcon className="h-5 w-5" />
         )}
       </div>
-      <dl className="flex flex-auto flex-wrap gap-x-2">
-        <dt className="sr-only">Company</dt>
-        <dd className="w-full flex-none text-sm font-medium text-zinc-900 dark:text-zinc-100">
-          {role.company}
-        </dd>
-        <dt className="sr-only">Role</dt>
-        <dd className="text-xs text-zinc-500 dark:text-zinc-400">
-          {role.title}
-        </dd>
-        {role.advisor && (
-          <>
-            <dt className="sr-only">Advisor</dt>
-            <dd className="w-full flex-none text-xs text-zinc-500 dark:text-zinc-400">
-              Advisor: {role.advisor}
-            </dd>
-          </>
-        )}
-        {role.description && (
-          <>
-            <dt className="sr-only">Description</dt>
-            <dd className="w-full flex-none text-xs text-zinc-500 dark:text-zinc-400">
-              {role.description}
-            </dd>
-          </>
-        )}
+      <dl>
         <dt className="sr-only">Date</dt>
         <dd
-          className="ml-auto text-xs text-zinc-400 dark:text-zinc-500"
+          className="text-xs text-zinc-400 dark:text-zinc-500"
           aria-label={
             startLabel === endLabel
               ? startLabel
@@ -194,9 +179,134 @@ function Role({ role }: { role: Role }) {
             </>
           )}
         </dd>
+        <dt className="sr-only">Company</dt>
+        <dd className="text-sm font-medium text-zinc-900 dark:text-zinc-100">
+          {role.company}
+        </dd>
+        <dt className="sr-only">Role</dt>
+        <dd className="text-xs text-zinc-600 dark:text-zinc-400">
+          {role.title}
+          {role.description && <> · {role.description}</>}
+        </dd>
+        {role.advisor && (
+          <>
+            <dt className="sr-only">Advisor</dt>
+            <dd className="text-xs text-zinc-500 dark:text-zinc-400">
+              Advisor: {role.advisor}
+            </dd>
+          </>
+        )}
       </dl>
     </li>
   )
+}
+
+function Timeline({ title, roles }: { title: string; roles: Array<Role> }) {
+  return (
+    <section>
+      <h2 className="border-b border-rule pb-2 text-3xl font-semibold tracking-tight text-zinc-900 dark:border-zinc-700 dark:text-zinc-100">
+        {title}
+      </h2>
+      <ol className="mt-8">
+        {roles.map((role, roleIndex) => (
+          <Role key={roleIndex} role={role} />
+        ))}
+      </ol>
+    </section>
+  )
+}
+
+const advisorLinkClass =
+  'underline decoration-zinc-300 underline-offset-2 dark:decoration-zinc-600'
+
+function Experiences() {
+  let experiences: Array<Role> = [
+    {
+      company: 'Apple AI/ML',
+      title: 'Research Scientist Intern',
+      logo: Apple,
+      logoClassName: 'p-1 dark:invert',
+      advisor: (
+        <>
+          Dongxu Li &amp;{' '}
+          <a
+            href="https://zhegan27.github.io/"
+            target="_blank"
+            rel="noreferrer"
+            className={advisorLinkClass}
+          >
+            Zhe Gan
+          </a>
+        </>
+      ),
+      description: 'Digital Agent Research',
+      start: '2026.07',
+      end: {
+        label: 'Present',
+        dateTime: new Date().getFullYear().toString(),
+      },
+    },
+    {
+      company: 'Qwen Team, Alibaba Group',
+      title: 'Research Scientist Intern',
+      logo: Qwen,
+      advisor: (
+        <>
+          <a
+            href="https://scholar.google.com/citations?user=3_zVvT0AAAAJ"
+            target="_blank"
+            rel="noreferrer"
+            className={advisorLinkClass}
+          >
+            Binyuan Hui
+          </a>{' '}
+          &amp;{' '}
+          <a
+            href="https://scholar.google.com/citations?user=xy6A44QAAAAJ"
+            target="_blank"
+            rel="noreferrer"
+            className={advisorLinkClass}
+          >
+            Junyang Lin
+          </a>
+        </>
+      ),
+      description: 'Post-training in CUA',
+      start: '2025.12',
+      end: '2026.07',
+    },
+    {
+      company: 'Moonshot AI',
+      title: 'Research Intern',
+      logo: MoonShot,
+      advisor: (
+        <>
+          <a
+            href="https://www.haohu.tech/"
+            target="_blank"
+            rel="noreferrer"
+            className={advisorLinkClass}
+          >
+            Hao Hu
+          </a>{' '}
+          &amp;{' '}
+          <a
+            href="https://floodsung.github.io/"
+            target="_blank"
+            rel="noreferrer"
+            className={advisorLinkClass}
+          >
+            Flood Sung
+          </a>
+        </>
+      ),
+      description: 'Post-training in CUA',
+      start: '2025.02',
+      end: '2025.12',
+    },
+  ]
+
+  return <Timeline title="Experiences" roles={experiences} />
 }
 
 function Education() {
@@ -205,6 +315,16 @@ function Education() {
       company: 'The University of Hong Kong',
       title: 'Ph.D. Student',
       logo: HKU,
+      advisor: (
+        <a
+          href="https://taoyds.github.io/"
+          target="_blank"
+          rel="noreferrer"
+          className={advisorLinkClass}
+        >
+          Tao Yu
+        </a>
+      ),
       start: '2024.09',
       end: {
         label: 'Present',
@@ -220,23 +340,7 @@ function Education() {
     },
   ]
 
-  return (
-    <div className="rounded-2xl border border-rule p-6 dark:border-zinc-700/40">
-      <h2 className="flex text-sm font-semibold text-zinc-900 dark:text-zinc-100">
-        <BriefcaseIcon className="h-6 w-6 flex-none" />
-        <span className="ml-3">Education</span>
-      </h2>
-      <ol className="mt-6 space-y-4">
-        {Education.map((role, roleIndex) => (
-          <Role key={roleIndex} role={role} />
-        ))}
-      </ol>
-      {/* <Button href="#" variant="secondary" className="group mt-6 w-full">
-        Download CV
-        <ArrowDownIcon className="h-4 w-4 stroke-zinc-400 transition group-active:stroke-zinc-600 dark:group-hover:stroke-zinc-50 dark:group-active:stroke-zinc-50" />
-      </Button> */}
-    </div>
-  )
+  return <Timeline title="Education" roles={Education} />
 }
 
 function BriefcaseIcon(props: React.ComponentPropsWithoutRef<'svg'>) {
@@ -291,7 +395,7 @@ function Article({ article }: { article: MyArticle }) {
       <Card.Authors author={article.author} />
       {/* <Card.Description>{article.description}</Card.Description> */}
       {article.link === 'True' ? (
-        <div className="relative z-10 mt-1 flex flex-wrap items-center gap-3 text-sm text-zinc-600 dark:text-zinc-400">
+        <div className="relative z-10 mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-zinc-600 dark:text-zinc-400">
           {article.publication}
           {hasAnyUrl && (
             <>
@@ -364,7 +468,7 @@ function TechnicalReportItem({ report }: { report: TechnicalReport }) {
     <Card className="md:col-span-3">
       <Card.Title>{report.title}</Card.Title>
       <Card.Authors author={report.authors} />
-      <div className="relative z-10 mt-1 flex flex-wrap items-center gap-3 text-sm text-zinc-600 dark:text-zinc-400">
+      <div className="relative z-10 mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-zinc-600 dark:text-zinc-400">
         <span className="text-sm font-semibold">{report.year}</span>
         <span>Technical Report</span>
         {report.url && (
@@ -382,6 +486,78 @@ function TechnicalReportItem({ report }: { report: TechnicalReport }) {
   )
 }
 
+/** Anchor id for a publication / report card, from the part of its
+ *  title before the colon (e.g. "CUA-Gym: ..." -> "pub-cua-gym"). */
+function anchorId(title: string) {
+  return (
+    'pub-' +
+    title
+      .split(':')[0]
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-|-$/g, '')
+  )
+}
+
+interface CiteRef {
+  n: number
+  label: string
+  href: string
+}
+
+const pubRef = (n: number, title: string): CiteRef => ({
+  n,
+  label: title,
+  href: `#${anchorId(title)}`,
+})
+
+const blogRef = (n: number, label: string, slug: string): CiteRef => ({
+  n,
+  label: `Blog: ${label}`,
+  href: `/blog/${slug}`,
+})
+
+/** Superscript citation, e.g. [1,2,3]; each number is its own link. */
+function Cite({ refs }: { refs: CiteRef[] }) {
+  return (
+    <sup className="ml-0.5 whitespace-nowrap text-[0.7em] leading-none text-zinc-400 dark:text-zinc-500">
+      [
+      {refs.map((r, i) => (
+        <Fragment key={r.n}>
+          {i > 0 && ','}
+          <a
+            href={r.href}
+            title={r.label}
+            aria-label={r.label}
+            className="text-amber-700 hover:underline dark:text-amber-300"
+          >
+            {r.n}
+          </a>
+        </Fragment>
+      ))}
+      ]
+    </sup>
+  )
+}
+
+/** Wraps a card so citations can scroll to it; flashes a tint when targeted. */
+function CiteTarget({
+  title,
+  children,
+}: {
+  title: string
+  children: React.ReactNode
+}) {
+  return (
+    <div
+      id={anchorId(title)}
+      className="-m-3 scroll-mt-28 rounded-xl p-3 transition-colors duration-700 target:bg-amber-100/60 dark:target:bg-amber-400/10"
+    >
+      {children}
+    </div>
+  )
+}
+
 export const metadata: Metadata = {
   title: 'About',
   description: 'Bryan Wang',
@@ -396,6 +572,21 @@ export default async function About() {
       article.title !==
         'Interaction Proxy Manager: Semantic Model Generation and Run-time Support for Reconstructing Ubiquitous User Interfaces of Mobile Services',
   )
+
+  // Superscript citations in the intro. Papers and reports scroll to their
+  // card below; blog refs open the post.
+  const cite = {
+    cuaGym: pubRef(1, 'CUA-Gym'),
+    openCua: pubRef(2, 'OpenCUA'),
+    osworld2: pubRef(3, 'OSWorld 2.0'),
+    arena: pubRef(4, 'Computer Agent Arena'),
+    blogOpm: blogRef(5, 'On-Policy Merge', 'on-policy-merge'),
+    blogMask: blogRef(6, 'Every Loss Mask Is a Reward', 'anticausal-masks'),
+    qwenCua: pubRef(7, 'Qwen-CUA'),
+    qwen35: pubRef(8, 'Qwen 3.5, Qwen 3.6, Qwen 3.7'),
+    kimiK25: pubRef(9, 'Kimi K2.5'),
+    kimiVl: pubRef(10, 'Kimi-VL Technical Report'),
+  }
 
   const newsItems: NewsItem[] = [
     {
@@ -501,9 +692,9 @@ export default async function About() {
           className="bg-grid-paper pointer-events-none absolute inset-0 -z-10"
         />
         <Container className="mt-8 sm:mt-16">
-          <div className="grid grid-cols-1 gap-y-16 lg:grid-cols-10 lg:grid-rows-[auto_1fr] lg:gap-y-12">
+          <div className="grid grid-cols-1 gap-y-8 sm:gap-y-16 lg:grid-cols-10 lg:grid-rows-[auto_1fr] lg:gap-y-12">
           <div className="lg:col-span-3 lg:pl-20">
-            <div className="max-w-md px-2.5 lg:max-w-none">
+            <div className="max-w-[10rem] px-2.5 sm:max-w-xs lg:max-w-none">
               <Image
                 src={portraitImage}
                 alt=""
@@ -516,10 +707,13 @@ export default async function About() {
             <h1 className="text-4xl font-bold tracking-tight text-zinc-800 dark:text-zinc-100 sm:text-5xl">
               Bowen Wang
             </h1>
-            <MyTypewriter text={['Computer-Use Agent', 'Agentic Models']} />
-            <div className="mt-6 space-y-7 text-base text-zinc-600 dark:text-zinc-400">
+            <MyTypewriter text={[
+                'Computer-Use Agents',
+                'Large-scale Agentic Reinforcement Learning',
+              ]} />
+            <div className="mt-6 space-y-6 text-base text-zinc-600 dark:text-zinc-400">
               <div>
-                I&apos;m a <p className="inline ordinal">2nd</p> year Ph.D.
+                I&apos;m a <p className="inline ordinal">3rd</p> year Ph.D.
                 student at&nbsp;
                 <a
                   href="https://www.hku.hk/"
@@ -534,7 +728,7 @@ export default async function About() {
                 >
                   Prof. Tao Yu
                 </a>
-                . Previously I got my bachlor&apos;s degree of Computer Science
+                . Previously I got my bachelor&apos;s degree of Computer Science
                 and Technology at&nbsp;
                 <a
                   href="https://www.tsinghua.edu.cn/"
@@ -545,20 +739,31 @@ export default async function About() {
                 &nbsp;
               </div>
               <div>
-                My research focuses on building universal digital agents. I have
-                primarily worked on computer-use agents (CUA), developing open
-                foundations through mid-training and post-training and building
-                open-sourced CUA models. My current research interests lie in
-                digital agentic models, particularly in post-training
-                methodologies for creating generalizable and intelligent agents
-                that can reliably operate across diverse digital environments
-                including coding, computer-use, terminal-use and more.
+                My research focuses on Digital Agents (Computer-Use Agents),
+                Large-Scale Agentic Reinforcement Learning, and Synthetic Data.
+                I am particularly interested in (1) post-training computer-use
+                agents to raise the ceiling of multimodal intelligence, so they
+                can take on real personal and professional work
+                <Cite
+                  refs={[cite.cuaGym, cite.openCua, cite.osworld2, cite.arena]}
+                />
+                ; (2) building frontier agentic RL infrastructure and
+                algorithms efficiently enough to support large-scale multi-task
+                RL
+                <Cite refs={[cite.blogOpm, cite.blogMask]} />; and
+                (3) using models to synthesize tasks and environments at scale
+                <Cite refs={[cite.cuaGym]} />, to break the data bottleneck in
+                frontier domains and raise the ceiling on recursive
+                self-improvement (RSI).
               </div>
               <div>
-                I hope to make computer-use a core capability of frontier
-                models. I believe universal digital agents (UDA) are a path
-                toward AGI. If you would like to talk about research or life,
-                feel free to reach out. I&apos;m open to opportunities.
+                I have primarily worked on computer-use agents (CUA), developing
+                open foundations through mid-training and post-training and
+                building open-sourced CUA models
+                <Cite
+                  refs={[cite.qwenCua, cite.qwen35, cite.kimiK25, cite.kimiVl]}
+                />
+                .
               </div>
             </div>
           </div>
@@ -624,7 +829,7 @@ export default async function About() {
           <h2 className="border-b border-rule pb-1.5 text-lg font-semibold tracking-tight text-zinc-900 dark:border-zinc-700 dark:text-zinc-100 sm:text-xl">
             What&apos;s New
           </h2>
-          <div className="no-scrollbar mt-3 h-40 overflow-y-auto sm:h-44">
+          <div className="no-scrollbar mt-3 sm:h-44 sm:overflow-y-auto">
             <ul className="list-disc space-y-1.5 pl-6 text-sm leading-6 text-zinc-700 marker:text-zinc-400 dark:text-zinc-300 dark:marker:text-zinc-500">
               {newsItems.map((item, index) => (
                 <li
@@ -643,8 +848,9 @@ export default async function About() {
       </Container>
       <Container className="mt-10 md:mt-16">
         <div className="mx-auto grid max-w-xl grid-cols-1 gap-y-20 lg:max-w-none lg:grid-cols-5">
-          <div className="col-span-2 space-y-6 lg:pr-8 xl:pr-12">
+          <div className="col-span-2 space-y-16 lg:pr-8 xl:pr-12">
             {/* <Newsletter /> */}
+            <Experiences />
             <Education />
           </div>
           <div className="col-span-3 flex flex-col gap-16">
@@ -654,10 +860,12 @@ export default async function About() {
               </h2>
               <div className="mt-8 flex flex-col gap-10">
                 {selectedPublications.map((article, index) => (
-                  <Article
+                  <CiteTarget
                     key={`${article.title}-${index}`}
-                    article={article}
-                  />
+                    title={article.title}
+                  >
+                    <Article article={article} />
+                  </CiteTarget>
                 ))}
               </div>
             </section>
@@ -668,10 +876,12 @@ export default async function About() {
               </h2>
               <div className="mt-8 flex flex-col gap-10">
                 {technicalReports.map((report, index) => (
-                  <TechnicalReportItem
+                  <CiteTarget
                     key={`${report.title}-${index}`}
-                    report={report}
-                  />
+                    title={report.title}
+                  >
+                    <TechnicalReportItem report={report} />
+                  </CiteTarget>
                 ))}
               </div>
             </section>

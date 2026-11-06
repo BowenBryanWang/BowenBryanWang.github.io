@@ -69,7 +69,7 @@ export default function Results() {
         </figure>
 
         {/* Table 1 */}
-        <figure className="col-span-12 lg:col-span-5 m-0">
+        <figure className="col-span-12 lg:col-span-5 m-0 overflow-x-auto">
           <table className="w-full text-[12.5px]">
             <thead>
               <tr className="border-b border-ink">

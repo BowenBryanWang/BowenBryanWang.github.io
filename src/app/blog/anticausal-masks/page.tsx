@@ -52,11 +52,8 @@ function Ref({ n }: { n: number }) {
 
 function PostHero() {
   return (
-    <header className="mb-8 mt-8">
-      <div className="font-mono text-[11px] uppercase tracking-[0.18em] text-zinc-500 dark:text-zinc-400">
-        Blog · {POST.date} · {POST.reading}
-      </div>
-      <h1 className="mt-3 text-4xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100 sm:text-[2.75rem] sm:leading-[1.15]">
+    <header className="mb-8 mt-4">
+      <h1 className="text-4xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100 sm:text-[2.75rem] sm:leading-[1.15]">
         {POST.title}
       </h1>
       <p className="mt-4 max-w-2xl text-base leading-relaxed text-zinc-600 dark:text-zinc-400">
@@ -104,7 +101,7 @@ function TableOfContents() {
 
 export default function AnticausalMasksPost() {
   return (
-    <Container className="mt-12 lg:mt-20">
+    <Container className="mt-6 lg:mt-10">
       <article className="mx-auto max-w-3xl">
 
         <PostHero />

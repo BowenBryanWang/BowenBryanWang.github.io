@@ -312,3 +312,15 @@
 .am-scope .am-refs li:target {
   background: var(--accent-soft);
 }
+
+/* Phones: a 760-wide figure squeezed to ~340px shrinks its labels to ~5px.
+   Keep a floor on the drawing width and let the figure scroll sideways. */
+@media (max-width: 640px) {
+  .am-scope figure {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .am-scope figure svg {
+    min-width: 600px;
+  }
+}

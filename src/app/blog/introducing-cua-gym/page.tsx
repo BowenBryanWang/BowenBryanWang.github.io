@@ -38,11 +38,8 @@ const POST = {
 
 function PostHero() {
   return (
-    <header className="mb-8 mt-8">
-      <div className="font-mono text-[11px] uppercase tracking-[0.18em] text-zinc-500 dark:text-zinc-400">
-        Blog · {POST.date} · {POST.reading}
-      </div>
-      <h1 className="mt-3 text-4xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100 sm:text-[2.75rem] sm:leading-[1.15]">
+    <header className="mb-8 mt-4">
+      <h1 className="text-4xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100 sm:text-[2.75rem] sm:leading-[1.15]">
         We Spent a Year Building Verifiable Training Tasks for GUI Agents.
         Here&rsquo;s What We Learned.
       </h1>
@@ -61,7 +58,7 @@ function PostHero() {
 
 export default function IntroducingCUAGymPost() {
   return (
-    <Container className="mt-12 lg:mt-20">
+    <Container className="mt-6 lg:mt-10">
       <article className="mx-auto max-w-4xl">
 
         <PostHero />

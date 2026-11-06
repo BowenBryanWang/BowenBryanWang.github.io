@@ -49,7 +49,7 @@ function Article({ article }: { article: MyArticle }) {
           <Card.Title>{article.title}</Card.Title>
           <Card.Authors author={article.author} />
           {article.link === 'True' ? (
-            <div className="relative z-10 mt-1 flex flex-wrap items-center gap-3 text-sm text-zinc-600 dark:text-zinc-400">
+            <div className="relative z-10 mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-zinc-600 dark:text-zinc-400">
               {article.publication}
               {hasAnyUrl && (
                 <>
@@ -124,7 +124,7 @@ function TechnicalReportItem({ report }: { report: TechnicalReport }) {
     <Card className="h-full">
       <Card.Title>{report.title}</Card.Title>
       <Card.Authors author={report.authors} />
-      <div className="relative z-10 mt-1 flex flex-wrap items-center gap-3 text-sm text-zinc-600 dark:text-zinc-400">
+      <div className="relative z-10 mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-zinc-600 dark:text-zinc-400">
         <span className="text-sm font-semibold">{report.year}</span>
         <span>Technical Report</span>
         {report.url && (

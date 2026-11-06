@@ -167,7 +167,7 @@ const COMPARISON: ComparisonRow[] = [
 
 function ComparisonTable() {
   return (
-    <figure className="my-10">
+    <figure className="my-10 overflow-x-auto">
       <table className="w-full text-[12.5px]">
         <thead>
           <tr className="border-b-2 border-ink">

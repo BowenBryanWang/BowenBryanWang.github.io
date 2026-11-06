@@ -21,7 +21,7 @@ const POST = {
 
 export default function CliAgentsGuiBenchmarkPost() {
   return (
-    <Container className="mt-12 lg:mt-20">
+    <Container className="mt-6 lg:mt-10">
       <article className="mx-auto max-w-6xl">
 
         <PostHero />
@@ -36,11 +36,8 @@ export default function CliAgentsGuiBenchmarkPost() {
 
 function PostHero() {
   return (
-    <header className="mt-8 mb-14">
-      <div className="text-[11px] font-mono uppercase tracking-[0.18em] text-zinc-500 dark:text-zinc-400">
-        Blog · {POST.date} · {POST.reading}
-      </div>
-      <h1 className="mt-3 text-4xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100 sm:text-[2.75rem] sm:leading-[1.15]">
+    <header className="mt-4 mb-14">
+      <h1 className="text-4xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100 sm:text-[2.75rem] sm:leading-[1.15]">
         {POST.title}
       </h1>
       <p className="mt-4 max-w-2xl text-base leading-relaxed text-zinc-600 dark:text-zinc-400">
