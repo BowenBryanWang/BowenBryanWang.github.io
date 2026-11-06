@@ -479,7 +479,7 @@
    the text column on large screens, stacked below that. */
 .am-scope .am-fig1-panels {
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: minmax(0, 1fr);
   gap: 1.5rem;
   align-items: center;
 }
@@ -500,7 +500,12 @@
   }
 }
 
-/* The landscape panel fits the screen instead of scrolling sideways. */
+/* The landscape panel fits the screen instead of scrolling sideways; on
+   phones only the timeline panel scrolls. */
+.am-scope .am-fig1-panels > div:first-child {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
 .am-scope .am-fit svg {
   min-width: 0;
   width: 100%;

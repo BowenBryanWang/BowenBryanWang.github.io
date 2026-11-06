@@ -335,7 +335,7 @@ function Trail({
 
 function Label({ at, dx = 0, dy = 0, anchor = 'start', cls = 'am-fig-ink', children }: { at: V2; dx?: number; dy?: number; anchor?: 'start' | 'middle' | 'end'; cls?: string; children: string }) {
   return (
-    <text x={at[0] + dx} y={at[1] + dy} textAnchor={anchor} className={`${cls} am-ls-label`} fontSize="15" fontWeight="700">
+    <text x={at[0] + dx} y={at[1] + dy} textAnchor={anchor} className={`${cls} am-ls-label`} fontSize="16" fontWeight="700">
       {children}
     </text>
   )
@@ -612,7 +612,7 @@ export default function Landscape3D() {
                 [s + LEN[key] - 0.02, 0],
               ])}
             />
-            <text x={16} y={32} className="am-fig-ink am-ls-label" fontSize="20" fontWeight="700">
+            <text x={16} y={32} className="am-fig-ink am-ls-label" fontSize="21" fontWeight="700">
               {NAMES[key]}
             </text>
             <Seg />
