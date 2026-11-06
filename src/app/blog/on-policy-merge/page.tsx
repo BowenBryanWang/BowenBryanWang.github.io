@@ -1540,6 +1540,47 @@ export default function OnPolicyMergingPost() {
               detail.
             </p>
             <p>
+              <span className="am-runin">An extension: grouped OPM.</span>{' '}
+              Frontier runs train dozens of domains, and the published evidence
+              on how they interact is mixed in a way that looks like structure
+              rather than noise. Reasoning domains tend to help each other:
+              RLVR across domains shows small mutual interference and synergy
+              among reasoning-intensive domains <Cite k="wang2026a" />, and math,
+              code and science benefit from cross-domain training while logic,
+              simulation and tabular reasoning need in-domain data{' '}
+              <Cite k="cheng2025" />. Other pairs conflict. Math-only GRPO on
+              Qwen2.5-7B lowers its code average from 67.46 to 29.59{' '}
+              <Cite k="li2025" />; the instruction-following specialist of{' '}
+              <CiteT k="wu2026" /> lowers BFCL from 63.9 to 54.1; models trained
+              on mixed-domain batches consistently underperform the best
+              domain experts <Cite k="cai2026" />; and in a Code → Math → QA →
+              writing curriculum, math falls from 66.49 to 57.66 during the later
+              stages while the full-model gradient cosine between math and QA
+              stays close to zero <Cite k="yang2026b" />. That last case is
+              interference a gradient cosine cannot see and a Fisher can.
+            </p>
+            <p>
+              This suggests a middle ground between one trainer for all domains
+              and one per domain. Group the domains that help each other into a
+              single multi-task trainer, so their transfer is kept inside the
+              group, and give groups that conflict separate trainers that meet
+              through the OPM merge. One group is multi-task RL; one domain per
+              group is OPM. Theorem 1 then holds between groups: each group is
+              protected from the others, and nothing is protected inside a
+              group. The quantities that decide the grouping are the ones OPM
+              already logs at every rendezvous, the visibility of one domain’s
+              update in another’s Fisher and the sign of the transfer term{' '}
+              <Tex tail=".">{T`T_j`}</Tex> Domains with positive{' '}
+              <Tex>{T`T_j`}</Tex> and high mutual visibility belong together; a
+              pair with negative <Tex>{T`T_j`}</Tex> and high visibility is the
+              one to split. Since a rendezvous is cheap, the grouping can change
+              during a run, for example by splitting a group when its members’
+              transfer terms turn negative. Grouping also cuts OPM’s memory cost
+              from one model copy per domain to one per group. We have not run
+              it yet; it is the natural next experiment once the main runs show
+              where the 9B domains fall.
+            </p>
+            <p>
               <span className="am-runin">Conclusion.</span> Combining RL domains
               is a choice of how often and in which geometry. Choosing often and
               in the on-policy KL geometry gives a merge with a closed form that
