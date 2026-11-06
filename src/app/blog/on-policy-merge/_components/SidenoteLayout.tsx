@@ -66,7 +66,7 @@ export default function SidenoteLayout() {
       for (let i = items.length - 1; i >= 0; i--) {
         const it = items[i]
         if (it.hidden) continue
-        const block = it.n.closest('details') ?? scope
+        const block: Element = it.n.closest('details') ?? scope
         let b = blockBottom.get(block)
         if (b === undefined) {
           b = block === scope ? scopeBottom : block.getBoundingClientRect().bottom
