@@ -964,35 +964,35 @@ export default function OnPolicyMergingPost() {
                   </tr>
                   <tr>
                     <td>Specialist, own domain</td>
-                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.00 }}>50.3</td>
-                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.00 }}>58.6</td>
-                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.03 }}>61.7</td>
-                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.00 }}>63.3</td>
-                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.00 }}>63.7</td>
-                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.89 }}>89.6</td>
-                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.74 }}>48.9</td>
-                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.44 }}>72.4</td>
-                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.26 }}>63.56</td>
+                    <td className="am-num">50.3</td>
+                    <td className="am-num">58.6</td>
+                    <td className="am-num">61.7</td>
+                    <td className="am-num">63.3</td>
+                    <td className="am-num">63.7</td>
+                    <td className="am-num">89.6</td>
+                    <td className="am-num">48.9</td>
+                    <td className="am-num">72.4</td>
+                    <td className="am-num">63.56</td>
                   </tr>
                   <tr>
                     <td>Task arithmetic, λ = 0.6</td>
-                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.67 }}>53.9</td>
-                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.39 }}>60.2</td>
+                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.62 }}>53.9</td>
+                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.26 }}>60.2</td>
                     <td className="am-num am-heat" style={{ ['--h' as string]: 0.79 }}>63.9</td>
-                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.13 }}>64.0</td>
-                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.03 }}>63.8</td>
-                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.51 }}>88.2</td>
+                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.02 }}>64.0</td>
+                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.00 }}>63.8</td>
+                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.58 }}>88.2</td>
                     <td className="am-num am-heat" style={{ ['--h' as string]: 0.02 }}>40.4</td>
                     <td className="am-num am-heat" style={{ ['--h' as string]: 0.00 }}>71.7</td>
-                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.18 }}>63.26</td>
+                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.20 }}>63.26</td>
                   </tr>
                   <tr>
                     <td>Mixed RL (released)</td>
-                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.44 }}>52.7</td>
-                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.34 }}>60.0</td>
+                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.36 }}>52.7</td>
+                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.21 }}>60.0</td>
                     <td className="am-num am-heat" style={{ ['--h' as string]: 0.00 }}>61.6</td>
-                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.14 }}>64.1</td>
-                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.16 }}>64.2</td>
+                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.05 }}>64.1</td>
+                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.14 }}>64.2</td>
                     <td className="am-num am-heat" style={{ ['--h' as string]: 0.00 }}>86.3</td>
                     <td className="am-num am-heat" style={{ ['--h' as string]: 0.00 }}>40.2</td>
                     <td className="am-num am-heat" style={{ ['--h' as string]: 0.00 }}>71.7</td>
@@ -1000,65 +1000,65 @@ export default function OnPolicyMergingPost() {
                   </tr>
                   <tr>
                     <td>MOPD (released)</td>
-                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.31 }}>52.0</td>
-                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.27 }}>59.7</td>
+                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.21 }}>52.0</td>
+                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.12 }}>59.7</td>
                     <td className="am-num am-heat" style={{ ['--h' as string]: 0.45 }}>62.9</td>
-                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.11 }}>63.9</td>
-                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.06 }}>63.9</td>
-                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.76 }}>89.1</td>
-                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.55 }}>46.7</td>
+                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.00 }}>63.9</td>
+                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.04 }}>63.9</td>
+                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.85 }}>89.1</td>
+                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.61 }}>46.7</td>
                     <td className="am-num am-heat" style={{ ['--h' as string]: 0.56 }}>72.6</td>
-                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.34 }}>63.84</td>
+                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.38 }}>63.84</td>
                   </tr>
                   <tr>
                     <td>Sum, λ = 1</td>
                     <td className="am-num am-heat" style={{ ['--h' as string]: 1.00 }}><strong>55.7</strong></td>
                     <td className="am-num am-heat" style={{ ['--h' as string]: 1.00 }}><strong>62.7</strong></td>
                     <td className="am-num am-heat" style={{ ['--h' as string]: 1.00 }}><strong>64.5</strong></td>
-                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.84 }}><strong>68.0</strong></td>
-                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.23 }}>64.4</td>
-                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.89 }}><strong>89.6</strong></td>
-                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.77 }}>49.3</td>
+                    <td className="am-num am-heat" style={{ ['--h' as string]: 1.00 }}><strong>68.0</strong></td>
+                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.21 }}>64.4</td>
+                    <td className="am-num am-heat" style={{ ['--h' as string]: 1.00 }}><strong>89.6</strong></td>
+                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.86 }}>49.3</td>
                     <td className="am-num am-heat" style={{ ['--h' as string]: 0.44 }}>72.4</td>
-                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.89 }}><strong>65.84</strong></td>
+                    <td className="am-num am-heat" style={{ ['--h' as string]: 1.00 }}><strong>65.84</strong></td>
                   </tr>
                   <tr>
                     <td>
                       <strong>OPM merge</strong>, 10 CG iterations
                     </td>
-                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.13 }}>51.0</td>
-                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.17 }}>59.3</td>
+                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.00 }}>51.0</td>
+                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.00 }}>59.3</td>
                     <td className="am-num am-heat" style={{ ['--h' as string]: 0.48 }}>63.0</td>
-                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.71 }}>67.3</td>
-                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.61 }}>65.6</td>
-                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.86 }}>89.5</td>
-                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.87 }}>50.5</td>
+                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.83 }}>67.3</td>
+                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.64 }}>65.6</td>
+                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.97 }}>89.5</td>
+                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.97 }}>50.5</td>
                     <td className="am-num am-heat" style={{ ['--h' as string]: 1.00 }}><strong>73.3</strong></td>
-                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.64 }}>64.94</td>
+                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.72 }}>64.94</td>
                   </tr>
                   <tr>
                     <td>OPM merge, 30 CG iterations</td>
-                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.67 }}>53.9</td>
-                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.29 }}>59.8</td>
+                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.62 }}>53.9</td>
+                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.15 }}>59.8</td>
                     <td className="am-num am-heat" style={{ ['--h' as string]: 0.41 }}>62.8</td>
-                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.61 }}>66.7</td>
-                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.94 }}><strong>66.6</strong></td>
-                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.73 }}>89.0</td>
-                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.90 }}><strong>50.8</strong></td>
+                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.68 }}>66.7</td>
+                    <td className="am-num am-heat" style={{ ['--h' as string]: 1.00 }}><strong>66.6</strong></td>
+                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.82 }}>89.0</td>
+                    <td className="am-num am-heat" style={{ ['--h' as string]: 1.00 }}><strong>50.8</strong></td>
                     <td className="am-num am-heat" style={{ ['--h' as string]: 0.81 }}>73.0</td>
-                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.75 }}>65.32</td>
+                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.84 }}>65.32</td>
                   </tr>
-                  <tr>
+                  <tr className="am-row-ref">
                     <td>OPM merge, 10 iterations, deployed in fp32</td>
-                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.56 }}>53.3</td>
-                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.90 }}>62.3</td>
-                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.86 }}>64.1</td>
-                    <td className="am-num am-heat" style={{ ['--h' as string]: 1.00 }}>68.9</td>
-                    <td className="am-num am-heat" style={{ ['--h' as string]: 1.00 }}>66.8</td>
-                    <td className="am-num am-heat" style={{ ['--h' as string]: 1.00 }}>90.0</td>
-                    <td className="am-num am-heat" style={{ ['--h' as string]: 1.00 }}>52.0</td>
-                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.50 }}>72.5</td>
-                    <td className="am-num am-heat" style={{ ['--h' as string]: 1.00 }}>66.24</td>
+                    <td className="am-num">53.3</td>
+                    <td className="am-num">62.3</td>
+                    <td className="am-num">64.1</td>
+                    <td className="am-num">68.9</td>
+                    <td className="am-num">66.8</td>
+                    <td className="am-num">90.0</td>
+                    <td className="am-num">52.0</td>
+                    <td className="am-num">72.5</td>
+                    <td className="am-num">66.24</td>
                   </tr>
                 </tbody>
               </table>
@@ -1066,10 +1066,10 @@ export default function OnPolicyMergingPost() {
             <p style={{ fontSize: '14px' }}>
               <strong>Table 3.</strong> One-shot merges of the five released
               Qwen3-4B specialists of <CiteT k="wu2026" />, mean over 32 samples
-              per prompt, in percent. Shading runs within each column, from
-              its lowest to its highest score; the base model is left
-              unshaded as the reference. Bold marks the best bf16 merge in each
-              column. All merged models are deployed in bf16
+              per prompt, in percent. Shading and bold compare the six bf16
+              merges within each column: darker is higher, bold is the best.
+              The base, specialist and fp32 rows are references and are left
+              unshaded. All merged models are deployed in bf16
               except the last row. The specialist row takes each benchmark from
               its own domain’s specialist. Run-to-run noise, measured by
               evaluating a bit-identical model twice, is about 0.3 points on the
