@@ -43,7 +43,7 @@ const POST = {
 // (the appendix has one), plus the introduction above the first of them.
 const TOC: TocItem[] = [
   { label: 'Introduction', href: '#introduction' },
-  { label: 'Four ways to get one model', href: '#map' },
+  { label: 'Five ways to get one model', href: '#map' },
   { label: 'On-Policy Merge', href: '#method' },
   { label: 'What the merge guarantees, and what it costs', href: '#theory' },
   { label: 'Making the merge cheap', href: '#engineering' },
@@ -175,8 +175,8 @@ export default function OnPolicyMergingPost() {
             </p>
             <p>
               <strong>On-Policy Merge</strong> (OPM) keeps the specialists’
-              independence and gives up only the distance. Each domain trains
-              on-policy on its own trainer, from a shared anchor. As soon as any
+              independence and gives up only the distance. Each domain has its
+              own on-policy trainer, started from a shared anchor. As soon as any
               trainer has drifted a fixed KL budget <Tex>{T`\delta`}</Tex> from
               the anchor, all of them merge: the anchor moves to the point whose
               policy on each domain is closest in KL to that domain’s trainer,
@@ -224,13 +224,12 @@ export default function OnPolicyMergingPost() {
           </div>
 
           {/* ------------------------------------------------------------ */}
-          <SectionTitle label="Four ways to get one model" id="map" />
+          <SectionTitle label="Five ways to get one model" id="map" />
           <div className="am-prose">
             <p>
               Every method for combining RL domains makes two choices: how often
               the domains’ progress is combined, and by what rule. Figure 1
-              shows the first choice; this section is about the second, and
-              Table 1 sets both side by side.
+              shows the first choice, and Table 1 sets both side by side.
             </p>
           </div>
 
@@ -347,6 +346,11 @@ export default function OnPolicyMergingPost() {
                 </tbody>
               </table>
             </div>
+            <p style={{ fontSize: '14px' }}>
+              <strong>Table 1.</strong> How often each method combines the
+              domains, in which geometry, whether reward is used when combining,
+              and what it pays.
+            </p>
             <p>
               The rules are related exactly, not by analogy (Appendix A,
               Table A2). Summing is OPM when the domains’ Fishers are mutually
@@ -354,8 +358,8 @@ export default function OnPolicyMergingPost() {
               natural-gradient step per trainer, the OPM merge is a natural
               policy gradient step on the summed objective{' '}
               <Cite k="kakade2001" />. Task arithmetic with a coefficient
-              between <Tex>{T`1/n`}</Tex> and 1 interpolates between the first
-              two presumptions. OPM measures, direction by direction, which one
+              between <Tex>{T`1/n`}</Tex> and 1 interpolates between the
+              presumptions of the average and the sum (Table 1). OPM measures, direction by direction, which one
               holds; Figure 2 shows what that looks like in weight space.
             </p>
           </div>
@@ -549,7 +553,7 @@ export default function OnPolicyMergingPost() {
               feature spans, the theorem is exact at every interval, not only to
               first order: after <Tex>r</Tex> rounds the anchor’s policy on
               domain <Tex>j</Tex> equals that of a run that trained domain{' '}
-              <Tex>j</Tex> alone for <Tex>{T`rK`}</Tex> steps. This holds for any
+              <Tex>j</Tex> alone for the same number of steps. This holds for any
               trainer optimizer whose update depends only on its own history,
               from gradient descent and momentum to natural gradient and Adam
               with persistent state.
@@ -598,14 +602,14 @@ export default function OnPolicyMergingPost() {
                 <li>
                   <strong>Idle protection.</strong> If trainer <Tex>j</Tex> makes
                   no progress, the anchor moves inside{' '}
-                  <Tex tail=".">{T`\operatorname{null}F_j`}</Tex>
+                  <Tex tail=".">{T`\operatorname{null}(F_j)`}</Tex>
                 </li>
                 <li>
                   <strong>The trigger is the trust region.</strong> For any
-                  optimizer, <Tex tail=",">{T`D_i\le\delta+\omega`}</Tex> with{' '}
-                  <Tex>{T`\omega`}</Tex> one step, and the exact merge has
-                  residual{' '}
-                  <Tex tail=".">{T`\sum_i\varepsilon_i\le\sum_iD_i\le n(\delta+\omega)`}</Tex>
+                  optimizer, <Tex tail=",">{T`D_i\le\delta_i+\omega`}</Tex> with{' '}
+                  <Tex>{T`\omega`}</Tex> the KL of one step, and the exact
+                  merge’s KL residuals <Tex>{T`\varepsilon_i`}</Tex> satisfy{' '}
+                  <Tex tail=".">{T`\sum_i\varepsilon_i\le\sum_iD_i\le\sum_i(\delta_i+\omega)`}</Tex>
                 </li>
               </ol>
             </div>
@@ -622,12 +626,12 @@ export default function OnPolicyMergingPost() {
               <Tex tail=",">{T`J_2=b\,(1-\sigma(s+p))`}</Tex> with domain 2’s
               share at 0.2. Multi-task SGD drives <Tex>{T`J_2`}</Tex> from 0.50
               down to 0.24, Adam in a rotated parameterisation drives it to{' '}
-              <Tex>{T`3\times10^{-4}`}</Tex> and leaves it there, and periodic
-              summing dips by 0.20. OPM’s <Tex>{T`J_2`}</Tex> trajectory is
-              identical, to <Tex tail=",">{T`2\times10^{-16}`}</Tex> for every
-              share and reward scale of domain 1. A cascade on the same problem
-              takes <Tex>{T`J_2`}</Tex> from 0.9987 to 0.0735 while domain 1
-              trains; keeping the idle trainer in an OPM merge keeps it at
+              <Tex>{T`3\times10^{-4}`}</Tex> and leaves it there, and under
+              periodic summing it dips by 0.20. OPM’s <Tex>{T`J_2`}</Tex>{' '}
+              trajectory is identical for every share and reward scale of
+              domain 1, to within <Tex tail=".">{T`2\times10^{-16}`}</Tex> A
+              cascade that trains domain 2 first takes <Tex>{T`J_2`}</Tex> from
+              0.9987 to 0.0735 while domain 1 then trains; keeping the idle trainer in an OPM merge keeps it at
               0.9987.
             </p>
             <p>
@@ -649,8 +653,8 @@ export default function OnPolicyMergingPost() {
                 convergence exponent is about <Tex>n</Tex> times OPM’s. With an
                 interior optimum the sum is better per round iff{' '}
                 <Tex>{T`x<2/(n+1)`}</Tex> and diverges iff{' '}
-                <Tex tail=";">{T`x>2/n`}</Tex> with a boundary optimum it is
-                better at every <Tex tail=".">x</Tex>
+                <Tex tail=";">{T`x>2/n`}</Tex> with a boundary optimum it is at
+                least as good at every <Tex tail=".">x</Tex>
               </p>
             </div>
             <p>
@@ -680,7 +684,7 @@ export default function OnPolicyMergingPost() {
               steps per task and 0.03–0.05 at 50. Under conflict OPM leads at
               every budget once both learning rates are tuned. At 50 steps it
               reaches 0.97 at its default rate, against 0.77–0.80 for the best
-              multi-task rate. No OPM run ever ended with a task below its
+              multi-task rate. No CG-merged OPM run ever ended with a task below its
               starting point, while multi-task RL, task arithmetic and summing
               left 20–37% of tasks below it.
             </p>
@@ -739,21 +743,23 @@ export default function OnPolicyMergingPost() {
               <span className="am-runin">
                 The Fisher-vector product is the cost.
               </span>{' '}
-              One exact product costs 6.9 GPU-milliseconds per generated token
+              One exact Fisher-vector product, with the true per-token Fisher
+              rather than the empirical one, costs 6.9 GPU-milliseconds per
+              generated token
               in fp32, about sixteen bf16 gradient passes. Roughly 40% goes to
               the finite-difference forward passes, 50% to the backward pass of
               the vector-Jacobian product and 7% to the vocabulary head.
               Communication and the <Tex>{T`n\times n`}</Tex> algebra are
               negligible. Keeping the CG vectors in CPU memory, a natural choice
               for vectors with nine billion entries, made each product about
-              three times slower: a float64 reduction over 2.35 billion entries
+              three times slower: a float64 reduction over 2.35 billion of those entries
               alone cost 31 seconds per product. At the Fisher budget we first
               planned, ten iterations made one merge take one to three hours,
               the time of tens of training steps.
             </p>
             <p>
               <span className="am-runin">Conjugate gradient overshoots.</span>{' '}
-              In a first test, CG started from the summed update made the true
+              In a first test, CG, started from the summed update, made the true
               held-out KL residual worse at each of its first two iterations
               (56, then 112, then 198 nats). The quadratic model was not the
               problem: along the cross-domain directions the locality ratio{' '}
@@ -870,12 +876,12 @@ export default function OnPolicyMergingPost() {
               Three iterations plus the line search cut the residual by 36%
               relative to the sum (13.35 to 8.57 nats) and by 72% relative to
               averaging, in about ten minutes: four Fisher-vector products and
-              four forward passes. The full CG step never beats a damped one,
+              four forward passes. The full CG step never beats the half step,
               five or more iterations make things worse, and a large
-              finite-difference step blows the residual up to 113–215 nats. This
-              guarded merge is the default in all our runs. When rendezvous are
-              frequent, the CG step can be dropped, leaving the sum plus the
-              line search. This is one test case, two domains on one model. The
+              finite-difference step of 0.3 blows the full step’s residual up to
+              113 nats after two iterations and 215 after three. This guarded merge is the default in all our training runs.
+              When rendezvous are frequent, the CG step can be dropped, leaving
+              a line search over the scale of the summed update. This is one test case, two domains on one model. The
               main runs log the residual for every <Tex>{T`\gamma`}</Tex> at
               every rendezvous.
             </p>
@@ -888,8 +894,8 @@ export default function OnPolicyMergingPost() {
               merge after one to ten CG iterations, for three damping factors{' '}
               <Tex>{T`\gamma`}</Tex> along the path from the summed update (data
               of Table 2). Dashed lines mark the sum (13.35 nats) and the
-              average (30.7); not merging at all leaves 125.3. Every damped step
-              stays below the sum, and the residual is lowest at three
+              average (30.7); not merging at all leaves 125.3. At the default
+              finite-difference step every damped step stays below the sum, and the residual is lowest at three
               iterations with <Tex tail=",">{T`\gamma=\tfrac12`}</Tex> the
               default. The full step degrades after two iterations, and a
               finite-difference step of 0.3 pushes two of the three settings off
@@ -1099,7 +1105,7 @@ export default function OnPolicyMergingPost() {
               estimated first-order advantage on the reasoning domains is
               positive, 0.17 to 0.26 of each domain’s own gain, while the
               instruction-following and agent domains barely see the others’
-              updates, and there every merge ties. The KL residual bounds how
+              updates, and there the sum and the OPM merge tie. The KL residual bounds how
               much of each specialist’s own behaviour is lost. It does not
               predict reward.
             </p>
@@ -1309,7 +1315,8 @@ export default function OnPolicyMergingPost() {
               an interval of 1 against −0.21 at 50. The theory attributes this
               to calibration along shared directions, not to transfer through
               lossless ones, and part of it is unexplained (Appendix E).
-              Experiment E measures the same curve on the 9B model.
+              The merge-frequency experiment below measures the same curve on the
+              9B model.
             </p>
           </div>
           <div className="am-prose">
@@ -1320,8 +1327,8 @@ export default function OnPolicyMergingPost() {
                     <th>Rendezvous per run</th>
                     <th className="am-num">Mean</th>
                     <th className="am-num">Worst</th>
-                    <th className="am-num">In-domain benefit (T1)</th>
-                    <th className="am-num">Untrained domain (T2)</th>
+                    <th className="am-num">In-domain benefit</th>
+                    <th className="am-num">Untrained domain</th>
                     <th className="am-num">Merge cost</th>
                   </tr>
                 </thead>
@@ -1344,16 +1351,16 @@ export default function OnPolicyMergingPost() {
           </div>
           <Placeholder
             label="Figure 5 and Table 7"
-            status="pending experiment E"
+            status="pending frequency sweep"
           >
             <p>
-              The merge-frequency curve E. A4 with the trigger ceiling set for
+              The merge-frequency curve. A4 with the drift ceiling set for
               about 1, 4, 16 and 32 rendezvous at a fixed budget; the
               one-rendezvous end coincides with A2’s one-shot OPM merge.
               Horizontal axis: rendezvous per run (log scale). Vertical axes:
               mean and worst normalised score, with A1 and A2 as horizontal
-              bands. Table 7 adds in-domain benefit from other domains (T1), the
-              score on competitive code, which no arm trains on (T2), and merge
+              bands. Table 7 adds in-domain benefit from other domains, the
+              score on competitive code, which no arm trains on, and merge
               cost.
             </p>
           </Placeholder>
@@ -1372,7 +1379,7 @@ export default function OnPolicyMergingPost() {
               intervention to multi-task RL.
             </p>
             <p>
-              <span className="am-runin">Demo B: adding a skill.</span> At half
+              <span className="am-runin">Demo 1: adding a skill.</span> At half
               the budget, competitive code, a domain no arm has trained on, is
               added. OPM starts a code trainer from the current anchor at the
               next rendezvous; multi-task RL resumes with a re-mixed nine-domain
@@ -1383,7 +1390,7 @@ export default function OnPolicyMergingPost() {
               range is independent of theirs.
             </p>
           </div>
-          <Placeholder label="Figure 6 and Table 8" status="pending demo B">
+          <Placeholder label="Figure 6 and Table 8" status="pending demo 1">
             <p>
               Code score against rollouts after the branch point for A1 and A4,
               with the code specialist as a reference line; below it, the
@@ -1396,7 +1403,7 @@ export default function OnPolicyMergingPost() {
           <div className="am-prose">
             <p>
               <span className="am-runin">
-                Demo C: containing a broken domain.
+                Demo 2: containing a broken domain.
               </span>{' '}
               At 30% of the budget the tool-use reward is broken for a fixed
               window: any syntactically valid tool call is rewarded. Then it is
@@ -1409,12 +1416,12 @@ export default function OnPolicyMergingPost() {
               them per round.
             </p>
           </div>
-          <Placeholder label="Figure 7 and Table 9" status="pending demo C">
+          <Placeholder label="Figure 7 and Table 9" status="pending demo 2">
             <p>
               Per-domain scores over training for A1 and A4 with the fault
               window shaded, plus tool-call validity and response length. Table
               9: worst drop on another domain during the window and after
-              recovery; the rendezvous at which the guard flagged the tool-use
+              recovery; the rendezvous at which the diagnostics flagged the tool-use
               trainer; the effect of rolling back that trainer alone.
             </p>
           </Placeholder>
@@ -1461,12 +1468,13 @@ export default function OnPolicyMergingPost() {
             <p>
               <span className="am-runin">KL residual is not reward loss.</span>{' '}
               The sum has the largest KL residual of any merge and the best
-              benchmark mean. The exact identity behind this is that a return
-              change equals the reward-weighted log-likelihood ratio plus at
-              most the KL. To first order it is{' '}
+              benchmark mean at bf16. Behind this is an exact decomposition: a
+              return change is the reward-weighted log-likelihood ratio plus a
+              term bounded by the KL. To first order it is{' '}
               <Tex tail=",">{T`\rho\,\sigma\sqrt{2\varepsilon}`}</Tex> with{' '}
               <Tex>{T`\rho`}</Tex> the correlation between reward and the
-              log-ratio. A large residual costs little reward when{' '}
+              log-ratio, <Tex>{T`\sigma`}</Tex> the reward’s standard deviation
+              and <Tex>{T`\varepsilon`}</Tex> the KL residual. A large residual costs little reward when{' '}
               <Tex>{T`\rho\approx0`}</Tex> and helps when{' '}
               <Tex tail=".">{T`\rho>0`}</Tex> Pinsker-type bounds are vacuous
               above about 2 nats, while specialists drift 75–248 nats.
@@ -1475,10 +1483,10 @@ export default function OnPolicyMergingPost() {
               <span className="am-runin">When the sum beats OPM.</span> The sum
               wins exactly when domains help each other, and that can be
               measured per domain: how much of the others’ updates domain{' '}
-              <Tex>j</Tex>’s Fisher sees, and the sign of the transfer term{' '}
+              <Tex>j</Tex>’s Fisher sees (its visibility), and the sign of the transfer term{' '}
               <Tex tail=".">{T`T_j`}</Tex> The 4B reasoning domains are in this
               regime. The instruction-following and agent domains barely see
-              each other, so every merge ties. The toy’s conflict variants are
+              the others’ updates, so the sum and the OPM merge tie there. The toy’s conflict variants are
               the opposite regime, where OPM wins. Logging <Tex>{T`T_j`}</Tex>{' '}
               at each rendezvous tells a practitioner which regime a run is in.
             </p>
@@ -1503,14 +1511,15 @@ export default function OnPolicyMergingPost() {
               <span className="am-runin">Limitations.</span> The guarantees
               assume lossless rounds, and we have not shown that they exist at
               LLM scale. In the 4B merge the residual after 30 CG iterations is
-              still 15% of drift, and the reasoning domains overlap. The
+              still 16% of drift on held-out prompts, and the reasoning domains
+              overlap. The
               informative statements at realistic drift are second-order or
               about KL, not reward. The trajectory Fisher grows with tokens, so
               long-response domains get more weight in shared directions. OPM
               keeps one model copy per domain in memory. The Fisher is estimated
               from a subsample, and the evidence for the guarded merge comes
-              from one two-domain test. At one shot, a stale metric tied the
-              on-policy one on benchmarks. All results are at 4B and 9B on dense
+              from one two-domain test. In the one-shot merge, a stale metric
+              tied the on-policy one on benchmarks. All results are at 4B and 9B on dense
               models; mixture-of-experts models and larger scales are untested.
             </p>
             <p>
@@ -1550,8 +1559,8 @@ export default function OnPolicyMergingPost() {
               is guarded. Merged once at 4B, it beats task arithmetic and MOPD
               and loses to the plain sum, for reasons the theory predicts.
               Whether merging often closes that gap, and what OPM buys against
-              multi-task RL and MOPD at scale, is what the pending results above
-              settle.
+              multi-task RL and MOPD at scale, are what the pending results
+              above will settle.
             </p>
           </div>
 
