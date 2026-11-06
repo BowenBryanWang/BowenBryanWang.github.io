@@ -209,9 +209,9 @@ export default function OnPolicyMergingPost() {
               Merging five released 4B RL specialists once with the OPM rule,
               with no training and no student rollouts, beats task arithmetic
               by 1.7 points and the released MOPD model by 1.1 points on an
-              eight-benchmark mean. Plain summation still wins by 0.9, as the
-              theory predicts for math, science and code, which help each
-              other.
+              eight-benchmark mean. At the same bf16 precision, plain
+              summation still wins by 0.9, as the theory predicts for math,
+              science and code, which help each other.
             </p>
             <p>
               The rest of the post places OPM among the existing recipes,
@@ -421,6 +421,9 @@ export default function OnPolicyMergingPost() {
               </Line>
               <Line>
                 <K>until</K> the training budget is spent
+              </Line>
+              <Line note="a final rendezvous, so the last round’s updates are kept">
+                merge once more (lines 8–9), whatever the drifts
               </Line>
               <Line>
                 <K>return</K> <Tex>{T`\bar\theta`}</Tex>
@@ -1081,12 +1084,14 @@ export default function OnPolicyMergingPost() {
               48.9 for the instruction-following specialist itself, so it
               recovers 119% of the gap that task arithmetic leaves. Deployed in
               fp32 instead of bf16, the same merge gains another 1.30 ± 0.34
-              points.
+              points. Its 66.24 is above the bf16 sum’s 65.84, but that is not a
+              like-for-like comparison: we have not deployed the sum in fp32, so
+              the comparisons below are all at bf16.
             </p>
             <p>
-              <strong>Plain summation is the best one-shot merge.</strong> The
-              sum (<Tex tail=")">{T`\lambda=1`}</Tex> beats the OPM merge by
-              0.89 ± 0.36 points, mostly on AIME, even though its KL residual is
+              <strong>Plain summation is the best one-shot merge at equal precision.</strong>{' '}
+              Both deployed in bf16, the sum (<Tex tail=")">{T`\lambda=1`}</Tex>{' '}
+              beats the OPM merge by 0.89 ± 0.36 points, mostly on AIME, even though its KL residual is
               almost four times larger. This is Theorem 1 at work, not a failure
               of the metric. Math, science and code help each other, and the
               merged reasoning scores exceed every individual specialist. The

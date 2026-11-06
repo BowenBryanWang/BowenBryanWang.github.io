@@ -1436,11 +1436,7 @@ export default function Appendix() {
             −0.16; training one task changes another by −0.16), pos-soft (+0.21;
             +0.10), pos-strong (+0.50; +0.19), neg (−0.24; −0.19) and mixed
             (−0.19; −0.13). OPM uses an interval of 5 steps and 10 CG iterations
-            unless noted. Script of the first version:{' '}
-            <a href="/research/opm-toy/opm_toy.py">
-              /research/opm-toy/opm_toy.py
-            </a>
-            .
+            unless noted. The code will be released with the main runs.
           </p>
           <p>
             <span className="am-runin">Correction.</span> The previous version of
@@ -1889,7 +1885,7 @@ export default function Appendix() {
           <p>
             <span className="am-runin">KL residual is not reward loss.</span> The
             sum has the largest residual (1.19 of drift in-sample, up to 3.06 on
-            code) and the best one-shot mean. By Lemma 2 the return change is the
+            code) and the best one-shot mean among bf16 merges. By Lemma 2 the return change is the
             reward-weighted log-ratio plus at most the KL; to first order{' '}
             <Tex tail=",">{T`\rho\sigma\sqrt{2\varepsilon}`}</Tex> with the
             reward–log-ratio correlation <Tex>{T`\rho`}</Tex> estimated at 0.1–0.3
@@ -1902,7 +1898,7 @@ export default function Appendix() {
             regime map of B.8, aligned overlap with <Tex>{T`C_j>0`}</Tex> favours
             the sum. One-shot at 4B the reasoning domains are there, IF and agent
             are in the low-visibility regime where every merge ties, and the sum
-            is the best one-shot merge. The same release also shows the
+            is the best one-shot merge at equal (bf16) precision. The same release also shows the
             conflicting regime outside the merge: trained alone, the IF specialist
             lowers BFCL from 63.9 to 54.1, and the agent and code specialists lose
             about 2 points on AIME25 <Cite k="wu2026" />. Which regime each pair
