@@ -24,13 +24,14 @@ const posts: BlogPost[] = [
     description:
       'One on-policy RL trainer per domain, merged at the KL barycenter of their policies whenever one drifts too far. Why the merge decouples domains and stabilizes multi-task RL, what it costs, and how it compares with multi-task RL, cascade RL, merging after training and MOPD.',
   },
-  {
-    slug: 'anticausal-masks',
-    title: 'Every Loss Mask Is a Reward',
-    date: '2026-11-03',
-    description:
-      'A pre-registered research plan: masking truncated or dropped rollouts in agentic RL pays them the mean reward. The identity, when it reverses the gradient, and the experiments that would confirm or kill it.',
-  },
+  // hidden from the blog index
+  // {
+  //   slug: 'anticausal-masks',
+  //   title: 'Every Loss Mask Is a Reward',
+  //   date: '2026-11-03',
+  //   description:
+  //     'A pre-registered research plan: masking truncated or dropped rollouts in agentic RL pays them the mean reward. The identity, when it reverses the gradient, and the experiments that would confirm or kill it.',
+  // },
   // hidden — draft not ready for public
   // {
   //   slug: 'cli-agents-gui-benchmark',
