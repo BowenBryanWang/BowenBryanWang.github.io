@@ -125,7 +125,3 @@
 .am-scope td.am-heat {
   background-color: rgba(var(--heat-rgb), calc(0.04 + var(--h) * 0.36));
 }
-/* Table 3: the fp32 row is a reference at a different precision */
-.am-scope tr.am-row-ref td {
-  border-top: 1.5px solid var(--ink-faint);
-}
