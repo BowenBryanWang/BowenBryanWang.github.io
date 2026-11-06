@@ -7,10 +7,10 @@ import { Layout } from '@/components/Layout'
 import '@/styles/tailwind.css'
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://bowenwang.me'),
   title: {
-    template: '%s - Bryan Wang',
-    default:
-      'Homepage - Bryan Wang',
+    template: '%s - Bowen Wang',
+    default: 'Bowen Wang',
   },
   description:
     '',
