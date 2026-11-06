@@ -263,6 +263,7 @@ function Avatar({
 }
 
 export function Header() {
+  const isBlogPost = /^\/blog\/[^/]+/.test(usePathname() ?? '')
   let isHomePage = usePathname() === '/'
 
   let headerRef = useRef<React.ElementRef<'div'>>(null)
@@ -431,7 +432,16 @@ export function Header() {
             }}
           >
             <div className="relative flex gap-4">
-              <div className="flex flex-1" />
+              <div className="flex flex-1 items-center">
+                {isBlogPost && (
+                  <Link
+                    href="/blog"
+                    className="pointer-events-auto text-sm text-zinc-500 transition hover:text-amber-700 dark:text-zinc-400 dark:hover:text-amber-300"
+                  >
+                    ← All posts
+                  </Link>
+                )}
+              </div>
               <div className="flex flex-1 justify-end md:justify-center">
                 <MobileNavigation className="pointer-events-auto md:hidden" />
                 <DesktopNavigation className="pointer-events-auto hidden md:block" />

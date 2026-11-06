@@ -1,0 +1,805 @@
+/* "On-Policy Merge" — page styles, scoped to `.am-scope` so the
+   tokens do not leak into the rest of the site. Typography inherits the
+   global personal-site font stack. Dark mode overrides the ink tokens. */
+
+@import 'katex/dist/katex.min.css';
+
+.am-scope {
+  --ink: #1b1816;
+  --ink-soft: #5c5651;
+  --ink-faint: #9c948a;
+  --rule: #e4ddcd;
+  --paper-deep: #f4f1ea;
+  --accent: #862d1a;
+  --accent-soft: rgba(134, 45, 26, 0.08);
+  --forest: #1f4e37;
+  --forest-soft: rgba(31, 78, 55, 0.08);
+  --indigo: #2f4a8a;
+  --ochre: #9a6a12;
+  --plum: #7b3a78;
+  --teal: #13788a;
+  --surf-hi: #f8f4ec;
+  --surf-lo: #9c8f79;
+  --surf-grid: rgba(120, 108, 90, 0.28);
+  --surf-halo: #fdfbf5;
+
+  font-family: inherit;
+  font-size: 16px;
+  line-height: 1.62;
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+.dark .am-scope {
+  --ink: #ece7df;
+  --ink-soft: #b8b1a7;
+  --ink-faint: #7f786f;
+  --rule: #3a3530;
+  --paper-deep: #1c1a18;
+  --accent: #e0a08a;
+  --accent-soft: rgba(224, 160, 138, 0.12);
+  --forest: #8ccaa6;
+  --forest-soft: rgba(140, 202, 166, 0.12);
+  --indigo: #9fb6ee;
+  --ochre: #e0b860;
+  --plum: #dba2d6;
+  --teal: #7ccfdc;
+  --surf-hi: #57514a;
+  --surf-lo: #161412;
+  --surf-grid: rgba(236, 231, 223, 0.13);
+  --surf-halo: #000;
+}
+
+.am-scope ::selection {
+  background-color: var(--accent-soft);
+}
+
+.am-scope .am-prose {
+  color: var(--ink-soft);
+  font-size: 16px;
+  line-height: 1.75;
+}
+.am-scope .am-prose p {
+  margin-bottom: 1.1em;
+}
+.am-scope .am-prose p:last-child {
+  margin-bottom: 0;
+}
+.am-scope .am-prose strong {
+  color: var(--ink);
+  font-weight: 600;
+}
+.am-scope .am-prose em {
+  font-style: italic;
+  color: var(--ink);
+}
+.am-scope .am-prose a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+}
+.am-scope .am-prose a:hover {
+  text-decoration-thickness: 2px;
+}
+.am-scope .am-prose ul,
+.am-scope .am-prose ol {
+  margin: 0.4em 0 1.1em 1.4em;
+}
+.am-scope .am-prose ul {
+  list-style: disc;
+}
+.am-scope .am-prose ol {
+  list-style: decimal;
+}
+.am-scope .am-prose li {
+  margin-bottom: 0.45em;
+  padding-left: 0.2em;
+}
+.am-scope .am-prose li::marker {
+  color: var(--ink-faint);
+}
+.am-scope .am-prose h3 {
+  color: var(--ink);
+  font-size: 1.15rem;
+  font-weight: 600;
+  margin: 2em 0 0.7em;
+  letter-spacing: -0.005em;
+}
+.am-scope .am-prose h4 {
+  color: var(--ink);
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 1.6em 0 0.5em;
+}
+.am-scope .am-prose sup a {
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 600;
+}
+.am-scope .am-prose code {
+  font-family: Consolas, 'Cascadia Code', 'JetBrains Mono', 'SF Mono',
+    ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.86em;
+  background: var(--paper-deep);
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  padding: 0.08em 0.35em;
+  color: var(--ink);
+}
+
+/* Display math */
+.am-scope .am-display {
+  margin: 1.1em 0 1.3em;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 0.2em 0;
+}
+.am-scope .katex {
+  font-size: 1.04em;
+  color: var(--ink);
+}
+.am-scope .am-display .katex-display {
+  margin: 0;
+}
+
+/* Figures */
+.am-scope figure {
+  margin: 1.8em 0 2.2em;
+}
+.am-scope figure svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+.am-scope figcaption {
+  margin-top: 0.8em;
+  font-size: 13px;
+  line-height: 1.65;
+  color: var(--ink-soft);
+}
+.am-scope figcaption strong {
+  color: var(--ink);
+}
+.am-scope .am-fig-ink {
+  fill: var(--ink);
+}
+.am-scope .am-fig-soft {
+  fill: var(--ink-soft);
+}
+.am-scope .am-fig-faint {
+  fill: var(--ink-faint);
+}
+.am-scope .am-fig-rule {
+  stroke: var(--rule);
+}
+.am-scope .am-fig-accent {
+  fill: var(--accent);
+}
+.am-scope .am-fig-accent-stroke {
+  stroke: var(--accent);
+}
+.am-scope .am-fig-forest {
+  fill: var(--forest);
+}
+.am-scope .am-fig-forest-stroke {
+  stroke: var(--forest);
+}
+.am-scope .am-fig-axis {
+  stroke: var(--ink-faint);
+}
+.am-scope .am-fig-text {
+  fill: var(--ink-soft);
+  font-family: inherit;
+}
+
+/* Tables: wrapped in .am-table so wide tables scroll sideways on phones
+   instead of forcing the whole page to scroll. */
+.am-scope .am-table {
+  overflow-x: auto;
+  margin: 1.2em 0 1.6em;
+  -webkit-overflow-scrolling: touch;
+}
+.am-scope table {
+  width: 100%;
+  min-width: 560px;
+  border-collapse: collapse;
+  font-size: 14px;
+  line-height: 1.5;
+  margin: 0;
+}
+.am-scope th {
+  text-align: left;
+  font-weight: 600;
+  color: var(--ink);
+  border-bottom: 1.5px solid var(--ink);
+  padding: 0.5em 0.6em;
+  vertical-align: bottom;
+}
+.am-scope td {
+  border-bottom: 1px solid var(--rule);
+  padding: 0.55em 0.6em;
+  vertical-align: top;
+  color: var(--ink-soft);
+}
+.am-scope td strong {
+  color: var(--ink);
+}
+.am-scope .am-num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Callouts */
+.am-scope .am-callout {
+  border: 1px solid var(--rule);
+  border-left: 3px solid var(--accent);
+  background: var(--accent-soft);
+  padding: 1.1em 1.4em;
+  margin: 1.6em 0 2em;
+  border-radius: 6px;
+}
+.am-scope .am-callout.forest {
+  border-left-color: var(--forest);
+  background: var(--forest-soft);
+}
+.am-scope .am-callout .am-callout-label {
+  font-family: Consolas, 'Cascadia Code', 'JetBrains Mono', 'SF Mono',
+    ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 0.6em;
+  font-weight: 600;
+}
+.am-scope .am-callout.forest .am-callout-label {
+  color: var(--forest);
+}
+.am-scope .am-callout ol,
+.am-scope .am-callout ul {
+  margin-bottom: 0;
+}
+
+/* Collapsible detail */
+.am-scope details {
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  padding: 0.6em 1.1em;
+  margin: 1.2em 0 1.6em;
+  background: var(--paper-deep);
+}
+.am-scope details summary {
+  cursor: pointer;
+  color: var(--ink);
+  font-weight: 600;
+  font-size: 14.5px;
+  list-style: none;
+}
+.am-scope details summary::before {
+  content: '▸ ';
+  color: var(--accent);
+}
+.am-scope details summary::-webkit-details-marker {
+  display: none;
+}
+.am-scope details[open] > summary::before {
+  content: '▾ ';
+}
+.am-scope details[open] > summary {
+  margin-bottom: 0.6em;
+}
+
+/* Appendices: one collapsed <details> each, the heading as its summary. */
+.am-scope details.am-app {
+  border: 0;
+  border-top: 1px solid var(--rule);
+  border-radius: 0;
+  background: none;
+  padding: 0;
+  margin: 0;
+  scroll-margin-top: 6rem;
+}
+.am-scope details.am-app:last-of-type {
+  border-bottom: 1px solid var(--rule);
+}
+.am-scope details.am-app > summary {
+  display: flex;
+  align-items: baseline;
+  gap: 0.15em;
+  padding: 0.85em 0;
+  margin: 0;
+}
+.am-scope details.am-app > summary::before {
+  flex: none;
+  width: 1.1em;
+}
+.am-scope details.am-app > summary h3 {
+  margin: 0;
+}
+.am-scope details.am-app > summary:hover h3 {
+  color: var(--accent);
+}
+.am-scope details.am-app[open] > summary {
+  margin-bottom: 0.2em;
+}
+.am-scope details.am-app[open] {
+  padding-bottom: 1.2em;
+}
+
+/* Run-in labels, like "Experiment setup." */
+.am-scope .am-runin {
+  color: var(--ink);
+  font-weight: 700;
+}
+
+/* Section rule */
+.am-scope .am-hr {
+  border: 0;
+  border-top: 1px solid var(--rule);
+  margin: 3em 0 2.4em;
+}
+
+/* Status pill (draft notice) */
+.am-scope .am-pill {
+  display: inline-block;
+  font-family: Consolas, 'Cascadia Code', 'JetBrains Mono', 'SF Mono',
+    ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 10.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  padding: 0.25em 0.7em;
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  color: var(--ink-soft);
+  background: var(--paper-deep);
+}
+
+/* Extra series colours for the data figures */
+.am-scope .am-fig-indigo {
+  fill: var(--indigo);
+}
+.am-scope .am-fig-indigo-stroke {
+  stroke: var(--indigo);
+}
+.am-scope .am-fig-ochre {
+  fill: var(--ochre);
+}
+.am-scope .am-fig-ochre-stroke {
+  stroke: var(--ochre);
+}
+.am-scope .am-fig-ink-stroke {
+  stroke: var(--ink);
+}
+.am-scope .am-fig-soft-stroke {
+  stroke: var(--ink-soft);
+}
+.am-scope .am-fig-band {
+  fill: var(--forest-soft);
+}
+
+/* On narrow screens KaTeX pins equation numbers to the right edge, on top of
+   a scrolled equation. Let the number follow the equation instead. */
+@media (max-width: 640px) {
+  .am-scope .am-display .katex-display {
+    text-align: left;
+  }
+  .am-scope .am-display .katex-display > .katex > .katex-html > .tag {
+    position: relative;
+    margin-left: 1.5em;
+  }
+}
+
+/* Phones: a 760-wide figure squeezed to ~340px shrinks its labels to ~5px.
+   Keep a floor on the drawing width and let the figure scroll sideways. */
+@media (max-width: 640px) {
+  .am-scope figure {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .am-scope figure svg {
+    min-width: 600px;
+  }
+}
+
+/* Placeholders for results and figures that are not in yet. Deliberately
+   loud (dashed border, hatched fill, magenta label) so none survives into a
+   final version unnoticed. */
+.am-scope {
+  --todo: #b0127a;
+  --todo-soft: rgba(176, 18, 122, 0.06);
+}
+.dark .am-scope {
+  --todo: #f08ccf;
+  --todo-soft: rgba(240, 140, 207, 0.08);
+}
+.am-scope .am-placeholder {
+  border: 1.5px dashed var(--todo);
+  border-radius: 6px;
+  padding: 0.9em 1.2em;
+  margin: 1.4em 0 1.8em;
+  background: repeating-linear-gradient(
+    -45deg,
+    var(--todo-soft),
+    var(--todo-soft) 8px,
+    transparent 8px,
+    transparent 16px
+  );
+  font-size: 14.5px;
+  color: var(--ink-soft);
+}
+.am-scope .am-placeholder-label {
+  font-family: Consolas, 'Cascadia Code', 'JetBrains Mono', 'SF Mono',
+    ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--todo);
+  font-weight: 600;
+}
+.am-scope .am-placeholder-body {
+  margin-top: 0.5em;
+}
+.am-scope .am-placeholder-body p {
+  margin: 0.4em 0 0;
+}
+.am-scope .am-pending {
+  display: inline-block;
+  font-family: Consolas, 'Cascadia Code', 'JetBrains Mono', 'SF Mono',
+    ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.78em;
+  letter-spacing: 0.04em;
+  color: var(--todo);
+  border: 1px dashed var(--todo);
+  border-radius: 4px;
+  padding: 0 0.35em;
+  background: var(--todo-soft);
+  white-space: nowrap;
+}
+
+
+/* BibTeX block */
+.am-scope .am-bib {
+  font-family: Consolas, 'Cascadia Code', 'JetBrains Mono', 'SF Mono',
+    ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 12.5px;
+  line-height: 1.55;
+  background: var(--paper-deep);
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  padding: 0.9em 1.1em;
+  overflow-x: auto;
+  white-space: pre;
+  color: var(--ink);
+}
+
+
+/* Figure 1: the paradigm timeline and the landscape side by side, wider than
+   the text column on large screens, stacked below that. */
+.am-scope .am-fig1-panels {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+  align-items: center;
+}
+@media (min-width: 1024px) {
+  /* Up to 9rem into each side, never past the viewport (the text column is
+     768px and centred here). */
+  .am-scope .am-fig1 {
+    margin-left: calc(-1 * min(9rem, (100vw - 768px) / 2 - 1.5rem));
+    margin-right: calc(-1 * min(9rem, (100vw - 768px) / 2 - 1.5rem));
+  }
+  .am-scope .am-fig1-panels {
+    grid-template-columns: 1.08fr 1fr;
+  }
+  .am-scope .am-fig1 figcaption {
+    max-width: 48rem;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
+/* The landscape panel fits the screen instead of scrolling sideways. */
+.am-scope .am-fit svg {
+  min-width: 0;
+  width: 100%;
+}
+
+/* Figure 1, right panel: the shaded loss surface and its labels. */
+.am-scope .am-fig-plum {
+  fill: var(--plum);
+}
+.am-scope .am-fig-plum-stroke {
+  stroke: var(--plum);
+}
+.am-scope .am-fig-teal {
+  fill: var(--teal);
+}
+.am-scope .am-fig-teal-stroke {
+  stroke: var(--teal);
+}
+.am-scope .am-ls-grid {
+  stroke: var(--surf-grid);
+}
+.am-scope .am-ls-0 {
+  fill: var(--surf-hi);
+  fill: color-mix(in srgb, var(--surf-lo) 0%, var(--surf-hi));
+}
+.am-scope .am-ls-1 {
+  fill: var(--surf-hi);
+  fill: color-mix(in srgb, var(--surf-lo) 9%, var(--surf-hi));
+}
+.am-scope .am-ls-2 {
+  fill: var(--surf-hi);
+  fill: color-mix(in srgb, var(--surf-lo) 18%, var(--surf-hi));
+}
+.am-scope .am-ls-3 {
+  fill: var(--surf-hi);
+  fill: color-mix(in srgb, var(--surf-lo) 27%, var(--surf-hi));
+}
+.am-scope .am-ls-4 {
+  fill: var(--surf-hi);
+  fill: color-mix(in srgb, var(--surf-lo) 36%, var(--surf-hi));
+}
+.am-scope .am-ls-5 {
+  fill: var(--surf-hi);
+  fill: color-mix(in srgb, var(--surf-lo) 45%, var(--surf-hi));
+}
+.am-scope .am-ls-6 {
+  fill: var(--surf-hi);
+  fill: color-mix(in srgb, var(--surf-lo) 55%, var(--surf-hi));
+}
+.am-scope .am-ls-7 {
+  fill: var(--surf-hi);
+  fill: color-mix(in srgb, var(--surf-lo) 64%, var(--surf-hi));
+}
+.am-scope .am-ls-8 {
+  fill: var(--surf-hi);
+  fill: color-mix(in srgb, var(--surf-lo) 73%, var(--surf-hi));
+}
+.am-scope .am-ls-9 {
+  fill: var(--surf-hi);
+  fill: color-mix(in srgb, var(--surf-lo) 82%, var(--surf-hi));
+}
+.am-scope .am-ls-10 {
+  fill: var(--surf-hi);
+  fill: color-mix(in srgb, var(--surf-lo) 91%, var(--surf-hi));
+}
+.am-scope .am-ls-11 {
+  fill: var(--surf-hi);
+  fill: color-mix(in srgb, var(--surf-lo) 100%, var(--surf-hi));
+}
+.am-scope .am-ls-label {
+  paint-order: stroke;
+  stroke: var(--surf-halo);
+  stroke-width: 4px;
+  stroke-linejoin: round;
+}
+
+/* ------------------------------------------------------------------ */
+/* Citations as numbered sidenotes (Cite.tsx).                         */
+/* Narrow screens: the superscript toggles the note open below its     */
+/* line (checkbox hack, no JS). >= 1280px: the note sits in the right  */
+/* margin level with its line; SidenoteLayout.tsx nudges notes down so */
+/* they do not overlap.                                                */
+/* ------------------------------------------------------------------ */
+.am-scope .am-cite-t {
+  color: var(--ink);
+}
+.am-scope .am-sn {
+  cursor: pointer;
+}
+.am-scope .am-sn-toggle {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+.am-scope .am-sn-num,
+.am-scope .am-sn-sep {
+  color: var(--accent);
+  font-weight: 600;
+  font-size: 0.7em;
+  font-variant-numeric: tabular-nums;
+  line-height: 0;
+}
+.am-scope .am-sn-num {
+  padding: 0 0.08em 0 0.12em;
+}
+.am-scope .am-sn-toggle:focus-visible + .am-sn-num {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+  border-radius: 2px;
+}
+.am-scope .am-sn-note {
+  display: none;
+  font-size: 12.5px;
+  line-height: 1.5;
+  font-weight: 400;
+  font-style: normal;
+  letter-spacing: 0;
+  text-align: left;
+  text-transform: none;
+  color: var(--ink-soft);
+  cursor: auto;
+}
+.am-scope .am-sn-n {
+  color: var(--ink-faint);
+  font-variant-numeric: tabular-nums;
+}
+.am-scope .am-sn-full {
+  display: none;
+}
+.am-scope .am-sn-note .am-sn-title {
+  color: var(--ink);
+  text-decoration: underline;
+  text-decoration-color: var(--ink-faint);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+}
+.am-scope .am-sn-note .am-sn-title:hover {
+  color: var(--accent);
+  text-decoration-color: var(--accent);
+}
+.am-scope .am-sn-by {
+  color: var(--ink-faint);
+}
+
+@media (max-width: 1279.98px) {
+  .am-scope .am-sn-toggle:checked ~ .am-sn-note {
+    display: block;
+    margin: 0.35em 0 0.6em;
+    padding: 0.45em 0.8em;
+    border-left: 2px solid var(--accent);
+    border-radius: 0 4px 4px 0;
+    background: var(--paper-deep);
+    max-width: 100%;
+    overflow-wrap: anywhere;
+  }
+  .am-scope .am-sn-note .am-sn-full {
+    display: inline;
+  }
+  .am-scope .am-sn-note .am-sn-by {
+    display: none;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Three-column layout >= 1280px: TOC | text | sidenotes.              */
+/* The text column stays centred under the hero; the TOC and the notes */
+/* hang in the side gutters.                                            */
+/* ------------------------------------------------------------------ */
+.am-scope .am-toc {
+  display: none;
+}
+@media (min-width: 1280px) {
+  .am-scope {
+    --col: 720px;
+    --sn-w: 216px;
+    --sn-gap: 32px;
+    --toc-w: 196px;
+    --toc-gap: 44px;
+    position: relative;
+    max-width: var(--col);
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .am-scope .am-sn {
+    cursor: default;
+  }
+  /* Stays inline so its static position is the line it is cited on; the
+     absolute positioning blockifies it, so width applies. */
+  .am-scope .am-sn-note {
+    display: inline;
+    position: absolute;
+    left: calc(100% + var(--sn-gap));
+    width: var(--sn-w);
+    margin-top: 0.3em;
+    transition: color 0.15s;
+  }
+  .am-scope .am-sn:hover .am-sn-note,
+  .am-scope .am-sn-note:hover {
+    color: var(--ink);
+  }
+
+  .am-scope .am-toc {
+    display: block;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    right: calc(100% + var(--toc-gap));
+    width: var(--toc-w);
+  }
+  .am-scope .am-toc-compact {
+    display: none;
+  }
+
+  /* Figure 1 spans the text and sidenote columns. */
+  .am-scope .am-fig1 {
+    margin-left: 0;
+    margin-right: calc(-1 * (var(--sn-gap) + var(--sn-w)));
+  }
+  .am-scope .am-fig1 figcaption {
+    max-width: var(--col);
+    margin-left: 0;
+    margin-right: 0;
+  }
+}
+@media (min-width: 1440px) {
+  .am-scope {
+    --col: 768px;
+    --sn-w: 236px;
+    --sn-gap: 40px;
+    --toc-w: 216px;
+    --toc-gap: 52px;
+  }
+}
+
+/* TOC (SideToc.tsx) */
+.am-scope .am-toc-inner {
+  position: sticky;
+  top: 2.5rem;
+  max-height: calc(100vh - 5rem);
+  overflow-y: auto;
+  font-size: 13px;
+  line-height: 1.4;
+}
+.am-scope .am-toc ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.am-scope .am-toc li {
+  position: relative;
+  padding-left: 14px;
+  margin-bottom: 0.7em;
+}
+.am-scope .am-toc a {
+  color: var(--ink-faint);
+  text-decoration: none;
+  transition: color 0.15s;
+}
+.am-scope .am-toc a:hover {
+  color: var(--ink-soft);
+}
+.am-scope .am-toc li.is-active a {
+  color: var(--ink);
+  font-weight: 600;
+}
+.am-scope .am-toc li.is-active::before {
+  content: '';
+  position: absolute;
+  left: 2px;
+  top: 0.5em;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--ink);
+}
+.am-scope .am-toc-compact {
+  margin: 0 0 1.6em;
+  padding: 0.5em 1em;
+}
+.am-scope .am-toc-compact summary {
+  font-size: 13.5px;
+}
+.am-scope .am-toc-compact ul {
+  list-style: none;
+  margin: 0.2em 0 0.3em;
+  padding: 0;
+  font-size: 13.5px;
+  line-height: 1.45;
+}
+.am-scope .am-toc-compact li {
+  margin-bottom: 0.45em;
+}
+.am-scope .am-toc-compact a {
+  color: var(--ink-soft);
+  text-decoration: none;
+}
+.am-scope .am-toc-compact a:hover {
+  color: var(--accent);
+}

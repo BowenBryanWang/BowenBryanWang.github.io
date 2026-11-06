@@ -1,5 +1,4 @@
 import { type Metadata } from 'next'
-import Link from 'next/link'
 import { Fragment } from 'react'
 
 import { Container } from '@/components/Container'
@@ -24,14 +23,6 @@ export default function CliAgentsGuiBenchmarkPost() {
   return (
     <Container className="mt-12 lg:mt-20">
       <article className="mx-auto max-w-6xl">
-        <div className="text-[12px]">
-          <Link
-            href="/blog"
-            className="text-zinc-500 hover:text-amber-700 dark:text-zinc-400 dark:hover:text-amber-300"
-          >
-            ← All posts
-          </Link>
-        </div>
 
         <PostHero />
         <IntroWriting />

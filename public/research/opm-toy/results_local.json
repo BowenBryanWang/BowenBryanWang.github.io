@@ -1,0 +1,52 @@
+{
+ "rows": [
+  {
+   "K": 2,
+   "name": "Fisher merge (all rollouts)",
+   "captured": 0.7802087234342292,
+   "kl_spec": 0.011086359169705389
+  },
+  {
+   "K": 2,
+   "name": "average",
+   "captured": 0.15614223788033024,
+   "kl_spec": 0.020134600597288037
+  },
+  {
+   "K": 2,
+   "name": "off-policy distill, 1500 steps",
+   "captured": 0.9935465175454805,
+   "kl_spec": 0.00012456171586146839
+  },
+  {
+   "K": 2,
+   "name": "MOPD-style, 1500 steps",
+   "captured": 0.9933181907878245,
+   "kl_spec": 0.0001268767645539298
+  },
+  {
+   "K": 30,
+   "name": "Fisher merge (all rollouts)",
+   "captured": -0.3549987441380824,
+   "kl_spec": 12.245966808918787
+  },
+  {
+   "K": 30,
+   "name": "average",
+   "captured": 0.23369953387239137,
+   "kl_spec": 0.8456729224419316
+  },
+  {
+   "K": 30,
+   "name": "off-policy distill, 1500 steps",
+   "captured": 0.9951092030628199,
+   "kl_spec": 0.007178242528361302
+  },
+  {
+   "K": 30,
+   "name": "MOPD-style, 1500 steps",
+   "captured": 0.9993262136276886,
+   "kl_spec": 0.03815681019148791
+  }
+ ]
+}

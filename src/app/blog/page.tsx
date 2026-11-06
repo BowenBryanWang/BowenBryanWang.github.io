@@ -18,6 +18,13 @@ interface BlogPost {
 
 const posts: BlogPost[] = [
   {
+    slug: 'on-policy-merging',
+    title: 'On-Policy Merge Stabilizes Multi-Task Reinforcement Learning',
+    date: '2026-11-05',
+    description:
+      'One on-policy RL trainer per domain, merged at the KL barycenter of their policies whenever one drifts too far. Why the merge decouples domains and stabilizes multi-task RL, what it costs, and how it compares with multi-task RL, cascade RL, merging after training and MOPD.',
+  },
+  {
     slug: 'anticausal-masks',
     title: 'Every Loss Mask Is a Reward',
     date: '2026-11-03',
