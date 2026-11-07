@@ -1105,7 +1105,7 @@ export default function Appendix() {
             model holds, <Tex>{T`\kappa`}</Tex> 0.87–1.0. With a finite-difference
             step of 0.3, CG with the full step gave 112.7 nats after two
             iterations and 214.7 after three; with step 0.01 the numbers are those
-            of <a className="am-ref" href="#table-3">Table 3</a>. The per-trainer residuals at the chosen point (three
+            of <a className="am-ref" href="#table-2">Table 2</a>. The per-trainer residuals at the chosen point (three
             iterations, <Tex tail=")">{T`\gamma=\tfrac12`}</Tex> are 3.0 and 5.5
             nats, against 5.2 and 8.1 for the sum.
           </p>
@@ -1128,6 +1128,84 @@ export default function Appendix() {
             <Tex tail=",">{T`\gamma`}</Tex> CG iterations, tokens, wall-clock,{' '}
             <Tex tail=",">{T`\kappa`}</Tex> and <Tex tail=".">{T`T_j`}</Tex>
           </p>
+          <p>
+            <span className="am-runin" id="table-c1">Table C1.</span> The five
+            recipes as systems, for <Tex>n</Tex> domains. A training state is a
+            full copy of weights, master weights and optimizer moments, about 16
+            bytes per parameter.
+          </p>
+          <div className="am-table am-table-wide">
+            <table>
+              <thead>
+                <tr>
+                  <th>Recipe</th>
+                  <th>Training states</th>
+                  <th>Rollouts</th>
+                  <th>What a step waits for</th>
+                  <th>Optimizer per domain</th>
+                  <th>Changing or fixing one domain</th>
+                  <th>Extra cost</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Multi-task RL</td>
+                  <td>One.</td>
+                  <td>One shared pool; every batch mixes all domains.</td>
+                  <td>Every domain’s quota, so the slowest domain sets the pace.</td>
+                  <td>No: one optimizer state, one clip, one learning rate.</td>
+                  <td>Re-mix the quotas and keep training; a broken domain has already reached every weight.</td>
+                  <td>None.</td>
+                </tr>
+                <tr>
+                  <td>Cascade RL</td>
+                  <td>One.</td>
+                  <td>One domain at a time.</td>
+                  <td>The stage in progress.</td>
+                  <td>Per stage, not per domain.</td>
+                  <td>Add a stage; earlier domains are not held in place and can be forgotten.</td>
+                  <td>None.</td>
+                </tr>
+                <tr>
+                  <td>Merge-after</td>
+                  <td>
+                    <Tex tail=",">n</Tex> in parallel or in turn.
+                  </td>
+                  <td>One pool per specialist.</td>
+                  <td>Nothing until the single merge at the end.</td>
+                  <td>Yes.</td>
+                  <td>Retrain one specialist and merge again, from tens to hundreds of nats apart.</td>
+                  <td>One merge.</td>
+                </tr>
+                <tr>
+                  <td>MOPD</td>
+                  <td>
+                    <Tex>n</Tex> for the specialists, then one student while{' '}
+                    <Tex>n</Tex> teachers run inference.
+                  </td>
+                  <td>One pool per specialist, then a student pool sampling every domain.</td>
+                  <td>The specialists, then the student.</td>
+                  <td>During the specialist stage only.</td>
+                  <td>Retrain one specialist and distil again.</td>
+                  <td>A second rollout stage in every domain.</td>
+                </tr>
+                <tr>
+                  <td>
+                    <strong>OPM</strong>
+                  </td>
+                  <td>
+                    <Tex tail=",">n</Tex> which can share one training pool in
+                    turn (Making the merge cheap).
+                  </td>
+                  <td>One engine group per trainer, sized by rollout cost.</td>
+                  <td>Only the next rendezvous; units never wait for each other between rendezvous.</td>
+                  <td>Yes, throughout training.</td>
+                  <td>Start, retune or roll back one trainer at a rendezvous; the others carry on.</td>
+                  <td>A merge per rendezvous, about ten minutes at 9B.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </details>
 
         {/* ============================================================ */}
@@ -1344,7 +1422,7 @@ export default function Appendix() {
             0.95, responses up to 16,384 tokens, non-thinking mode, their scorers
             for each benchmark, and a local sandbox for LiveCodeBench. Our base,
             MOPD and IF-specialist IFBench scores (30.7 / 46.7 / 48.9) reproduce
-            the published 30.3 / 47.3 / 49.0. <a className="am-ref" href="#table-4">Table 4</a> reports AIME 2025 and 2026
+            the published 30.3 / 47.3 / 49.0. <a className="am-ref" href="#table-3">Table 3</a> reports AIME 2025 and 2026
             pooled, LiveCodeBench v6 only and a domain-balanced mean; the paired
             differences quoted with ± in this appendix are on the eight-benchmark
             mean of Wu et al., which weights AIME and LiveCodeBench twice. Our task-arithmetic point is
@@ -1916,7 +1994,7 @@ export default function Appendix() {
             precision. The same release also shows the
             conflicting regime outside the merge: in their evaluation, the IF
             specialist trained alone lowers BFCL from 63.9 to 54.1, and the agent and code specialists lose
-            about 2 points on AIME25 <Cite k="wu2026" />. <a className="am-ref" href="#table-7">Table 7</a> and <a className="am-ref" href="#fig-5">Figure 5</a>{' '}
+            about 2 points on AIME25 <Cite k="wu2026" />. <a className="am-ref" href="#table-6">Table 6</a> and <a className="am-ref" href="#fig-5">Figure 5</a>{' '}
             measure which regime each of the eight main domains falls in.
           </p>
           <p>

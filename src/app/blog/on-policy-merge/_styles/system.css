@@ -95,24 +95,16 @@
   }
 }
 
-/* Table 2: seven columns, a little wider than the text on desktop */
-.am-scope #table-2 table {
-  font-size: 14px;
-  min-width: 600px;
+/* Table C1 (Appendix C): seven columns of short sentences */
+.am-scope .am-table-wide table {
+  font-size: 13.5px;
+  min-width: 760px;
 }
-.am-scope #table-2 .am-c {
-  text-align: center;
+.am-scope .am-table-wide td {
+  vertical-align: top;
+  line-height: 1.45;
 }
-.am-scope #table-2 td:first-child,
-.am-scope #table-2 th:first-child {
+.am-scope .am-table-wide td:first-child {
   white-space: nowrap;
-}
-@media (min-width: 1024px) {
-  .am-scope #table-2 {
-    margin-left: -1.5rem;
-    margin-right: -1.5rem;
-  }
-}
-.am-scope #table-2 td {
-  white-space: nowrap;
+  font-weight: 600;
 }
