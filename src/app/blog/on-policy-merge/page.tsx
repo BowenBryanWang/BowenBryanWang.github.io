@@ -1156,7 +1156,12 @@ export default function OnPolicyMergingPost() {
               weights, fp32 master weights, two fp32 Adam moments and the
               gradient), 16 TB at a trillion parameters. Multi-task RL already
               pays this once, sharded across thousands of GPUs; OPM would pay it
-              once per trainer. Four choices bring it back close to one copy
+              once per trainer. That is a cost of training domains apart, not of
+              OPM alone: the recipe in recent frontier reports already trains a
+              specialist per domain before distilling them{' '}
+              <Cite k={['deepseek2026', 'kimi2026', 'ma2026']} />, which pays the
+              same <Tex>n</Tex> training states, and MOPD then keeps the{' '}
+              <Tex>n</Tex> teachers resident on top. Four choices bring it back close to one copy
               without changing the method. Asynchronous RL is bound by rollouts,
               so its training GPUs are often idle: one shared training pool can
               step the <Tex>n</Tex> trainers in turn and keep the idle trainers’
