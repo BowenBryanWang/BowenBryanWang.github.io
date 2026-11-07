@@ -240,7 +240,7 @@ export const REFS: Record<string, RefEntry> = {
   },
   wang2025: {
     cite: 'Wang et al.',
-    year: '2025',
+    year: '2025a',
     title: 'Nemotron-Cascade: Scaling Cascaded Reinforcement Learning for General-Purpose Reasoning Models',
     text: 'Boxin Wang, Chankyu Lee, Nayeon Lee, Sheng-Chieh Lin, Wenliang Dai, Yang Chen, Yangyi Chen, Zhuolin Yang, Zihan Liu, Mohammad Shoeybi, Bryan Catanzaro, Wei Ping. Nemotron-Cascade: Scaling Cascaded Reinforcement Learning for General-Purpose Reasoning Models. arXiv:2512.13607, 2025.',
     url: 'https://arxiv.org/abs/2512.13607',
@@ -321,6 +321,27 @@ export const REFS: Record<string, RefEntry> = {
     title: 'Local Conflict, Targeted Repair: A Perturbation Analysis of Multi-Domain RL',
     text: 'Lei Yang, Siyu Ding, Deyi Xiong. Local Conflict, Targeted Repair: A Perturbation Analysis of Multi-Domain RL. arXiv:2606.02398, 2026.',
     url: 'https://arxiv.org/abs/2606.02398',
+  },
+  schulman2025: {
+    cite: 'Schulman and Thinking Machines Lab',
+    year: '2025',
+    title: 'LoRA Without Regret',
+    text: 'John Schulman and Thinking Machines Lab. LoRA Without Regret. Thinking Machines Lab: Connectionism, September 2025.',
+    url: 'https://thinkingmachines.ai/blog/lora/',
+  },
+  wang2025b: {
+    cite: 'Wang et al.',
+    year: '2025b',
+    title: 'Beyond the 80/20 Rule: High-Entropy Minority Tokens Drive Effective Reinforcement Learning for LLM Reasoning',
+    text: 'Shenzhi Wang, Le Yu, et al. Beyond the 80/20 Rule: High-Entropy Minority Tokens Drive Effective Reinforcement Learning for LLM Reasoning. NeurIPS 2025. arXiv:2506.01939.',
+    url: 'https://arxiv.org/abs/2506.01939',
+  },
+  yao2025: {
+    cite: 'Yao et al.',
+    year: '2025',
+    title: 'Your Efficient RL Framework Secretly Brings You Off-Policy RL Training',
+    text: 'Feng Yao, Liyuan Liu, Dinghuai Zhang, Chengyu Dong, Jingbo Shang, Jianfeng Gao. Your Efficient RL Framework Secretly Brings You Off-Policy RL Training. 2025.',
+    url: 'https://fengyao.notion.site/off-policy-rl',
   },
   yu2024: {
     cite: 'Yu et al.',

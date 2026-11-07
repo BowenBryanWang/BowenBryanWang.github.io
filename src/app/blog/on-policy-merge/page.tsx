@@ -823,48 +823,73 @@ export default function OnPolicyMergingPost() {
           <SectionTitle label="Making the merge cheap" id="engineering" />
           <div className="am-prose">
             <p>
-              Formula (2) cannot be formed for a model with billions of
-              parameters, but it can be solved. Conjugate gradient needs only
-              Fisher-vector products <Cite k="martens2010" />. Each trainer
-              computes its own <Tex>{T`F_iv`}</Tex> on its own GPUs, at its own
-              weights, over its own cached rollouts, and one all-reduce per
-              iteration sums them. We profiled this on MiMo-V2.6-Distill-Qwen-9B{' '}
-              <Cite k="mimo2026" /> and found three things.
+              A merge is only worth having if it is cheap next to the training
+              it interrupts, at the scale frontier runs use: hundreds of billions
+              to trillions of parameters, mixture-of-experts layers, and
+              asynchronous rollouts corrected for training–inference mismatch.
+              This section gives the cost model, what we measured at 9B, the one
+              numerical trap we hit, and the levers we expect to matter at scale.
             </p>
             <p>
-              <span className="am-runin">
-                The Fisher-vector product is the cost.
-              </span>{' '}
-              One exact Fisher-vector product, with the true per-token Fisher
-              rather than the empirical one, costs 6.9 GPU-milliseconds per
-              generated token
-              in fp32, about sixteen bf16 gradient passes. Roughly 40% goes to
-              the finite-difference forward passes, 50% to the backward pass of
-              the vector-Jacobian product and 7% to the vocabulary head.
-              Communication and the <Tex>{T`n\times n`}</Tex> algebra are
-              negligible. Keeping the CG vectors in CPU memory, a natural choice
-              for vectors with nine billion entries, made each product about
-              three times slower: a float64 reduction over 2.35 billion of those entries
-              alone cost 31 seconds per product. At the Fisher budget we first
-              planned, ten iterations made one merge take one to three hours,
-              the time of tens of training steps.
+              <span className="am-runin">What a merge costs.</span> Formula (2)
+              cannot be formed for a large model, but it can be solved:
+              conjugate gradient (CG) needs only Fisher-vector products{' '}
+              <Cite k="martens2010" />. Each trainer computes its own{' '}
+              <Tex>{T`F_iv`}</Tex> on its own GPUs, at its own weights, over its
+              own cached rollouts, and one all-reduce per iteration sums them. A
+              rendezvous with <Tex>K</Tex> CG iterations and <Tex>L</Tex>{' '}
+              line-search candidates, on <Tex>{T`N_F`}</Tex> Fisher tokens per
+              trainer, every <Tex>S</Tex> training steps of{' '}
+              <Tex>{T`N_{\rm step}`}</Tex> tokens, adds the fraction
+            </p>
+            <Tex
+              display
+            >{T`\text{overhead}\;\approx\;\frac{(K\,c_{\rm FVP}+L\,c_{\rm fwd})\,N_F}{S\,N_{\rm step}}`}</Tex>
+            <p>
+              to training compute, with <Tex>{T`c_{\rm FVP}`}</Tex> and{' '}
+              <Tex>{T`c_{\rm fwd}`}</Tex> the cost per token of a
+              Fisher-vector product and a forward pass relative to one training
+              token. Two consequences follow. <Key>The compute ratio does not
+              depend on model size</Key>: products, forward passes and training
+              all scale with the active parameters, so a trillion-parameter
+              mixture-of-experts model pays the same fraction as a dense model
+              of its active size. <Key>Memory and communication scale with the
+              total parameters</Key> <Tex tail=".">P</Tex> CG keeps a few
+              fp32 vectors of size <Tex>P</Tex> per trainer, as much as the
+              training state itself at four vectors, and each iteration
+              all-reduces one of them across trainers: 4 TB per iteration at a
+              trillion parameters, seconds inside one cluster and impractical
+              between clusters.
+            </p>
+            <p>
+              <span className="am-runin">What we measured at 9B.</span> On
+              MiMo-V2.6-Distill-Qwen-9B <Cite k="mimo2026" /> the product
+              dominates. An exact product, with the true per-token Fisher rather
+              than the empirical one, in fp32 with finite differences in logit
+              space, costs 6.9 GPU-milliseconds per token,{' '}
+              <Tex>{T`c_{\rm FVP}\approx16`}</Tex> bf16 gradient passes: 40%
+              in the finite-difference forward passes, 50% in the backward pass
+              and 7% in the vocabulary head. Communication and the{' '}
+              <Tex>{T`n\times n`}</Tex> algebra were negligible on one node,
+              and keeping the CG vectors in CPU memory made each product three
+              times slower. With four products and four forward passes, the
+              guarded merge below takes about ten minutes, so{' '}
+              <Tex>{T`c_{\rm FVP}`}</Tex> is the term to attack.
             </p>
             <p>
               <span className="am-runin">Conjugate gradient overshoots.</span>{' '}
-              In a first test, CG, started from the summed update, made the true
-              held-out KL residual worse at each of its first two iterations
-              (56, then 112, then 198 nats). The quadratic model was not the
-              problem: along the cross-domain directions the locality ratio{' '}
-              <Tex tail=",">{T`\kappa`}</Tex> true KL over quadratic prediction,
-              stayed between 0.87 and 1.0. The problem is where CG looks. Its
-              first search directions lie in the Fisher’s stiffest
-              eigendirections, about <Tex>{T`10^7`}</Tex> times stiffer than
-              typical ones, where the KL saturates within roughly 0.3% of the
-              update norm. A finite-difference Fisher-vector product measures a
-              secant over its step, and over a saturating stretch the secant is
-              flatter than the local curvature. It underestimated the curvature
-              sixteen-fold at a logit step of 0.3 and by about 40% at 0.03, so
-              CG takes too long a step.
+              In a first test, CG started from the summed update made the true
+              held-out KL residual worse at each of its first two iterations. The
+              quadratic model was not the problem: along the cross-domain
+              directions the locality ratio <Tex>{T`\kappa`}</Tex> stayed
+              between 0.87 and 1.0. The problem is where CG looks. Its first
+              directions lie in the Fisher’s stiffest eigendirections, about{' '}
+              <Tex>{T`10^7`}</Tex> times stiffer than typical ones, where the KL
+              saturates within roughly 0.3% of the update norm. A
+              finite-difference product measures a secant over its step, and
+              over a saturating stretch the secant is flatter than the local
+              curvature: it underestimated the curvature sixteen-fold at a logit
+              step of 0.3 and by about 40% at 0.03, so CG stepped too far.
             </p>
             <p>
               <span className="am-runin">The fix is a guarded merge.</span> Use
@@ -971,11 +996,10 @@ export default function OnPolicyMergingPost() {
               four forward passes. The full CG step never beats the half step,
               five or more iterations make things worse, and a large
               finite-difference step of 0.3 blows the full step’s residual up to
-              113 nats after two iterations and 215 after three. This guarded merge is the default in all our training runs.
-              When rendezvous are frequent, the CG step can be dropped, leaving
-              a line search over the scale of the summed update. This is one test case, two domains on one model. The
-              main runs log the residual for every <Tex>{T`\gamma`}</Tex> at
-              every rendezvous.
+              113 nats after two iterations and 215 after three. This guarded
+              merge is the default in all our training runs. It is one test
+              case, two domains on one model, and the main runs log the residual
+              for every <Tex>{T`\gamma`}</Tex> at every rendezvous.
             </p>
           </div>
 
@@ -994,6 +1018,166 @@ export default function OnPolicyMergingPost() {
               the chart.
             </figcaption>
           </figure>
+          <div className="am-prose">
+            <p>
+              <span className="am-runin">Levers at frontier scale.</span> Four
+              of them act on the cost per product, the number of products, and
+              the memory a rendezvous needs. None is measured yet; the list at
+              the end of this section says what would settle each.
+            </p>
+            <ul>
+              <li>
+                <Key>Fewer tokens.</Key> The Fisher concentrates on uncertain
+                tokens. Per token its logit-space core,{' '}
+                <Tex tail=",">{T`\mathrm{diag}(p)-pp^\top`}</Tex> has trace{' '}
+                <Tex tail=",">{T`1-\sum_ap_a^2`}</Tex> which vanishes on
+                confident tokens, and in RL on reasoning traces only about a
+                fifth of tokens are high-entropy forks that carry most of the
+                learning signal <Cite k="wang2025b" />. Sampling tokens in
+                proportion to <Tex>{T`1-\sum_ap_a^2`}</Tex> and reweighting
+                keeps the estimate unbiased, and keeping only the top logits of
+                each token trims the vocabulary head. If the Fisher follows the
+                gradient’s 80/20 pattern, this alone cuts{' '}
+                <Tex>{T`c_{\rm FVP}N_F`}</Tex> several-fold.
+              </li>
+              <li>
+                <Key>Exact, lower-precision products.</Key> A Jacobian-vector
+                product followed by a vector-Jacobian product gives the exact
+                Gauss–Newton product with no finite-difference step, which
+                removes the secant bias behind the overshoot and turns the guard
+                from a necessity into a safety net. Running products in bf16
+                with fp32 accumulation, while the merge’s own arithmetic stays
+                in fp32 above the bf16 floor, cuts{' '}
+                <Tex>{T`c_{\rm FVP}`}</Tex> further. Forward-mode
+                differentiation through fused attention and expert kernels is
+                the engineering risk.
+              </li>
+              <li>
+                <Key>A subspace solve.</Key> Restricting the merge to the span
+                of the updates,{' '}
+                <Tex tail=",">{T`\theta^{+}=\bar\theta+\sum_kc_k\Delta_k`}</Tex>{' '}
+                turns (2) into an <Tex>{T`n\times n`}</Tex> system with entries{' '}
+                <Tex tail=".">{T`\sum_i\Delta_j^\top F_i\Delta_k`}</Tex> This
+                is task arithmetic with Fisher-optimal coefficients. Each trainer
+                computes <Tex>{T`F_i\Delta_k`}</Tex> for every{' '}
+                <Tex>k</Tex> on its own data, in parallel, streams the inner
+                products and sends <Tex>{T`n^2`}</Tex> numbers; splitting the
+                inner products by layer or by expert gives per-block
+                coefficients from the same products. It costs <Tex>n</Tex>{' '}
+                parallel products instead of <Tex>K</Tex> sequential ones, one
+                vector of memory, and no <Tex>P</Tex>-sized traffic beyond the
+                exchange of updates every merge needs, which is what makes
+                trainers in different clusters feasible. It is also a better
+                starting point for CG than the sum, and a rendezvous can
+                warm-start from the previous one.
+              </li>
+              <li>
+                <Key>Mixture-of-experts structure and memory.</Key> An expert’s
+                Fisher sums only over tokens routed to it, so where domains use
+                different experts their Fishers barely overlap and (2) reduces to
+                the sum block by block; the coupling, and the CG work, sit in
+                attention, embeddings, shared experts and the router. Routing
+                adds a locality condition: a merge that flips many top-
+                <Tex>k</Tex> choices leaves the quadratic regime, so the
+                fraction of flipped routes belongs next to <Tex>{T`\kappa`}</Tex>{' '}
+                among the per-rendezvous diagnostics. Memory is the larger
+                frontier cost: <Tex>n</Tex> trainers hold <Tex>n</Tex> training
+                states of about 16 bytes per parameter, 16 TB each at a trillion
+                parameters. Grouping domains (Discussion) divides it, and so
+                would low-rank trainers: each domain trains an adapter on the
+                shared anchor, and each rendezvous merges the adapters’ updates
+                in their span and folds the result into the anchor. LoRA matches
+                full fine-tuning in RL even at very low rank{' '}
+                <Cite k="schulman2025" />; whether the merge keeps its
+                guarantees under that restriction is open.
+              </li>
+            </ul>
+            <p>
+              <span className="am-runin">
+                Asynchronous RL and training–inference mismatch.
+              </span>{' '}
+              Frontier RL is asynchronous. Rollouts come from inference engines
+              running weights several steps old, often with different kernels
+              and precision, and the trainer corrects the gap with truncated
+              importance sampling <Cite k={['yao2025', 'ling2025']} />. This
+              touches the core of OPM, because the range property needs the
+              gradient and the Fisher under the same distribution. Two choices
+              keep it intact. First, <Key>compute the Fisher in logit space,
+              not from sampled scores</Key>: per token,{' '}
+              <Tex>{T`J_t^\top\big(\mathrm{diag}(p_t)-p_tp_t^\top\big)J_t`}</Tex>{' '}
+              under the trainer’s own recomputed distribution{' '}
+              <Tex tail=".">{T`p_t`}</Tex> The sampled action, which is where
+              staleness and mismatch enter, never appears, and the estimate is
+              centred by construction, since{' '}
+              <Tex>{T`\mathrm{diag}(p)-pp^\top`}</Tex> is the covariance of the
+              one-hot action under <Tex tail=".">p</Tex> A Fisher built from
+              sampled scores would need per-token importance weights and
+              explicit score centring, because the score has mean zero only
+              under the trainer’s own policy. What remains is a shift in which
+              histories are visited, of the size of the per-token KL between
+              rollout and trainer policies, which truncated prefix weights
+              absorb. Second, <Key>treat a rendezvous as one more policy
+              lag</Key>. Rollouts in flight at a merge become stale by the
+              merge’s displacement, and the importance weights the trainer
+              already applies handle them, provided the per-token KL a merge
+              introduces stays within the range those weights are tuned for.
+              That is a concrete reason to bound the merge per token. The same
+              logic hides the merge’s latency: solve it on a snapshot while the
+              trainers keep stepping, then add{' '}
+              <Tex>{T`\theta^{+}-\theta_{\rm snapshot}`}</Tex> to every
+              trainer, a correction a few steps stale, which asynchronous RL
+              already tolerates. One floor bounds all of this: casting an fp32
+              specialist to bf16 moves its policy by 25–40% of its RL drift
+              (Side findings), so triggers, residual targets and the guard must
+              sit above the mismatch of the serving stack.
+            </p>
+          </div>
+          <Placeholder label="Experiments to run" status="need experiment">
+            <ul>
+              <li>
+                【need experiment: cost baseline. One rendezvous at 9B and on
+                the largest MoE available: training-step time,{' '}
+                <Tex>{T`c_{\rm FVP}`}</Tex> for fp32 finite differences, bf16
+                and exact JVP–VJP, line-search time, peak memory of the CG
+                vectors; report the overhead formula’s terms.】
+              </li>
+              <li>
+                【need experiment: token subsampling. Keep 5, 10, 20 and 50% of
+                tokens sampled by <Tex tail=";">{T`1-\sum_ap_a^2`}</Tex> report
+                relative error of <Tex tail=",">{T`F_iv`}</Tex> the Table 2
+                residual and product time.】
+              </li>
+              <li>
+                【need experiment: subspace solve. Global, per-layer and
+                per-expert coefficients against the sum and guarded CG, on the
+                9B two-domain case and the 4B five-domain merge: residual,
+                benchmarks, GPU minutes; also as a CG warm start.】
+              </li>
+              <li>
+                【need experiment: exact Gauss–Newton products. Replace finite
+                differences with JVP–VJP; does CG still overshoot, and does the
+                guard still pick <Tex>{T`\gamma<1`}</Tex>?】
+              </li>
+              <li>
+                【need experiment: asynchronous fit. Per-token KL displacement of
+                each rendezvous against the run’s staleness and
+                training–inference KL; fraction of truncated importance weights
+                before and after a rendezvous; a snapshot merge applied 0, 2 and
+                5 steps late.】
+              </li>
+              <li>
+                【need experiment: MoE locality. Top-<Tex>k</Tex> routing flip
+                rate per merge against <Tex tail=";">{T`\kappa`}</Tex> Fisher
+                overlap between domains per expert.】
+              </li>
+              <li>
+                【need experiment: low-rank trainers. LoRA ranks 8, 32 and 128
+                with merges in the adapter span, against full-parameter OPM on
+                the frequency-sweep setup.】
+              </li>
+            </ul>
+          </Placeholder>
+
 
           {/* ------------------------------------------------------------ */}
           <SectionTitle
