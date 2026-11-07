@@ -12,9 +12,19 @@ interface BlockProps {
   children?: ReactNode
 }
 
+/** Anchors for every "Figure N" / "Table N" a placeholder stands in for. */
+function anchorsOf(label: ReactNode) {
+  if (typeof label !== 'string') return null
+  const ids = Array.from(label.matchAll(/(Figure|Table) ([A-Z]?\d+)/g)).map(
+    (m) => `${m[1] === 'Figure' ? 'fig' : 'table'}-${m[2].toLowerCase()}`,
+  )
+  return ids.map((id) => <span key={id} id={id} className="am-anchor" />)
+}
+
 export function Placeholder({ label, status, children }: BlockProps) {
   return (
     <div className="am-placeholder" role="note">
+      {anchorsOf(label)}
       <div className="am-placeholder-label">
         Placeholder · {label} · {status}
       </div>

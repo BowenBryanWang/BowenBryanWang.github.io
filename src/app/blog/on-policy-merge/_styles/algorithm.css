@@ -166,3 +166,30 @@
   color: var(--accent);
   font-weight: 700;
 }
+
+/* Internal cross-references (Appendix, Table, Figure, Theorem, Proposition, sections) */
+.am-scope a.am-ref {
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-style: dotted;
+  text-decoration-color: var(--ink-faint);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  transition: color 0.15s, text-decoration-color 0.15s;
+}
+.am-scope a.am-ref:hover {
+  color: var(--accent);
+  text-decoration-color: var(--accent);
+}
+.am-scope [id^='fig-'],
+.am-scope [id^='table-'],
+.am-scope [id^='thm-'],
+.am-scope [id^='prop-'],
+.am-scope [id^='app-'],
+.am-scope #why-meet-often {
+  scroll-margin-top: 6rem;
+}
+.am-scope .am-anchor {
+  display: block;
+  height: 0;
+}

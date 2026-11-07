@@ -123,12 +123,12 @@ export default function Appendix() {
               trainers agree on every history they share, and (2), the
               second-order version in logit space with Fishers at the trainers’
               endpoints, inherits the mixture only while per-context logit moves
-              stay of order one (B.6). ∎
+              stay of order one (<a className="am-ref" href="#app-b-6">B.6</a>). ∎
             </p>
           </details>
 
           <p>
-            <span className="am-runin">Table A1.</span> The displacement of the
+            <span className="am-runin" id="table-a1">Table A1.</span> The displacement of the
             shared model under each method.
           </p>
           <div className="am-table">
@@ -202,7 +202,7 @@ export default function Appendix() {
           </div>
 
           <p>
-            <span className="am-runin">Table A2.</span> Exact limits{' '}
+            <span className="am-runin" id="table-a2">Table A2.</span> Exact limits{' '}
             <Status s="T" />. Each row is a setting of OPM and what it becomes.
           </p>
           <div className="am-table">
@@ -254,7 +254,7 @@ export default function Appendix() {
                   <td>Cascade RL: multi-task RL with every share but one at 0</td>
                   <td>
                     Protection of idle domains; keeping them in an OPM merge gives
-                    a protected cascade (B.5)
+                    a protected cascade (<a className="am-ref" href="#app-b-5">B.5</a>)
                   </td>
                 </tr>
                 <tr>
@@ -292,7 +292,7 @@ export default function Appendix() {
               <Tex tail=",">{T`\sum_i(\mathrm{tok}_i/\mathrm{tok})\hat g_i`}</Tex>{' '}
               so <Tex>{T`c_i`}</Tex> is the token share. For natural-gradient
               trainers <Tex>{T`F_i\Delta_i=\eta F_iF_i^{+}g_i=\eta g_i`}</Tex> by
-              the range lemma (B.1), so{' '}
+              the range lemma (<a className="am-ref" href="#app-b-1">B.1</a>), so{' '}
               <Tex tail=".">{T`d^\star=\eta A^{+}\sum_ig_i`}</Tex> Orthogonal
               ranges give <Tex tail=",">{T`A^{+}=\sum_iF_i^{+}`}</Tex> so{' '}
               <Tex>{T`d^\star=\sum_jF_j^{+}F_j\Delta_j=\sum_j\Delta_j`}</Tex> for{' '}
@@ -313,7 +313,7 @@ export default function Appendix() {
             <h3>B. Theory: statements and proofs</h3>
           </summary>
 
-          <h4>B.1 Two lemmas</h4>
+          <h4 id="app-b-1">B.1 Two lemmas</h4>
           <p>
             <strong>Lemma 1 (range)</strong> <Status s="T" />.{' '}
             <Tex tail=".">{T`g_i(\theta)\in\operatorname{range}F_i(\theta)`}</Tex>{' '}
@@ -369,7 +369,7 @@ export default function Appendix() {
             </p>
           </details>
 
-          <h4>B.2 Decoupling</h4>
+          <h4 id="app-b-2">B.2 Decoupling</h4>
           <p>
             <strong>Pythagoras</strong> <Status s="T" />. For any PSD{' '}
             <Tex tail=",">{T`F_i`}</Tex> any <Tex>{T`\Delta_i`}</Tex> and any{' '}
@@ -520,7 +520,7 @@ export default function Appendix() {
             </p>
           </details>
 
-          <h4>B.3 KL-efficiency and the natural-gradient limit</h4>
+          <h4 id="app-b-3">B.3 KL-efficiency and the natural-gradient limit</h4>
           <p>
             <strong>KL-efficiency</strong> <Status s="T" />. (a) For any update{' '}
             <Tex tail=",">d</Tex>{' '}
@@ -592,7 +592,7 @@ export default function Appendix() {
             </p>
           </details>
 
-          <h4>B.4 The price</h4>
+          <h4 id="app-b-4">B.4 The price</h4>
           <p>
             <strong>Proposition 3</strong> <Status s="P" />, in the stated models.
             (A) <em>Amplification against averaging.</em> With <Tex>n</Tex>{' '}
@@ -654,7 +654,7 @@ export default function Appendix() {
             <p>
               (A) <Tex>K</Tex> gradient steps contract the error by{' '}
               <Tex tail=".">{T`(1-\eta f)^K`}</Tex> Identical trainers make OPM
-              the average (Table A2), error <Tex tail=";">{T`1-x`}</Tex> the sum
+              the average (<a className="am-ref" href="#table-a2">Table A2</a>), error <Tex tail=";">{T`1-x`}</Tex> the sum
               gives <Tex tail=".">{T`|1-nx|`}</Tex> For <Tex>{T`nx\le1`}</Tex> the
               sum is better since <Tex tail=";">{T`(n-1)x>0`}</Tex> for{' '}
               <Tex>{T`nx>1`}</Tex> it is better iff{' '}
@@ -685,7 +685,7 @@ export default function Appendix() {
             </p>
           </details>
 
-          <h4>B.5 Regression under multi-task RL; cascade forgetting</h4>
+          <h4 id="app-b-5">B.5 Regression under multi-task RL; cascade forgetting</h4>
           <p>
             <strong>Multi-task RL can regress a domain; OPM cannot in a lossless round</strong>{' '}
             <Status s="T" />. A multi-task RL step changes <Tex>{T`J_j`}</Tex> by{' '}
@@ -696,7 +696,7 @@ export default function Appendix() {
             <Tex tail=",">{T`J_2=b(1-\sigma(s+p))`}</Tex> <Tex>{T`J_2`}</Tex>{' '}
             falls at the origin under SGD iff <Tex tail=".">{T`c_1a>2c_2b`}</Tex> The Fisher
             ranges <Tex>{T`\operatorname{span}(1,0)`}</Tex> and{' '}
-            <Tex>{T`\operatorname{span}(1,1)`}</Tex> are independent, so Theorem 1
+            <Tex>{T`\operatorname{span}(1,1)`}</Tex> are independent, so <a className="am-ref" href="#thm-1">Theorem 1</a>
             applies to OPM. Numbers are in the main text.
           </p>
           <p>
@@ -718,7 +718,7 @@ export default function Appendix() {
             forward along it, which protection blocks.
           </p>
 
-          <h4>B.6 The trigger, locality and the choice of δ</h4>
+          <h4 id="app-b-6">B.6 The trigger, locality and the choice of δ</h4>
           <p>
             <strong>The trigger is a trust region</strong> <Status s="T" /> for
             (a) and (c), <Status s="P" /> second order for (b). Let rounds end
@@ -731,7 +731,7 @@ export default function Appendix() {
             because the old anchor is feasible. An inexact merge inherits this
             only if its candidate set contains a point with residual at most{' '}
             <Tex tail=";">{T`\sum_iD_i`}</Tex> the production merge guarantees
-            only “no worse than the sum” (Proposition 5). (b) On domain{' '}
+            only “no worse than the sum” (<a className="am-ref" href="#prop-5">Proposition 5</a>). (b) On domain{' '}
             <Tex>j</Tex> the new anchor is within{' '}
             <Tex>{T`\|d\|_{F_j}\le\sqrt{2\varepsilon^{(2)}_j}+\sqrt{2D^{(2)}_j}`}</Tex>{' '}
             of the old one. (c){' '}
@@ -801,7 +801,7 @@ export default function Appendix() {
             locality failures.
           </p>
 
-          <h4>B.7 MOPD</h4>
+          <h4 id="app-b-7">B.7 MOPD</h4>
           <p>
             <strong>Teacher ceiling (Proposition 4)</strong> <Status s="T" />. With{' '}
             <Tex tail=",">{T`L_i(\theta)=\mathrm{KL}(P^i_\theta\|P^i_{\theta_i})`}</Tex>{' '}
@@ -837,7 +837,7 @@ export default function Appendix() {
             forward passes for the line search.
           </p>
 
-          <h4>B.8 The transfer predictor and a regime map</h4>
+          <h4 id="app-b-8">B.8 The transfer predictor and a regime map</h4>
           <p>
             <strong>Transfer predictor</strong> <Status s="T" /> as an estimator,{' '}
             <Status s="C" /> as a predictor.{' '}
@@ -931,7 +931,7 @@ export default function Appendix() {
             best task-arithmetic coefficient for RL specialists stays near 1.
           </p>
 
-          <h4>B.9 What is not claimed</h4>
+          <h4 id="app-b-9">B.9 What is not claimed</h4>
           <ul>
             <li>
               No general rate advantage over well-tuned multi-task RL. OPM is
@@ -961,7 +961,7 @@ export default function Appendix() {
               shared directions.
             </li>
             <li>
-              Exact gradients and Fishers are assumed except in Proposition 5 and
+              Exact gradients and Fishers are assumed except in <a className="am-ref" href="#prop-5">Proposition 5</a> and
               the CG step criterion; the tabular rate is inherited from the
               discounted literature.
             </li>
@@ -973,7 +973,7 @@ export default function Appendix() {
           <summary>
             <h3>C. The merge solver and its cost</h3>
           </summary>
-          <p>
+          <p id="prop-5">
             <strong>Proposition 5 (the production merge)</strong> <Status s="T" />
             . Candidates are{' '}
             <Tex>{T`d(\gamma)=d_\Sigma+\gamma(x_k-d_\Sigma)`}</Tex>, with{' '}
@@ -994,7 +994,7 @@ export default function Appendix() {
             and silent about reward. Estimating{' '}
             <Tex>{T`\hat E(\gamma)-\hat E(0)`}</Tex> on the same rollouts shrinks{' '}
             <Tex tail=".">s</Tex> Adding a candidate on the anchor side would
-            restore the <Tex>{T`n(\delta+\omega)`}</Tex> bound of B.6.
+            restore the <Tex>{T`n(\delta+\omega)`}</Tex> bound of <a className="am-ref" href="#app-b-6">B.6</a>.
           </p>
           <p>
             <strong>When CG raises the true KL</strong> <Status s="T" /> for the
@@ -1105,7 +1105,7 @@ export default function Appendix() {
             model holds, <Tex>{T`\kappa`}</Tex> 0.87–1.0. With a finite-difference
             step of 0.3, CG with the full step gave 112.7 nats after two
             iterations and 214.7 after three; with step 0.01 the numbers are those
-            of Table 2. The per-trainer residuals at the chosen point (three
+            of <a className="am-ref" href="#table-2">Table 2</a>. The per-trainer residuals at the chosen point (three
             iterations, <Tex tail=")">{T`\gamma=\tfrac12`}</Tex> are 3.0 and 5.5
             nats, against 5.2 and 8.1 for the sum.
           </p>
@@ -1344,7 +1344,7 @@ export default function Appendix() {
             0.95, responses up to 16,384 tokens, non-thinking mode, their scorers
             for each benchmark, and a local sandbox for LiveCodeBench. Our base,
             MOPD and IF-specialist IFBench scores (30.7 / 46.7 / 48.9) reproduce
-            the published 30.3 / 47.3 / 49.0. Table 3 reports AIME 2025 and 2026
+            the published 30.3 / 47.3 / 49.0. <a className="am-ref" href="#table-3">Table 3</a> reports AIME 2025 and 2026
             pooled, LiveCodeBench v6 only and a domain-balanced mean; the paired
             differences quoted with ± in this appendix are on the eight-benchmark
             mean of Wu et al., which weights AIME and LiveCodeBench twice. Our task-arithmetic point is
@@ -1428,7 +1428,7 @@ export default function Appendix() {
           <p>
             About 330 B200 GPU-hours were logged for the merges, residual scoring
             and evaluation. Only bf16 checkpoints of the 8B specialists were
-            released, and bf16 rounding destroys their task vectors (Appendix G),
+            released, and bf16 rounding destroys their task vectors (<a className="am-ref" href="#app-g">Appendix G</a>),
             so we did not merge at 8B.
           </p>
         </details>
@@ -1560,7 +1560,7 @@ export default function Appendix() {
             sum −0.13 / +0.13 / +0.33 / −0.19 / −0.15 over the five variants;
             exact OPM −0.07 / −0.08 / −0.11 / −0.03 / −0.05; OPM CG-10 −0.01 /
             +0.04 / +0.19 / −0.03 / −0.01. OPM blocks positive transfer into idle
-            tasks, as Theorem 1 predicts. A task absent from the run receives
+            tasks, as <a className="am-ref" href="#thm-1">Theorem 1</a> predicts. A task absent from the run receives
             about as much transfer under OPM as under multi-task RL or the sum
             (pos-strong: +0.30, +0.24, +0.33). In a sweep of the interval at 50
             steps (pos-strong), idle-task transfer under exact OPM is +0.48 at an
@@ -1863,11 +1863,11 @@ export default function Appendix() {
             <span className="am-runin">Orthogonal is not independent.</span> At
             4B, global cosines between task vectors are at most 0.022 and mostly
             below 0.002, yet the off-diagonal interference index has median 0.122
-            and maximum 1.78 (Appendix D). Directions along the specialists’
+            and maximum 1.78 (<a className="am-ref" href="#app-d">Appendix D</a>). Directions along the specialists’
             updates carry 5,800 times the Fisher curvature of random directions of
             the same norm. Whether two domains interfere is a property of their
             Fishers’ overlap, which cosines do not measure; this is the coupling
-            table of B.2.
+            table of <a className="am-ref" href="#app-b-2">B.2</a>.
           </p>
           <p>
             <span className="am-runin">Sparsity is a bf16 artefact.</span> On
@@ -1909,14 +1909,14 @@ export default function Appendix() {
           </p>
           <p>
             <span className="am-runin">When the sum beats OPM.</span> In the
-            regime map of B.8, aligned overlap with <Tex>{T`C_j>0`}</Tex> favours
+            regime map of <a className="am-ref" href="#app-b-8">B.8</a>, aligned overlap with <Tex>{T`C_j>0`}</Tex> favours
             the sum. One-shot at 4B, the reasoning domains are in that regime and
             IF and agent in the low-visibility one, where the sum and the OPM
             merge tie; so the sum is the best one-shot merge at equal (bf16)
             precision. The same release also shows the
             conflicting regime outside the merge: in their evaluation, the IF
             specialist trained alone lowers BFCL from 63.9 to 54.1, and the agent and code specialists lose
-            about 2 points on AIME25 <Cite k="wu2026" />. Table 6 and Figure 4
+            about 2 points on AIME25 <Cite k="wu2026" />. <a className="am-ref" href="#table-6">Table 6</a> and <a className="am-ref" href="#fig-4">Figure 4</a>
             measure which regime each of the eight main domains falls in.
           </p>
           <p>
@@ -1960,10 +1960,10 @@ export default function Appendix() {
             the gradient need not lie in the Fisher’s range. FedFish derives a
             function-space average and applies it each round in supervised
             federated learning <Cite k="dhawan2024" />. <CiteT k="liu2026" /> show
-            that MOPD is Fisher merging to second order; B.7 adds the lossless
+            that MOPD is Fisher merging to second order; <a className="am-ref" href="#app-b-7">B.7</a> adds the lossless
             statement and which Fisher to use. M2A merges a math task vector into a
             software agent only along the null space of agent-critical activations{' '}
-            <Cite k="wang2026b" />, which is the intuition of Theorem 1 applied
+            <Cite k="wang2026b" />, which is the intuition of <a className="am-ref" href="#thm-1">Theorem 1</a> applied
             once.
           </p>
           <p>
@@ -1987,9 +1987,9 @@ export default function Appendix() {
             <Cite k={['li2020', 'karimireddy2020', 'wang2020']} />. For log-linear
             policies (<Tex tail=")">{T`M=0`}</Tex> OPM has no drift bias; otherwise
             lossless rounds still leave a floor proportional to{' '}
-            <Tex>{T`M(1+n\kappa_c)^2\eta KG^2`}</Tex> (B.4). Federated natural policy
+            <Tex>{T`M(1+n\kappa_c)^2\eta KG^2`}</Tex> (<a className="am-ref" href="#app-b-4">B.4</a>). Federated natural policy
             gradient for multi-task RL aggregates natural gradients for a common
-            objective <Cite k="yang2023" />; the tabular reduction in B.3 shows
+            objective <Cite k="yang2023" />; the tabular reduction in <a className="am-ref" href="#app-b-3">B.3</a> shows
             why the multi-task Fisher, not an average of directions, is needed
             when domains visit different states. Federated GRPO with plain
             averaging fell below local-only training under non-IID data{' '}
@@ -2003,7 +2003,7 @@ export default function Appendix() {
             <span className="am-runin">Policy optimisation.</span> The natural
             policy gradient <Cite k="kakade2001" /> and trust-region policy
             optimisation <Cite k="schulman2015" /> supply the geometry; the return
-            bound of B.6 is the standard trust-region argument applied to a merge
+            bound of <a className="am-ref" href="#app-b-6">B.6</a> is the standard trust-region argument applied to a merge
             residual. The limitations of the empirical Fisher{' '}
             <Cite k="kunstner2019" /> are why the metric has to be computed on the
             trainer’s own samples.

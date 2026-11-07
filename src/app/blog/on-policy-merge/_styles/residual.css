@@ -125,3 +125,10 @@
 .am-scope td.am-heat {
   background-color: rgba(var(--heat-rgb), calc(0.04 + var(--h) * 0.36));
 }
+
+/* Figure 3 at about body-text size */
+.am-scope .am-res {
+  display: block;
+  max-width: 560px;
+  margin: 0 auto;
+}
