@@ -921,78 +921,79 @@ export default function OnPolicyMergingPost() {
           <div className="am-prose">
             <p>
               <a className="am-ref" href="#table-2">Table 2</a> compares the
-              five recipes as systems rather than as optimizers. OPM pays in
-              training states and in merges; in return it is the only recipe
-              that keeps every domain’s optimizer separate during training and
-              lets one domain be added or rolled back without touching the
-              others.
+              five recipes as systems rather than as optimizers. OPM pays what
+              merge-after pays, a training state per domain, plus a merge at
+              every rendezvous. What it buys over merge-after is that the domains
+              meet throughout training, so the merged model never ends far from
+              any trainer, while each domain can still be changed or rolled back
+              on its own.
             </p>
             <div className="am-table" id="table-2">
               <table>
                 <thead>
                   <tr>
                     <th>Recipe</th>
-                    <th>Training states</th>
-                    <th>Rollout engines</th>
-                    <th>Waits for</th>
-                    <th>Own optimizer per domain</th>
-                    <th>Add or fix one domain</th>
+                    <th className="am-c">Training states</th>
+                    <th>Rollouts</th>
+                    <th>Syncs</th>
+                    <th className="am-c">Isolated optimizers</th>
+                    <th>Changing one domain</th>
                     <th>Extra cost</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr>
                     <td>Multi-task RL</td>
-                    <td>1</td>
-                    <td>one pool, mixed batches</td>
-                    <td>every domain’s quota, every step</td>
-                    <td>no</td>
-                    <td>re-mix the quotas; a broken domain reaches every weight</td>
+                    <td className="am-c">1</td>
+                    <td>one shared pool</td>
+                    <td>every step</td>
+                    <td className="am-c">✗</td>
+                    <td>re-mix all</td>
                     <td>none</td>
                   </tr>
                   <tr>
                     <td>Cascade RL</td>
-                    <td>1</td>
-                    <td>one domain at a time</td>
-                    <td>the stage in progress</td>
-                    <td>per stage</td>
-                    <td>a new stage, which forgets earlier ones</td>
+                    <td className="am-c">1</td>
+                    <td>one domain</td>
+                    <td>every stage</td>
+                    <td className="am-c">per stage</td>
+                    <td>new stage, forgets</td>
                     <td>none</td>
                   </tr>
                   <tr>
                     <td>Merge-after</td>
-                    <td>
+                    <td className="am-c">
                       <Tex>n</Tex>
                     </td>
-                    <td>one pool per specialist</td>
-                    <td>nothing until the end</td>
-                    <td>yes</td>
-                    <td>retrain one specialist, merge again</td>
+                    <td>per domain</td>
+                    <td>at the end</td>
+                    <td className="am-c">✓</td>
+                    <td>retrain, re-merge</td>
                     <td>one merge</td>
                   </tr>
                   <tr>
                     <td>MOPD</td>
-                    <td>
-                      <Tex>n</Tex>, then 1 plus <Tex>n</Tex> teachers
+                    <td className="am-c">
+                      <Tex>{T`n+1`}</Tex>
                     </td>
-                    <td>one pool per specialist, then a student pool</td>
-                    <td>the specialists, then the student</td>
-                    <td>in the specialist stage</td>
-                    <td>retrain one specialist, distil again</td>
-                    <td>a second rollout stage in every domain</td>
+                    <td>per domain + student</td>
+                    <td>end + distil</td>
+                    <td className="am-c">until distillation</td>
+                    <td>retrain, re-distil</td>
+                    <td>extra rollouts</td>
                   </tr>
                   <tr>
                     <td>
                       <strong>OPM</strong>
                     </td>
-                    <td>
-                      <Tex>n</Tex>, time-sliceable
+                    <td className="am-c">
+                      <Tex>n</Tex>
                     </td>
-                    <td>one group per trainer</td>
-                    <td>the next rendezvous</td>
-                    <td>yes</td>
-                    <td>start or roll back one trainer at a rendezvous</td>
-                    <td>a merge per rendezvous, about ten minutes at 9B</td>
+                    <td>per domain</td>
+                    <td>rendezvous</td>
+                    <td className="am-c">✓</td>
+                    <td>that unit only</td>
+                    <td>a merge each</td>
                   </tr>
                 </tbody>
               </table>
@@ -1001,8 +1002,9 @@ export default function OnPolicyMergingPost() {
               <strong>Table 2.</strong> The five recipes as systems, for{' '}
               <Tex>n</Tex> domains. A training state is a full copy of weights,
               master weights and optimizer moments, about 16 bytes per
-              parameter; Making the merge cheap discusses how to bring OPM’s
-              closer to one.
+              parameter. MOPD trains <Tex>n</Tex> specialists and then a student
+              while the <Tex>n</Tex> teachers run inference; OPM’s merge takes
+              about ten minutes at 9B.
             </p>
           </div>
 

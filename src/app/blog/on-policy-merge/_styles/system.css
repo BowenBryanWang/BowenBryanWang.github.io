@@ -98,7 +98,10 @@
 /* Table 2: seven columns, a little wider than the text on desktop */
 .am-scope #table-2 table {
   font-size: 14px;
-  min-width: 720px;
+  min-width: 600px;
+}
+.am-scope #table-2 .am-c {
+  text-align: center;
 }
 .am-scope #table-2 td:first-child,
 .am-scope #table-2 th:first-child {
@@ -109,4 +112,7 @@
     margin-left: -1.5rem;
     margin-right: -1.5rem;
   }
+}
+.am-scope #table-2 td {
+  white-space: nowrap;
 }
