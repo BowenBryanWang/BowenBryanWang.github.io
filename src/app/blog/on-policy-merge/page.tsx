@@ -1203,34 +1203,32 @@ export default function OnPolicyMergingPost() {
           />
           <div className="am-prose">
             <p>
-              Before training anything, we can test the merge operator on RL
+              Before training anything, we can test the merge rule on RL
               specialists that someone else trained. <CiteT k="wu2026" />{' '}
               released five 300-step GRPO specialists of Qwen3-4B-Instruct-2507
               in fp32 (math, science, code, instruction following and a
-              tool-using agent), together with their task-arithmetic merge (
-              <Tex tail=")">{T`\lambda=0.6`}</Tex>, a mixed-RL model, an MOPD
-              model, and their data and evaluation. We merged the five
-              specialists once with the OPM rule: ten CG iterations from the
-              summed update, with exact per-token Fisher-vector products on 256
-              of each specialist’s own fp32 rollouts. There is no training and
-              there are no student rollouts. This tests the operator in its
-              least favourable setting, one merge at the end of 75 to 248 nats
-              of drift. It does not test the loop.
+              tool-using agent), together with their own task-arithmetic, mixed-RL
+              and MOPD models and their evaluation. We merged the five
+              specialists once with (2): ten CG iterations from the summed
+              update, with exact per-token Fisher-vector products on 256 of each
+              specialist’s own rollouts, and no training or student rollouts.
+              This tests the operator, not the loop, and in its least favourable
+              setting: a single merge after 75 to 248 nats of drift. It also
+              lets us check three things the theory predicts.
             </p>
             <p>
-              The quadratic model holds even at that drift. The locality ratio{' '}
+              <span className="am-runin">The merge does what the theory says.</span>{' '}
+              The quadratic model still holds at this drift: the locality ratio{' '}
               <Tex>{T`\kappa`}</Tex> toward the merged points is 0.96–1.17,
-              where a quadratic would give exactly 1, and the directions of the
-              specialists’ updates carry 5,800 times the curvature of random
-              directions of the same norm. The merge brings each specialist’s KL
-              residual far below task arithmetic’s. On held-out prompts the
-              residual averages 0.31 of the drift, against 0.52 for task
-              arithmetic, 1.12 for the sum and 0.34 for the released MOPD model,
-              and it falls to 0.16 after 30 iterations. For the
-              instruction-following and agent specialists it is 0.025 and 0.037
-              of their drift, against 0.26 for task arithmetic. Held-out and
-              in-sample residuals agree, so 256 rollouts per domain do not
-              overfit.
+              where an exact quadratic gives 1, and plain CG did not overshoot
+              here. The merge keeps far more of each specialist than the other
+              rules do. On held-out prompts its KL residual is 0.31 of the
+              drift, against 0.52 for task arithmetic, 0.34 for the released MOPD
+              model and 1.12 for the sum, and 0.16 after 30 iterations. Where a
+              domain barely sees the others’ updates, the round is{' '}
+              <Key>close to lossless</Key>: the residual is 0.025 of the drift
+              for the instruction-following specialist and 0.037 for the agent,
+              against 0.26 for task arithmetic.
             </p>
             <div className="am-table" id="table-3">
               <table>
@@ -1358,57 +1356,57 @@ export default function OnPolicyMergingPost() {
               eight-benchmark mean of <CiteT k="wu2026" />.
             </p>
             <p>
-              On benchmarks (<a className="am-ref" href="#table-3">Table 3</a>) the one-shot OPM merge beats task
-              arithmetic by 1.26 points on the domain-balanced mean and the
-              released MOPD model by 0.78. Paired intervals for this mean are{' '}
-              <Pending>being recomputed</Pending>; on the eight-benchmark mean
-              of <CiteT k="wu2026" />, which counts AIME and LiveCodeBench twice,
-              the same gaps are 1.68 ± 0.42 and 1.11 ± 0.40, paired over
-              prompts, and every ± below is on that mean.
-              It uses no rollouts beyond the 256 per domain behind the Fisher.
-              On IFBench it scores 50.5, against 40.4 for task arithmetic and
-              48.9 for the instruction-following specialist itself, so it
-              recovers 119% of the gap that task arithmetic leaves. Deployed in
-              fp32 instead of bf16, the same merge gains another 1.03 points
-              (1.30 ± 0.34). Its 66.44 is above the bf16 sum’s 65.99, but that is not a
-              like-for-like comparison: we have not deployed the sum in fp32, so
-              the comparisons below are all at bf16.
+              <span className="am-runin">On benchmarks it beats task arithmetic and MOPD.</span>{' '}
+              On the domain-balanced mean of{' '}
+              <a className="am-ref" href="#table-3">Table 3</a>, the one-shot OPM
+              merge is 1.26 points above task arithmetic and 0.78 above the
+              released MOPD model, with no rollouts beyond the 256 per domain
+              behind the Fisher. Paired intervals for this mean are{' '}
+              <Pending>being recomputed</Pending>; on the eight-benchmark mean of{' '}
+              <CiteT k="wu2026" />, which counts AIME and LiveCodeBench twice,
+              the same gaps are 1.68 ± 0.42 and 1.11 ± 0.40 over prompts. The
+              clearest single case is IFBench: 50.5, against 40.4 for task
+              arithmetic and 48.9 for the instruction-following specialist
+              itself. Deploying the same merge in fp32 adds about a point more
+              (<a className="am-ref" href="#findings">Side findings</a>).
             </p>
             <p>
-              <strong>Plain summation is the best one-shot merge at equal precision.</strong>{' '}
-              Both deployed in bf16, the sum (<Tex tail=")">{T`\lambda=1`}</Tex>{' '}
-              beats the OPM merge by 0.58 points (0.89 ± 0.36), mostly on AIME,
-              even though its KL residual is almost four times larger; with 30
-              CG iterations the gap is 0.16. This is <a className="am-ref" href="#thm-1">Theorem 1</a> at work, not a failure
-              of the metric. Math, science and code help each other, and the
-              merged reasoning scores exceed every individual specialist. The
-              OPM merge pulls each specialist back toward its own behaviour and
-              gives that transfer up. The theory’s diagnostic agrees: the sum’s
-              estimated first-order advantage on the reasoning domains is
-              positive, 0.17 to 0.26 of each domain’s own gain, while the
-              instruction-following and agent domains barely see the others’
-              updates, and there the sum and the OPM merge tie. The KL residual bounds how
-              much of each specialist’s own behaviour is lost. It does not
-              predict reward.
+              <span className="am-runin">Where domains help each other, the sum wins.</span>{' '}
+              At the same bf16 precision, plain summation beats the OPM merge by
+              0.58 points, mostly on AIME, although its KL residual is almost
+              four times larger; with 30 CG iterations the gap shrinks to 0.16,
+              within run-to-run noise. This is{' '}
+              <a className="am-ref" href="#thm-1">Theorem 1</a> at work, not a
+              failure of the metric. Math, science and code help each other: the
+              summed model beats every reasoning specialist on its own benchmark,
+              and the estimated cross-domain term is positive on all three, 0.17
+              to 0.26 of each domain’s own gain. The OPM merge pulls each
+              specialist back toward its own behaviour and gives that transfer
+              up, exactly as the theory says it should. Instruction following
+              and the agent barely see the others’ updates, and there the sum
+              and the OPM merge tie. <Key>The KL residual measures how much of
+              each specialist is kept, not how much reward is gained.</Key>
             </p>
             <p>
-              Two more observations temper the result. A metric computed on
-              stale rollouts (the base model’s, instead of each specialist’s
-              own) is worse in KL, 0.38 against 0.31 of drift, but ties on
-              benchmarks (−0.22 ± 0.31). And starting CG from the
-              task-arithmetic point instead of the sum does not beat task
-              arithmetic (−0.25 ± 0.35). One-shot at 4B, then, the operator
-              earns its keep against task arithmetic and MOPD but not against
-              the sum, and the quadratic model still held (<Tex>{T`\kappa`}</Tex>{' '}
-              0.96–1.17): what remains is overlap between the reasoning domains,
-              not a failure of locality. A one-shot OPM merge is therefore
-              already a strong post-hoc tool for released specialists. What
-              merging during training has to add is the rest of the case in Why
-              meet often, calibrated weights and a next round of RL that repairs
-              the residual. That is what the main experiment and the frequency
-              sweep test. Appendix
-              D has the full residual tables, the interference matrix and the
-              evaluation protocol.
+              <span className="am-runin">What this shows, and what it does not.</span>{' '}
+              One-shot at 4B, the operator earns its keep against task
+              arithmetic and MOPD but not against the sum, and since the quadratic
+              model held, what limits it is overlap between the reasoning
+              domains rather than locality. That already makes a one-shot OPM
+              merge a strong post-hoc tool for released specialists. One caveat
+              cuts the other way: a Fisher computed on the base model’s rollouts
+              instead of each specialist’s own is worse in KL but ties on
+              benchmarks, so the case for the on-policy metric does not rest on
+              this experiment. What merging during training must add is the rest
+              of{' '}
+              <a className="am-ref" href="#why-meet-often">
+                Why meet often
+              </a>
+              : calibrated weights and a next round of RL that repairs the
+              residual. The main experiment and the frequency sweep test that.{' '}
+              <a className="am-ref" href="#app-d">Appendix D</a> has the full
+              residual tables, the interference matrix, the other merge
+              variants and the evaluation protocol.
             </p>
           </div>
 
