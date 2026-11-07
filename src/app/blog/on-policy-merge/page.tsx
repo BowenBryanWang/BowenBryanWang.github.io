@@ -174,18 +174,11 @@ export default function OnPolicyMergingPost() {
               teachers.
             </p>
             <p>
-              <strong>On-Policy Merge</strong> (OPM) keeps the specialists’
-              independence and gives up only the distance. Each domain has its
-              own on-policy trainer, started from a shared anchor. As soon as any
-              trainer has drifted a fixed KL budget <Tex>{T`\delta`}</Tex> from
-              the anchor, all of them merge: the anchor moves to the point whose
-              policy on each domain is closest in KL to that domain’s trainer,
-              measured on the rollouts the trainer has just collected. Every
-              trainer reloads it and continues. Train apart, meet often.
-            </p>
-            <p>
-              To second order the merge has a closed form, a Fisher-weighted
-              average{' '}
+              Our starting point is a merge rule, not a training loop. Let
+              trainers move from a shared anchor <Tex>{T`\bar\theta`}</Tex> by
+              updates <Tex tail=".">{T`\Delta_i`}</Tex> The model whose behaviour
+              on each domain is closest in KL to that domain’s trainer has, to
+              second order, a closed form, a Fisher-weighted average{' '}
               <Tex tail=",">{T`\theta^{+}=\bar\theta+\big(\sum_iF_i\big)^{+}\sum_iF_i\Delta_i`}</Tex>{' '}
               and the choice of Fisher is what does the work. With{' '}
               <Tex>{T`F_i`}</Tex> taken on trainer <Tex>i</Tex>’s own on-policy
@@ -194,29 +187,48 @@ export default function OnPolicyMergingPost() {
               see is a change its return cannot feel. Whenever the trainers’
               updates can be reconciled, the merged model therefore keeps every
               domain’s own first-order gain and drops every cross-domain term.
-              This is the sense in which OPM stabilizes multi-task RL. Each
-              domain improves whenever its own trainer does, whatever the
-              batch shares, gradient scales or speeds of the others, and a
-              domain that stalls or breaks is held in place rather than
-              dragged.
             </p>
             <p>
-              Decoupling removes transfer of both signs, so OPM is not a faster
-              optimizer, and when domains help each other, summing their
-              updates does better. What OPM buys is a per-domain guarantee at a
-              measurable price. With a guarded solver, one merge of a 9B model
-              takes about ten minutes and needs no environment interaction.
-              Merging five released 4B RL specialists once with the OPM rule,
-              with no training and no student rollouts, beats task arithmetic
-              by 1.3 points and the released MOPD model by 0.8 points on a
-              domain-balanced benchmark mean. At the same bf16 precision, plain
-              summation still wins by 0.6, as the theory predicts for math,
-              science and code, which help each other.
+              The rule is accurate only locally. It is a second-order expansion
+              around each trainer, and its weights are each trainer’s current
+              Fisher, which fades on exactly the behaviour a trainer has become
+              confident about. Applied once to finished specialists, tens to
+              hundreds of nats apart, it still works: merging five released 4B
+              RL specialists with no training and no student rollouts beats
+              task arithmetic by 1.3 points and the released MOPD model by 0.8
+              points on a domain-balanced benchmark mean. But it leaves part of
+              each specialist behind, and nothing corrects what it misses.
+            </p>
+            <p>
+              <strong>On-Policy Merge</strong> (OPM) therefore applies the rule
+              during training, keeping the specialists’ independence and giving
+              up only the distance. Each domain has its own on-policy trainer,
+              started from a shared anchor. As soon as any trainer has drifted a
+              fixed KL budget <Tex>{T`\delta`}</Tex> from the anchor, all of
+              them merge with the rule above, measured on the rollouts each
+              trainer has just collected. Every trainer reloads the merged model
+              and continues, and the next round of RL repairs what the merge
+              missed. Train apart, meet often: often enough that every merge
+              stays where the rule is accurate.
+            </p>
+            <p>
+              This is the sense in which OPM stabilizes multi-task RL. Each
+              domain improves whenever its own trainer does, whatever the batch
+              shares, gradient scales or speeds of the others, and a domain that
+              stalls or breaks is held in place rather than dragged. Decoupling
+              removes transfer of both signs, so OPM is not a faster optimizer:
+              when domains help each other, summing their updates does better,
+              and at the same bf16 precision plain summation beats the one-shot
+              merge by 0.6, as the theory predicts for math, science and code.
+              What OPM buys is a per-domain guarantee at a measurable price: one
+              model copy per domain, and a merge that takes about ten minutes on
+              a 9B model with a guarded solver and needs no environment
+              interaction.
             </p>
             <p>
               The rest of the post places OPM among the existing recipes,
-              derives the merge and what it guarantees, shows how to make it
-              cheap, and tests it: first on those released specialists, then
+              derives the merge, why it must be applied often and what it
+              guarantees, shows how to make it cheap, and tests it: first on those released specialists, then
               against strong multi-task RL, merging after training and MOPD on
               eight frontier-style domains at 9B. The 9B results are marked as
               pending until the runs finish.
@@ -493,6 +505,30 @@ export default function OnPolicyMergingPost() {
               on-policy: the merge moves each trainer by a small per-token KL,
               so the rollouts it holds remain usable and training resumes
               without a hand-over stage.
+            </p>
+            <p>
+              <span className="am-runin">Why meet often.</span> Formula (2) is
+              accurate only near the trainers, and four things degrade as they
+              drift apart. The quadratic model: the cubic remainder accumulates
+              token by token, and its total over a run falls as{' '}
+              <Tex>{T`1/R^2`}</Tex> with the number of rounds{' '}
+              <Tex>R</Tex> (Appendix B.4). In a two-action example the locality
+              ratio <Tex tail=",">{T`\kappa`}</Tex> true KL over its quadratic
+              prediction, is 1.00, 1.35, 1.92 and 8.9 after 1, 10, 20 and 200
+              steps. The weights: as a trainer grows confident, its Fisher
+              vanishes on the logits it pushed, so a late merge undervalues
+              exactly what that trainer learned best. The repair: after a merge
+              during training, the next round of RL starts from the merged model
+              and corrects with reward what the merge missed, while a merge
+              after training has no second chance. And the continuation: a
+              merge that moves each trainer by a small per-token KL keeps its
+              rollouts in flight usable. Frequency does not fix everything.
+              Where domains genuinely conflict, each round leaves a second-order
+              residual whose first-order reward cost does not shrink with
+              frequency, and in lossless directions frequency changes nothing.
+              How often to meet is therefore a trade-off between these effects
+              and the cost of a merge, which the next sections make small and
+              then measure.
             </p>
           </div>
 
@@ -1104,10 +1140,16 @@ export default function OnPolicyMergingPost() {
               own) is worse in KL, 0.38 against 0.31 of drift, but ties on
               benchmarks (−0.22 ± 0.31). And starting CG from the
               task-arithmetic point instead of the sum does not beat task
-              arithmetic (−0.25 ± 0.35). One-shot at 4B, then, the metric earns
-              its keep against task arithmetic and MOPD, but not against the
-              sum. The case for OPM rests on merging repeatedly while trainers
-              are still close. That is what the main experiment tests. Appendix
+              arithmetic (−0.25 ± 0.35). One-shot at 4B, then, the operator
+              earns its keep against task arithmetic and MOPD but not against
+              the sum, and the quadratic model still held (<Tex>{T`\kappa`}</Tex>{' '}
+              0.96–1.17): what remains is overlap between the reasoning domains,
+              not a failure of locality. A one-shot OPM merge is therefore
+              already a strong post-hoc tool for released specialists. What
+              merging during training has to add is the rest of the case in Why
+              meet often, calibrated weights and a next round of RL that repairs
+              the residual. That is what the main experiment and the frequency
+              sweep test. Appendix
               D has the full residual tables, the interference matrix and the
               evaluation protocol.
             </p>
@@ -1285,15 +1327,14 @@ export default function OnPolicyMergingPost() {
           <div className="am-prose">
             <p>
               The rendezvous frequency is the one knob that moves OPM along the
-              frequency axis, from merge-after (a single rendezvous at the end) toward
-              multi-task RL. The theory says what frequency does and does not
-              do. It keeps every round local, so the quadratic model holds and
-              rollouts in flight stay usable. It keeps the Fisher weights
-              calibrated along shared directions: as a trainer grows confident,
-              its endpoint Fisher vanishes on the logits it pushed, and a merge
-              made too late undervalues it. In a two-action example the locality
-              ratio is 1.00, 1.35, 1.92 and 8.9 after 1, 10, 20 and 200 steps.
-              In lossless directions, frequency changes nothing.
+              frequency axis, from merge-after (a single rendezvous at the end)
+              toward multi-task RL. Why meet often gave four reasons to merge
+              early and one thing frequency cannot fix; this section tests
+              them. Between the two ends sits a cheap compromise,
+              merge-then-polish: the specialists train apart as usual, and a few
+              rendezvous at the end of the run bring them back together. It
+              keeps the training pipeline unchanged and adds the repair that a
+              single merge lacks.
             </p>
             <p>
               In the toy the interval matters sharply. At 50 steps per task,
@@ -1327,6 +1368,10 @@ export default function OnPolicyMergingPost() {
                     n={5}
                   />
                   <PendingRow label="≈ 4" n={5} />
+                  <PendingRow
+                    label="Merge-then-polish (4 rendezvous in the last 20%)"
+                    n={5}
+                  />
                   <PendingRow label="≈ 16" n={5} />
                   <PendingRow label="≈ 32" n={5} />
                   <PendingRow label="A1 · Multi-task RL (reference)" n={5} />
@@ -1344,8 +1389,10 @@ export default function OnPolicyMergingPost() {
           >
             <p>
               The merge-frequency curve. A4 with the drift ceiling set for
-              about 1, 4, 16 and 32 rendezvous at a fixed budget; the
-              one-rendezvous end coincides with A2’s one-shot OPM merge.
+              about 1, 4, 16 and 32 rendezvous at a fixed budget, plus
+              merge-then-polish (independent specialists, then four rendezvous
+              in the last 20% of the budget); the one-rendezvous end coincides
+              with A2’s one-shot OPM merge.
               Horizontal axis: rendezvous per run (log scale). Vertical axes:
               mean and worst normalised score, with A1 and A2 as horizontal
               bands. Table 7 adds in-domain benefit from other domains, the
@@ -1496,6 +1543,17 @@ export default function OnPolicyMergingPost() {
               recovers that only through larger trainer steps. The transfer term
               and visibility, both logged at every rendezvous, tell which
               situation a run is in.
+            </p>
+            <p>
+              <span className="am-runin">Trade-offs.</span> Every rendezvous
+              costs a merge, about ten minutes on a 9B model with the guarded
+              solver, and a synchronisation, since every trainer waits for the
+              merged model. Meeting often buys locality, calibrated weights and
+              repair, and pays for them in merges; merge-then-polish pays for
+              only a few. Memory grows with the number of trainers, one model
+              copy per domain, which grouping domains reduces. And decoupling
+              gives up transfer along shared directions, which a larger trainer
+              learning rate recovers only in part.
             </p>
             <p>
               <span className="am-runin">Limitations.</span> The guarantees
