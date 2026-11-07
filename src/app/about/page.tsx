@@ -581,11 +581,12 @@ export default async function About() {
     osworld2: pubRef(3, 'OSWorld 2.0'),
     arena: pubRef(4, 'Computer Agent Arena'),
     blogOpm: blogRef(5, 'On-Policy Merge', 'on-policy-merge'),
-    blogMask: blogRef(6, 'Every Loss Mask Is a Reward', 'anticausal-masks'),
-    qwenCua: pubRef(7, 'Qwen-CUA'),
-    qwen35: pubRef(8, 'Qwen 3.5, Qwen 3.6, Qwen 3.7'),
-    kimiK25: pubRef(9, 'Kimi K2.5'),
-    kimiVl: pubRef(10, 'Kimi-VL Technical Report'),
+    blogMix: blogRef(6, "Filtering Doesn't Change Your Mix", 'multitask-rl-done-right'),
+    blogMask: blogRef(7, 'Every Loss Mask Is a Reward', 'anticausal-masks'),
+    qwenCua: pubRef(8, 'Qwen-CUA'),
+    qwen35: pubRef(9, 'Qwen 3.5, Qwen 3.6, Qwen 3.7'),
+    kimiK25: pubRef(10, 'Kimi K2.5'),
+    kimiVl: pubRef(11, 'Kimi-VL Technical Report'),
   }
 
   const newsItems: NewsItem[] = [
@@ -750,7 +751,7 @@ export default async function About() {
                 ; (2) building frontier agentic RL infrastructure and
                 algorithms efficiently enough to support large-scale multi-task
                 RL
-                <Cite refs={[cite.blogOpm, cite.blogMask]} />; and
+                <Cite refs={[cite.blogOpm, cite.blogMix, cite.blogMask]} />; and
                 (3) using models to synthesize tasks and environments at scale
                 <Cite refs={[cite.cuaGym]} />, to break the data bottleneck in
                 frontier domains and raise the ceiling on recursive
