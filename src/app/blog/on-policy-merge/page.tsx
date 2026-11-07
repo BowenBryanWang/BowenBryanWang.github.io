@@ -721,7 +721,52 @@ export default function OnPolicyMergingPost() {
               covers forgetting under Cascade RL).
             </p>
             <p>
-              Item 4 deserves a word: <Key>the trigger is the trust region</Key>.
+              <span className="am-runin">In terms of gradients.</span> The
+              formula above is only the first of three ways multi-task RL
+              couples domains. A shared update adds their gradients, so their
+              directions interfere. A global gradient-norm clip scales every
+              domain’s step by the norm of the sum, so a domain with long,
+              high-norm rollouts shrinks everyone’s step whenever it triggers the
+              clip. And Adam’s second moment is a running average of the squared{' '}
+              <em>mixed</em> gradient: wherever one domain’s gradients are large,
+              every domain’s effective learning rate in those coordinates drops,
+              even when the gradients are orthogonal, because in a dense model
+              all domains share all coordinates. OPM cuts all three inside a
+              round. Each trainer has its own optimizer state, clip, learning
+              rate and schedule, which we call <Key>optimizer isolation</Key>;
+              it is the mechanism behind item 2 of{' '}
+              <a className="am-ref" href="#prop-2">Proposition 2</a> and behind
+              the Adam example above.
+            </p>
+            <p>
+              At the merge, the weight a domain gets in a direction is its
+              curvature there, not its gradient norm. A fast domain cannot pull
+              the anchor its way by pushing hard, and a converged domain whose
+              gradients are small but whose curvature is large is protected.
+              Direction is judged in the metric that matters: Euclidean cosines
+              between updates are close to zero at LLM scale, at most 0.022
+              between the 4B specialists, and say little, while the Fisher
+              overlap that actually couples domains is what (2) weighs. The same
+              choice has a blind spot. A drift that leaves domain{' '}
+              <Tex>j</Tex>’s return unchanged to first order, because it is
+              orthogonal to <Tex tail=",">{T`\nabla J_j`}</Tex> still costs KL,
+              so OPM resists it as firmly as a harmful one.{' '}
+              <Key>The merge preserves behaviour, not reward</Key>, and it pays
+              for that wherever such drift would have been harmless.
+            </p>
+            <Placeholder label="Gradient diagnostics" status="need experiment">
+              <p>
+                【need experiment: gradient coupling. For each pair of domains in
+                the main runs, the Euclidean and Adam-preconditioned gradient
+                cosines next to the Fisher visibility; in the multi-task run, how
+                often the global clip triggers and how much the shared second
+                moment lowers each domain’s effective learning rate.】
+              </p>
+            </Placeholder>
+            <p>
+              Item 4 of{' '}
+              <a className="am-ref" href="#prop-2">Proposition 2</a> deserves a
+              word: <Key>the trigger is the trust region</Key>.
               OPM therefore needs no reference-KL penalty, which matches frontier
               practice; no arm of our experiments uses one. Because the cubic
               remainder accumulates per token, the ceiling{' '}
@@ -1791,8 +1836,10 @@ export default function OnPolicyMergingPost() {
               <span className="am-runin">When to use it.</span> OPM is a
               decoupling device. It pays where coupling hurts: domains that
               conflict, many domains with small shares each, rollout latencies
-              that differ by orders of magnitude, and teams that want to add,
-              drop or fix a domain without retraining the rest. It gives ground
+              that differ by orders of magnitude, domains whose gradient scales
+              differ enough to fight over a shared clip or Adam state, and teams
+              that want to add, drop, tune or fix a domain without retraining the
+              rest. It gives ground
               where coupling helps: when domains share skills, multi-task RL or
               the plain sum moves faster along the shared directions, and OPM
               recovers that only through larger trainer steps. The transfer term
