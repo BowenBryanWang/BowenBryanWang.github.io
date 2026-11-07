@@ -24,6 +24,11 @@ import SidenoteLayout from './_components/SidenoteLayout'
 
 const T = String.raw
 
+/** Brown bold for the post's key concepts and claims. */
+function Key({ children }: { children: ReactNode }) {
+  return <strong className="am-key">{children}</strong>
+}
+
 export const metadata: Metadata = {
   title: 'On-Policy Merge Stabilizes Multi-Task Reinforcement Learning',
   description:
@@ -379,6 +384,141 @@ export default function OnPolicyMergingPost() {
           {/* ------------------------------------------------------------ */}
           <SectionTitle label="On-Policy Merge" id="method" />
           <div className="am-prose">
+            <p>
+              This section builds OPM step by step: what a merge of RL trainers
+              should preserve, the closed form that preserves it, the Fisher that
+              makes the closed form right for RL, why the merge has to happen
+              during training, and the loop that runs it.
+            </p>
+            <p>
+              <span className="am-runin">What a merge should preserve.</span>{' '}
+              Each trainer has learned something about its own domain, and the
+              merged model should keep it. We measure that by behaviour, not by
+              weights: on domain <Tex>i</Tex>, the merged model’s rollouts should
+              look like trainer <Tex>i</Tex>’s. A rollout{' '}
+              <Tex>{T`\xi=(h_1,a_1,\dots,h_L,a_L)`}</Tex> has probability{' '}
+              <Tex>{T`P^i_\theta(\xi)=\prod_t\pi_\theta(a_t\mid h_t)`}</Tex>{' '}
+              times environment terms that do not depend on{' '}
+              <Tex tail=",">{T`\theta`}</Tex> so the KL between rollout
+              distributions is well defined and the environment cancels from it.
+              The merge we want is the <Key>KL barycenter</Key> of the trainers:
+            </p>
+            <Tex
+              display
+            >{T`\theta^{+}\in\arg\min_\theta\;\sum_i\mathrm{KL}\big(P^i_{\theta_i}\,\|\,P^i_\theta\big).\tag{1}`}</Tex>
+            <p>
+              Up to a constant, (1) is the negative log-likelihood of every
+              trainer’s own rollouts under the merged model, so it needs nothing
+              the trainers do not already hold. The objective is not new:
+              Distral and Divide-and-Conquer RL use it for their shared policy
+              and reach it by distillation{' '}
+              <Cite k={['teh2017', 'ghosh2018']} />. What is new is solving it in
+              closed form, in one shared network, during training.
+            </p>
+            <p>
+              <span className="am-runin">The closed form.</span> Let trainer{' '}
+              <Tex>i</Tex> move from the anchor to{' '}
+              <Tex tail=".">{T`\theta_i=\bar\theta+\Delta_i`}</Tex> Expanding
+              each KL to second order around its trainer,{' '}
+              <Tex tail=",">{T`\mathrm{KL}\approx\tfrac12(\theta-\theta_i)^\top F_i(\theta-\theta_i)`}</Tex>{' '}
+              and setting the gradient of the sum to zero gives the OPM merge:
+            </p>
+            <Tex
+              display
+            >{T`\boxed{\;\theta^{+}=\bar\theta+\Big(\sum_iF_i\Big)^{+}\sum_iF_i\,\Delta_i\;},\qquad F_i=\mathbb{E}_{\xi\sim P^i_{\theta_i}}\Big[\sum_t s_ts_t^\top\Big],\quad s_t=\nabla\log\pi_{\theta_i}(a_t\mid h_t).\tag{2}`}</Tex>
+            <p>
+              Read (2) one direction of weight space at a time. Where only
+              domain <Tex>i</Tex> has curvature, the anchor takes all of{' '}
+              <Tex tail=".">{T`\Delta_i`}</Tex> Where several domains do, it
+              takes their curvature-weighted mean. Where none does, it moves
+              nowhere any domain can see. For tabular policies the exact
+              minimiser of (1) is, at every history, the mixture of the
+              trainers’ action distributions weighted by how often each visits
+              it; (2) is its second-order version.
+            </p>
+            <p>
+              <span className="am-runin">Which Fisher.</span> Formula (2) is
+              Fisher-weighted averaging <Cite k="matena2022" />, and everything
+              depends on which Fisher. OPM uses the <Key>on-policy Fisher</Key>:
+              the Fisher of trainer <Tex>i</Tex>’s current policy on its own
+              domain, estimated from rollouts that policy has just sampled and
+              summed over the tokens of each rollout. One property makes this
+              the right choice for RL. Write{' '}
+              <Tex>{T`S(\xi)=\sum_ts_t`}</Tex> for the score of a rollout and{' '}
+              <Tex>b</Tex> for any reward baseline. For every direction{' '}
+              <Tex tail=",">v</Tex>
+            </p>
+            <Tex
+              display
+            >{T`F_iv=0\;\Longrightarrow\;\mathbb{E}\big[(v^\top S)^2\big]=0\;\Longrightarrow\;v^\top S=0\ \text{on every rollout}\;\Longrightarrow\;v^\top\nabla J_i=\mathbb{E}\big[(R_i-b)\,v^\top S\big]=0 .`}</Tex>
+            <p>
+              <Key>
+                The policy gradient lies in the range of the on-policy Fisher: a
+                change that a domain’s Fisher cannot see is a change its return
+                cannot feel.
+              </Key>{' '}
+              That is why a merge that respects each Fisher can respect each
+              return without ever looking at a reward. The argument needs the
+              gradient and the Fisher to be expectations under the same
+              distribution. It fails for the empirical Fisher of stale or
+              foreign rollouts, a different and biased object{' '}
+              <Cite k="kunstner2019" />, and for supervised gradients against a
+              model Fisher. Hence the name: the data, the metric and, as the loop
+              below ensures, the continuation are all on-policy.
+            </p>
+            <p>
+              <span className="am-runin">Why meet often.</span> Formula (2) is a
+              second-order expansion with weights measured at the trainers, so
+              it is <Key>accurate only locally</Key>. Four things degrade as the
+              trainers drift apart, and each is a reason to merge during
+              training rather than after it.
+            </p>
+            <ul>
+              <li>
+                <Key>Locality.</Key> The cubic remainder of the quadratic model
+                accumulates token by token; over a run of <Tex>R</Tex> rounds its
+                total falls as <Tex>{T`1/R^2`}</Tex> (Appendix B.4). In a
+                two-action example the locality ratio{' '}
+                <Tex tail=",">{T`\kappa`}</Tex> true KL over its quadratic
+                prediction, grows from 1.00 to 1.92 after 20 steps and to 8.9
+                after 200.
+              </li>
+              <li>
+                <Key>Calibration.</Key> As a trainer grows confident, its Fisher
+                vanishes on the logits it pushed, so a late merge undervalues
+                exactly what the trainer learned best.
+              </li>
+              <li>
+                <Key>Repair.</Key> After a merge during training, the next round
+                of RL starts from the merged model and corrects with reward what
+                the merge missed. A merge after training has no second chance.
+              </li>
+              <li>
+                <Key>Continuation.</Key> A merge that moves each trainer by a
+                small per-token KL keeps its rollouts in flight usable under
+                per-token importance weights, so training never stops for a
+                hand-over.
+              </li>
+            </ul>
+            <p>
+              Frequency does not fix everything. Where domains genuinely
+              conflict, each round leaves a second-order residual whose
+              first-order reward cost does not shrink with frequency, and where
+              the domains’ Fishers do not overlap, frequency changes nothing. How
+              often to merge is therefore a trade-off against the cost of a
+              merge, which the engineering section makes small and the frequency
+              sweep measures.
+            </p>
+            <p>
+              <span className="am-runin">The loop.</span> OPM runs one ordinary
+              on-policy trainer per domain from a shared anchor and merges them
+              by (2) whenever the drift of any trainer from the anchor,{' '}
+              <Tex tail=",">{T`D_i=\mathrm{KL}(P^i_{\theta_i}\,\|\,P^i_{\bar\theta})`}</Tex>{' '}
+              reaches its ceiling <Tex tail=".">{T`\delta_i`}</Tex> We call each
+              merge a <Key>rendezvous</Key>. The drift is measured on a
+              subsample of each batch and never penalised. Algorithm 1 gives the
+              whole procedure.
+            </p>
             <Algorithm
               number={1}
               title="On-Policy Merge"
@@ -445,91 +585,6 @@ export default function OnPolicyMergingPost() {
                 <K>return</K> <Tex>{T`\bar\theta`}</Tex>
               </Line>
             </Algorithm>
-            <p>
-              <span className="am-runin">The objective.</span> We want one model
-              whose behaviour on each domain is as close as possible to that
-              domain’s trainer. A rollout{' '}
-              <Tex>{T`\xi=(h_1,a_1,\dots,h_L,a_L)`}</Tex> of domain <Tex>i</Tex>{' '}
-              has probability{' '}
-              <Tex>{T`P^i_\theta(\xi)=\prod_t\pi_\theta(a_t\mid h_t)`}</Tex>{' '}
-              times environment terms that do not depend on{' '}
-              <Tex tail=".">{T`\theta`}</Tex> Closeness of behaviour over whole
-              rollouts is the KL between rollout distributions, in which the
-              environment terms cancel:
-            </p>
-            <Tex
-              display
-            >{T`\theta^{+}\in\arg\min_\theta\;\sum_i\mathrm{KL}\big(P^i_{\theta_i}\,\|\,P^i_\theta\big).\tag{1}`}</Tex>
-            <p>
-              Up to a constant, this is the negative log-likelihood of every
-              trainer’s own rollouts under the merged model, so it needs nothing
-              the trainers do not already hold. The barycenter objective is not
-              ours: Distral and Divide-and-Conquer RL use it for their shared
-              policy and reach it by distillation{' '}
-              <Cite k={['teh2017', 'ghosh2018']} />. What is new is solving it
-              in closed form, in one shared network, during training.
-            </p>
-            <p>
-              <span className="am-runin">The closed form.</span> In a round,
-              trainer <Tex>i</Tex> moves from the anchor to{' '}
-              <Tex tail=".">{T`\theta_i=\bar\theta+\Delta_i`}</Tex> Expanding
-              each KL around its trainer,{' '}
-              <Tex tail=",">{T`\mathrm{KL}\approx\tfrac12(\theta-\theta_i)^\top F_i(\theta-\theta_i)`}</Tex>{' '}
-              and setting the gradient of the sum to zero gives the OPM merge:
-            </p>
-            <Tex
-              display
-            >{T`\boxed{\;\theta^{+}=\bar\theta+\Big(\sum_iF_i\Big)^{+}\sum_iF_i\,\Delta_i\;},\qquad F_i=\mathbb{E}_{\xi\sim P^i_{\theta_i}}\Big[\sum_t s_ts_t^\top\Big],\quad s_t=\nabla\log\pi_{\theta_i}(a_t\mid h_t).\tag{2}`}</Tex>
-            <p>
-              Each direction in weight space goes to the domains that are
-              sensitive to it. Where only domain <Tex>i</Tex> has curvature, the
-              anchor takes all of <Tex tail=".">{T`\Delta_i`}</Tex> Where
-              several do, it takes their curvature-weighted mean. Where none
-              does, nothing changes that any domain can see. For tabular
-              policies the exact minimiser of (1) is, at every history, the
-              mixture of the trainers’ action distributions weighted by how
-              often each one visits that history; (2) is its second-order
-              version.
-            </p>
-            <p>
-              Formula (2) is Fisher-weighted averaging <Cite k="matena2022" />.
-              The difference is which Fisher. Here it is the Fisher of each
-              trainer’s current policy, on its own domain, estimated from
-              rollouts that policy has just sampled, summed over tokens. That is
-              where the name comes from. The <em>data</em> are on-policy: every
-              gradient step of every trainer uses its own rollouts. The{' '}
-              <em>metric</em> is on-policy: the Fisher is an expectation over
-              the policy’s own actions, and on stale or foreign rollouts the
-              same formula becomes the empirical Fisher, a different and biased
-              object <Cite k="kunstner2019" />. And the <em>continuation</em> is
-              on-policy: the merge moves each trainer by a small per-token KL,
-              so the rollouts it holds remain usable and training resumes
-              without a hand-over stage.
-            </p>
-            <p>
-              <span className="am-runin">Why meet often.</span> Formula (2) is
-              accurate only near the trainers, and four things degrade as they
-              drift apart. The quadratic model: the cubic remainder accumulates
-              token by token, and its total over a run falls as{' '}
-              <Tex>{T`1/R^2`}</Tex> with the number of rounds{' '}
-              <Tex>R</Tex> (Appendix B.4). In a two-action example the locality
-              ratio <Tex tail=",">{T`\kappa`}</Tex> true KL over its quadratic
-              prediction, is 1.00, 1.35, 1.92 and 8.9 after 1, 10, 20 and 200
-              steps. The weights: as a trainer grows confident, its Fisher
-              vanishes on the logits it pushed, so a late merge undervalues
-              exactly what that trainer learned best. The repair: after a merge
-              during training, the next round of RL starts from the merged model
-              and corrects with reward what the merge missed, while a merge
-              after training has no second chance. And the continuation: a
-              merge that moves each trainer by a small per-token KL keeps its
-              rollouts in flight usable. Frequency does not fix everything.
-              Where domains genuinely conflict, each round leaves a second-order
-              residual whose first-order reward cost does not shrink with
-              frequency, and in lossless directions frequency changes nothing.
-              How often to meet is therefore a trade-off between these effects
-              and the cost of a merge, which the next sections make small and
-              then measure.
-            </p>
           </div>
 
           {/* ------------------------------------------------------------ */}
@@ -539,60 +594,24 @@ export default function OnPolicyMergingPost() {
           />
           <div className="am-prose">
             <p>
-              The theory rests on one property of the on-policy Fisher. Write{' '}
-              <Tex>{T`S(\xi)=\sum_ts_t`}</Tex> for the score of a rollout. If{' '}
-              <Tex tail=",">{T`F_iv=0`}</Tex> then{' '}
-              <Tex>{T`\mathbb{E}[(v^\top S)^2]=0`}</Tex>, so{' '}
-              <Tex>{T`v^\top S=0`}</Tex> on every rollout of domain{' '}
-              <Tex tail=",">i</Tex> and therefore{' '}
-              <Tex tail=".">{T`v^\top\nabla J_i=\mathbb{E}[(R_i-b)\,v^\top S]=0`}</Tex>{' '}
-              The policy gradient lies in the range of the Fisher. A
-              displacement the Fisher cannot see is a displacement the return
-              cannot feel. This holds because the gradient and the Fisher are
-              expectations under the same distribution. It fails for supervised
-              gradients against a model Fisher, and for Fishers computed on
-              stale or foreign states.
+              The property above says that (2) never moves a domain’s return
+              through a direction its Fisher ignores. This section asks what the
+              merge guarantees in the directions that remain, what multi-task RL
+              lacks by comparison, and what the guarantee costs. Each statement
+              carries a status in Appendix B (theorem, proposition under stated
+              assumptions, or conjecture with numerical support), with its proof.
             </p>
             <p>
-              Call a round <em>lossless</em> if some displacement <Tex>d</Tex>{' '}
-              leaves every trainer’s policy unchanged to second order,{' '}
-              <Tex>{T`F_j(d-\Delta_j)=0`}</Tex> for all <Tex tail=".">j</Tex>{' '}
-              This holds for every possible set of updates exactly when the
-              Fisher ranges are linearly independent: independent, not
-              orthogonal.
-            </p>
-            <div className="am-callout">
-              <div className="am-callout-label">Theorem 1 · decoupling</div>
-              <p>
-                In a lossless round, (2) returns a lossless point and, for every
-                domain <Tex tail=",">j</Tex> to first order in the
-                displacements,
-              </p>
-              <Tex
-                display
-              >{T`J_j(\theta^{+})-J_j(\theta_j)=0,\qquad J_j\Big(\bar\theta+\sum_i\Delta_i\Big)-J_j(\theta^{+})=T_j,\qquad T_j=\nabla J_j(\theta_j)^\top\sum_{i\ne j}\Delta_i .`}</Tex>
-            </div>
-            <p>
-              The second identity is the important one. <Tex>{T`T_j`}</Tex> is
-              the cross-domain term: what the other domains’ updates do to
-              domain <Tex>j</Tex>’s return. Summing keeps it; OPM removes it.
-              When <Tex>{T`T_j<0`}</Tex> that term is interference, and removing
-              it is the point. When <Tex>{T`T_j>0`}</Tex> it is positive
-              transfer, and OPM removes that too. Coupling between domains needs
-              overlapping Fishers, not aligned gradients. In the released 4B
-              specialists merged below, parameter cosines are at most 0.022, yet
-              the math specialist’s update moves the code specialist’s policy by
-              1.78 times the code specialist’s own drift.
-            </p>
-            <p>
-              For log-linear policies whose domains have linearly independent
-              feature spans, the theorem is exact at every interval, not only to
-              first order: after <Tex>r</Tex> rounds the anchor’s policy on
-              domain <Tex>j</Tex> equals that of a run that trained domain{' '}
-              <Tex>j</Tex> alone for the same number of steps. This holds for any
-              trainer optimizer whose update depends only on its own history,
-              from gradient descent and momentum to natural gradient and Adam
-              with persistent state.
+              <span className="am-runin">When a merge loses nothing.</span> Each
+              domain’s policy is unchanged, to second order, along the affine
+              subspace <Tex tail=":">{T`\theta_j+\operatorname{null}(F_j)`}</Tex>{' '}
+              a flat-bottomed trough in weight space (Figure 2). Call a round{' '}
+              <Key>lossless</Key> if the troughs meet, that is, if some
+              displacement <Tex>d</Tex> satisfies{' '}
+              <Tex>{T`F_j(d-\Delta_j)=0`}</Tex> for every{' '}
+              <Tex tail=".">j</Tex> This holds for every possible set of updates
+              exactly when the Fisher ranges are linearly independent:
+              independent, not orthogonal.
             </p>
           </div>
 
@@ -611,15 +630,49 @@ export default function OnPolicyMergingPost() {
                 arithmetic) both land on the walls; the OPM merge (2) solves for
                 the point where the troughs cross, which exists when the round
                 is lossless. The quadratic picture holds only near the trainers,
-                which is why the rendezvous happens before they drift far.
+                which is why OPM meets before they drift far.
               </figcaption>
             </figure>
           </div>
 
           <div className="am-prose">
+            <div className="am-callout">
+              <div className="am-callout-label">Theorem 1 · decoupling</div>
+              <p>
+                In a lossless round, (2) returns a lossless point and, for every
+                domain <Tex tail=",">j</Tex> to first order in the
+                displacements,
+              </p>
+              <Tex
+                display
+              >{T`J_j(\theta^{+})-J_j(\theta_j)=0,\qquad J_j\Big(\bar\theta+\sum_i\Delta_i\Big)-J_j(\theta^{+})=T_j,\qquad T_j=\nabla J_j(\theta_j)^\top\sum_{i\ne j}\Delta_i .`}</Tex>
+            </div>
             <p>
-              Where lossless rounds exist, decoupling gives guarantees that
-              multi-task RL does not have.
+              The second identity is the one that matters.{' '}
+              <Tex>{T`T_j`}</Tex> is the <Key>cross-domain term</Key>: what the
+              other domains’ updates do to domain <Tex>j</Tex>’s return. Summing
+              keeps it; OPM removes it, whatever its sign. When{' '}
+              <Tex>{T`T_j<0`}</Tex> it is interference, and removing it is the
+              point. When <Tex>{T`T_j>0`}</Tex> it is positive transfer, and OPM
+              removes that too. What the term depends on is the surprise:{' '}
+              <Key>
+                domains couple through overlapping Fishers, not through aligned
+                gradients.
+              </Key>{' '}
+              In the released 4B specialists merged later in this post,
+              parameter cosines are at most 0.022, yet the math specialist’s
+              update moves the code specialist’s policy by 1.78 times the code
+              specialist’s own drift.
+            </p>
+            <p>
+              <span className="am-runin">What decoupling buys.</span> Where
+              rounds are lossless, each domain behaves as if it were trained
+              alone: to first order per round in general, and exactly for
+              log-linear policies with linearly independent feature spans, after
+              any number of rounds and for any trainer optimizer whose update
+              depends only on its own history, Adam with persistent state
+              included (Appendix B.2). That gives guarantees multi-task RL does
+              not have.
             </p>
             <div className="am-callout">
               <div className="am-callout-label">
@@ -650,34 +703,35 @@ export default function OnPolicyMergingPost() {
               </ol>
             </div>
             <p>
-              Items 1–3 are exact for log-linear policies and hold per round to
-              first order otherwise; item 4 needs no lossless point. Multi-task
-              RL has none of these. One step changes{' '}
-              <Tex>{T`J_j`}</Tex> by{' '}
-              <Tex tail=",">{T`\eta\big(c_j\nabla J_j^\top P\nabla J_j+\sum_{i\ne j}c_i\nabla J_j^\top P\nabla J_i\big)`}</Tex>{' '}
+              Item 4 needs no lossless point. Multi-task RL has none of these
+              guarantees. One step of it changes the return of domain <Tex>j</Tex> by
+            </p>
+            <Tex
+              display
+            >{T`\Delta J_j\approx\eta\Big(c_j\,\nabla J_j^\top P\,\nabla J_j+\sum_{i\ne j}c_i\,\nabla J_j^\top P\,\nabla J_i\Big),`}</Tex>
+            <p>
               with <Tex>{T`c_i`}</Tex> the batch shares and <Tex>P</Tex> the
               optimizer’s preconditioner, so under conflict any domain with a
               small enough share or gradient regresses. Two parameters are
-              enough to see it. Take <Tex>{T`J_1=a\,\sigma(s)`}</Tex> and{' '}
-              <Tex tail=",">{T`J_2=b\,(1-\sigma(s+p))`}</Tex> with domain 2’s
-              share at 0.2. Multi-task SGD drives <Tex>{T`J_2`}</Tex> from 0.50
-              down to 0.24, Adam in a rotated parameterisation drives it to{' '}
-              <Tex>{T`3\times10^{-4}`}</Tex> and leaves it there, and under
-              periodic summing it dips by 0.20. OPM’s <Tex>{T`J_2`}</Tex>{' '}
-              trajectory is identical for every share and reward scale of
-              domain 1, to within <Tex tail=".">{T`2\times10^{-16}`}</Tex> A
-              cascade that trains domain 2 first takes <Tex>{T`J_2`}</Tex> from
-              0.9987 to 0.0735 while domain 1 then trains; keeping the idle trainer in an OPM merge keeps it at
-              0.9987.
+              enough to see it: with domain 2’s share at 0.2, multi-task SGD
+              drives its return from 0.50 to 0.24, and Adam in a rotated
+              parameterisation drives it to <Tex tail=",">{T`3\times10^{-4}`}</Tex>{' '}
+              while under OPM domain 2 follows the same trajectory for every
+              share and reward scale of domain 1 (Appendix B.5, which also
+              covers forgetting under Cascade RL).
             </p>
             <p>
-              No reference-KL penalty is needed for a trust region, because the
-              trigger is one. That matches frontier practice, where RL runs
-              without a KL term, and no arm of our experiments uses one. The
-              ceiling is best set per token. The cubic remainder of the
-              quadratic model accumulates token by token, so{' '}
-              <Tex>{T`\delta_i`}</Tex> should scale with domain <Tex>i</Tex>’s
-              response length (Appendix B.6).
+              Item 4 deserves a word: <Key>the trigger is the trust region</Key>.
+              OPM therefore needs no reference-KL penalty, which matches frontier
+              practice; no arm of our experiments uses one. Because the cubic
+              remainder accumulates per token, the ceiling{' '}
+              <Tex>{T`\delta_i`}</Tex> is best set in proportion to domain{' '}
+              <Tex>i</Tex>’s response length (Appendix B.6).
+            </p>
+            <p>
+              <span className="am-runin">What decoupling costs.</span> Removing
+              the cross-domain term removes positive transfer with it, and the
+              price can be stated exactly.
             </p>
             <div className="am-callout">
               <div className="am-callout-label">Proposition 3 · the price</div>
@@ -695,34 +749,38 @@ export default function OnPolicyMergingPost() {
             </div>
             <p>
               A boundary optimum is the common case: pushing up an action that
-              every domain rewards. With nonlinear policies OPM also carries an
-              error floor of order <Tex tail=",">{T`\eta K`}</Tex> set by how far
-              the lossless point lies in parameter space. So OPM has no general
-              rate advantage over a well-tuned multi-task RL run, and we do not
-              claim one. In KL geometry, positive transfer
-              is extra reward-aligned drift on a domain, in effect a larger
-              step, and a larger trainer learning rate recovers part of it.
-              Meeting more often does not change this for an exact merge: in
-              lossless directions OPM equals solo training at every interval.
-              What OPM offers instead of speed are the guarantees above, and
-              when domains conflict, those are worth more than speed.
+              every domain rewards. So{' '}
+              <Key>
+                OPM has no general rate advantage over a well-tuned multi-task
+                run
+              </Key>
+              , and we do not claim one. In KL geometry positive transfer is
+              extra reward-aligned drift, in effect a larger step, and a larger
+              trainer learning rate recovers part of it; merging more often does
+              not, because in lossless directions OPM equals solo training at
+              every interval. With nonlinear policies OPM also carries an error
+              floor of order <Tex tail=",">{T`\eta K`}</Tex> set by how far the
+              lossless point lies in parameter space (Appendix B.4). What OPM
+              offers instead of speed are the guarantees above, and when domains
+              conflict, those are worth more than speed.
             </p>
             <p>
-              A controlled toy shows both sides (Appendix E): four chain tasks
-              share a 704-parameter policy, with exact gradients, ten seeds, and
-              five variants ranging from strong positive transfer to conflict.
-              With learning rates tuned for both methods, OPM and multi-task RL
-              end within a few hundredths of each other on the original problem:
-              0.955 to 0.993 for OPM against 0.949 at 50 steps per task. An
-              earlier version of this comparison used an under-tuned multi-task
-              baseline (0.688) and overstated the gap as 0.27. Under positive
-              transfer, multi-task RL leads at small budgets: by 0.20–0.23 at 10
-              steps per task and 0.03–0.05 at 50. Under conflict OPM leads at
-              every budget once both learning rates are tuned. At 50 steps it
-              reaches 0.97 at its default rate, against 0.77–0.80 for the best
-              multi-task rate. No CG-merged OPM run ever ended with a task below its
-              starting point, while multi-task RL, task arithmetic and summing
-              left 20–37% of tasks below it.
+              A controlled toy shows both sides (Appendix E). Four chain tasks
+              share a 704-parameter policy trained with exact gradients over ten
+              seeds, in five variants from strong positive transfer to conflict,
+              with learning rates tuned for both methods. Under positive transfer
+              multi-task RL leads, by 0.20–0.23 in success at 10 steps per task
+              and 0.03–0.05 at 50. Under conflict OPM leads at every budget, 0.97
+              against at most 0.80 at 50 steps. Across all variants no CG-merged
+              OPM run ended with a task below its starting point, while
+              multi-task RL, task arithmetic and the sum left 20–37% of tasks
+              below it.
+            </p>
+            <p>
+              <span className="am-runin">Relation to MOPD.</span> Multi-teacher
+              on-policy distillation minimises the reverse KLs to the same
+              trainers on the student’s own rollouts, so the two can be compared
+              directly.
             </p>
             <div className="am-callout">
               <div className="am-callout-label">Proposition 4 · MOPD</div>
@@ -740,26 +798,24 @@ export default function OnPolicyMergingPost() {
               </p>
             </div>
             <p>
-              The bound is Pinsker’s inequality. It means that at its optimum
-              the MOPD student equals its teachers, and can exceed them only by
-              not converging or through an added outcome reward. OPM reaches
-              that optimum without any student rollouts.{' '}
-              <CiteT k="liu2026" /> showed that MOPD is Fisher merging to second
-              order; what we add is the lossless statement and which Fisher to
-              use. OPM has no fixed teacher: each round’s “teacher”{' '}
-              <Tex>{T`\theta_i`}</Tex> is retrained on reward from the last
-              merge. And a rendezvous needs no environment interaction, while a
+              The bound is Pinsker’s inequality: at its optimum the MOPD student
+              equals its teachers, and it can exceed them only by not converging
+              or through an added outcome reward. <CiteT k="liu2026" /> showed
+              that MOPD is Fisher merging to second order; Proposition 4 adds the
+              lossless statement and which Fisher to use. OPM reaches the same
+              point without student rollouts, and it has no fixed teacher: each
+              round’s <Tex>{T`\theta_i`}</Tex> is retrained on reward from the
+              last merge. A rendezvous needs no environment interaction, while a
               round of MOPD needs fresh rollouts in every domain, which for
-              agentic domains means sandboxes running for minutes to tens of
-              minutes per episode.
+              agentic domains means sandboxes running for minutes per episode.
             </p>
             <p>
-              Every statement here carries a status in Appendix B: theorem,
-              proposition under stated assumptions, or conjecture with numerical
-              support. The guarantees of Proposition 2 assume lossless rounds,
-              which we have not shown to exist at LLM scale (see the
-              Discussion). Appendix B also has the proofs, the first-order
-              coupling of every merge, and a list of what is not claimed.
+              <span className="am-runin">What is not claimed.</span> Theorem 1
+              and Proposition 2 assume lossless rounds, which we have not shown
+              to exist at LLM scale: the one-shot 4B merge below still leaves 16%
+              of drift on held-out prompts (see the Discussion). Appendix B
+              lists the status of every statement, the first-order coupling of
+              each merge rule, and what is not claimed.
             </p>
           </div>
 

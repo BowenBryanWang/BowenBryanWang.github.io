@@ -158,3 +158,11 @@
     color: var(--accent);
   }
 }
+
+/* Key concepts and claims (Key in page.tsx): bold in the accent brown */
+.am-scope .am-key,
+.am-scope .am-prose strong.am-key,
+.am-scope .am-callout strong.am-key {
+  color: var(--accent);
+  font-weight: 700;
+}
