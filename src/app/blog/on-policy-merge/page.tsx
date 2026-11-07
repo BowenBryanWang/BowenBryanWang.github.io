@@ -1138,7 +1138,7 @@ export default function OnPolicyMergingPost() {
               previous one.
             </p>
             <p>
-              <Key>Experts and memory.</Key> Mixture-of-experts layers give the
+              <Key>Experts.</Key> Mixture-of-experts layers give the
               Fisher a block structure. An expert’s block sums only over the
               tokens routed to it, so where domains use different experts their
               blocks barely overlap and (2) reduces to the plain sum there; the
@@ -1148,16 +1148,32 @@ export default function OnPolicyMergingPost() {
               choice for many tokens moves them onto different experts, outside
               any quadratic model, so the fraction of flipped routes belongs next
               to <Tex>{T`\kappa`}</Tex> among the diagnostics logged at every
-              rendezvous. The larger frontier cost is memory: <Tex>n</Tex>{' '}
-              trainers hold <Tex>n</Tex> training states of about 16 bytes per
-              parameter, 16 TB each at a trillion parameters. Grouping domains
-              (<a className="am-ref" href="#discussion">Discussion</a>) divides that by the group size. Low-rank trainers
-              would divide it further: each domain trains an adapter on the
-              shared anchor, and each rendezvous merges the adapters’ updates in
-              their span and folds the result into the anchor. LoRA matches full
-              fine-tuning in RL even at very low rank <Cite k="schulman2025" />;
-              whether the merge keeps its guarantees under that restriction is
-              open.
+              rendezvous.
+            </p>
+            <p>
+              <Key>Memory.</Key> Memory is the larger frontier cost. A
+              full-parameter trainer holds about 16 bytes per parameter (bf16
+              weights, fp32 master weights, two fp32 Adam moments and the
+              gradient), 16 TB at a trillion parameters. Multi-task RL already
+              pays this once, sharded across thousands of GPUs; OPM would pay it
+              once per trainer. Four choices bring it back close to one copy
+              without changing the method. Asynchronous RL is bound by rollouts,
+              so its training GPUs are often idle: one shared training pool can
+              step the <Tex>n</Tex> trainers in turn and keep the idle trainers’
+              sharded states in host memory, where a 16 TB state spread over
+              2,048 GPUs is about 8 GB per GPU per domain and swaps in in well
+              under a second. The trainers can share the anchor’s fp32 master
+              weights and keep only their own update <Tex>{T`\Delta_i`}</Tex> in
+              bf16, which is accurate because the update is small. Adam’s
+              moments can be kept in bf16, but per trainer, since sharing them
+              would undo optimizer isolation. And experts a domain barely routes
+              to keep the anchor’s weights and need no optimizer state of their
+              own, so the trainers can share them copy-on-write. Together these
+              leave roughly 4–6 bytes per parameter for each additional domain,
+              in host memory rather than on the GPU, at the price of swap and
+              synchronisation time; grouping domains (
+              <a className="am-ref" href="#discussion">Discussion</a>) divides
+              what remains.
             </p>
             <p>
               <span className="am-runin">
@@ -1242,8 +1258,10 @@ export default function OnPolicyMergingPost() {
                 against <Tex tail=".">{T`\kappa`}</Tex>】
               </li>
               <li>
-                【need experiment: LoRA trainers at ranks 8, 32, 128 against
-                full-parameter OPM.】
+                【need experiment: time-sliced trainers. 2, 4 and 8 trainers on
+                one training pool with host-resident states, bf16 updates and
+                bf16 Adam moments: step time, swap time and peak GPU memory,
+                against one multi-task trainer.】
               </li>
             </ul>
           </Placeholder>
