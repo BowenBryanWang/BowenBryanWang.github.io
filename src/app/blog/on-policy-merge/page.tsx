@@ -245,7 +245,7 @@ export default function OnPolicyMergingPost() {
           <div className="am-prose">
             <p>
               Every method for combining RL domains makes two choices: how often
-              the domains’ progress is combined, and by what rule. <a className="am-ref" href="#fig-1">Figure 1</a>
+              the domains’ progress is combined, and by what rule. <a className="am-ref" href="#fig-1">Figure 1</a>{' '}
               shows the first choice, and <a className="am-ref" href="#table-1">Table 1</a> sets both side by side.
             </p>
           </div>
@@ -281,7 +281,7 @@ export default function OnPolicyMergingPost() {
             <p>
               <strong>OPM</strong> takes the remaining combination. It combines
               during training, as often as a KL budget demands, in KL geometry,
-              with the Fisher measured on each trainer’s own states. <a className="am-ref" href="#table-1">Table 1</a>
+              with the Fisher measured on each trainer’s own states. <a className="am-ref" href="#table-1">Table 1</a>{' '}
               lists what each method pays.
             </p>
             <div className="am-table" id="table-1">
@@ -855,12 +855,19 @@ export default function OnPolicyMergingPost() {
               agentic domains means sandboxes running for minutes per episode.
             </p>
             <p>
-              <span className="am-runin">What is not claimed.</span> <a className="am-ref" href="#thm-1">Theorem 1</a>
-              and <a className="am-ref" href="#prop-2">Proposition 2</a> assume lossless rounds, which we have not shown
-              to exist at LLM scale: the one-shot 4B merge below still leaves 16%
-              of drift on held-out prompts (see the <a className="am-ref" href="#discussion">Discussion</a>). <a className="am-ref" href="#app-b">Appendix B</a>
-              lists the status of every statement, the first-order coupling of
-              each merge rule, and what is not claimed.
+              <span className="am-runin">The scope of these guarantees.</span>{' '}
+              <a className="am-ref" href="#thm-1">Theorem 1</a> and{' '}
+              <a className="am-ref" href="#prop-2">Proposition 2</a> hold
+              exactly only in <Key>lossless</Key> rounds, where some merged point
+              keeps every trainer’s policy. We have not shown that such rounds
+              exist at LLM scale, and the one-shot 4B merge below suggests they
+              do not quite: even after 30 CG iterations, the merged model’s KL to
+              the specialists is still 16% of how far they drifted. In practice
+              the guarantees hold approximately, as closely as that residual is
+              small, which is why the main runs log it at every rendezvous.{' '}
+              <a className="am-ref" href="#app-b">Appendix B</a> gives the
+              status and proof of every statement, and lists what is not
+              claimed.
             </p>
           </div>
 

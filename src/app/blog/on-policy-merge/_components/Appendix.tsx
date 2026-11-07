@@ -696,7 +696,7 @@ export default function Appendix() {
             <Tex tail=",">{T`J_2=b(1-\sigma(s+p))`}</Tex> <Tex>{T`J_2`}</Tex>{' '}
             falls at the origin under SGD iff <Tex tail=".">{T`c_1a>2c_2b`}</Tex> The Fisher
             ranges <Tex>{T`\operatorname{span}(1,0)`}</Tex> and{' '}
-            <Tex>{T`\operatorname{span}(1,1)`}</Tex> are independent, so <a className="am-ref" href="#thm-1">Theorem 1</a>
+            <Tex>{T`\operatorname{span}(1,1)`}</Tex> are independent, so <a className="am-ref" href="#thm-1">Theorem 1</a>{' '}
             applies to OPM. Numbers are in the main text.
           </p>
           <p>
@@ -1916,7 +1916,7 @@ export default function Appendix() {
             precision. The same release also shows the
             conflicting regime outside the merge: in their evaluation, the IF
             specialist trained alone lowers BFCL from 63.9 to 54.1, and the agent and code specialists lose
-            about 2 points on AIME25 <Cite k="wu2026" />. <a className="am-ref" href="#table-6">Table 6</a> and <a className="am-ref" href="#fig-4">Figure 4</a>
+            about 2 points on AIME25 <Cite k="wu2026" />. <a className="am-ref" href="#table-6">Table 6</a> and <a className="am-ref" href="#fig-4">Figure 4</a>{' '}
             measure which regime each of the eight main domains falls in.
           </p>
           <p>
