@@ -6,12 +6,14 @@ import { Container } from '@/components/Container'
 import './_styles/merge.css'
 import './_styles/algorithm.css'
 import './_styles/residual.css'
+import './_styles/system.css'
 
 import Tex from './_components/Tex'
 import SectionTitle from './_components/SectionTitle'
 import { ParadigmFigure } from './_components/Figures'
 import WeightSpace3D from './_components/WeightSpace3D'
 import ResidualChart from './_components/ResidualChart'
+import SystemDiagram from './_components/SystemDiagram'
 import Landscape3D from './_components/Landscape3D'
 import { Cite, CiteT } from './_components/Cite'
 import { Placeholder, Pending } from './_components/Placeholder'
@@ -51,6 +53,7 @@ const TOC: TocItem[] = [
   { label: 'Five ways to get one model', href: '#map' },
   { label: 'On-Policy Merge', href: '#method' },
   { label: 'What the merge guarantees, and what it costs', href: '#theory' },
+  { label: 'System design', href: '#system' },
   { label: 'Making the merge cheap', href: '#engineering' },
   { label: 'A first test on released specialists', href: '#oneshot' },
   { label: 'Main results', href: '#results' },
@@ -872,6 +875,138 @@ export default function OnPolicyMergingPost() {
           </div>
 
           {/* ------------------------------------------------------------ */}
+          <SectionTitle label="System design" id="system" />
+          <div className="am-prose">
+            <p>
+              OPM changes the training loop, not the RL stack.{' '}
+              <a className="am-ref" href="#fig-3">Figure 3</a> shows the system
+              for <Tex>n</Tex> domains. Each domain runs as a{' '}
+              <Key>unit</Key> of ordinary asynchronous RL: a trainer with its
+              own optimizer state and settings, a group of rollout engines
+              serving that trainer’s current weights, and a buffer between them,
+              synchronised every step exactly as in single-domain RL. Rollouts
+              must come from the trainer’s own weights, so engines belong to a
+              unit rather than to a shared pool, and a unit’s share of them
+              follows its rollout cost: long agentic episodes get more engines
+              than math.
+            </p>
+            <p>
+              Everything else is shared. Verifiers, sandboxes and environments
+              serve all units. The anchor that measures each trainer’s drift
+              lives in the slot RL frameworks already reserve for a reference
+              model, which is free here because no arm carries a KL penalty, and
+              it is replaced by <Tex>{T`\theta^{+}`}</Tex> at every rendezvous.
+              A small coordinator watches the drifts, triggers a rendezvous,
+              runs the solver of{' '}
+              <a className="am-ref" href="#engineering">Making the merge cheap</a>{' '}
+              across the trainers and broadcasts the result. Between rendezvous
+              the units never wait for each other, so a slow domain cannot hold
+              back a fast one, and a unit can be added, retuned or rolled back
+              alone. To keep rendezvous from being dictated by one fast domain,
+              engines can be moved between units at each rendezvous so that the
+              drifts grow at similar rates.
+            </p>
+          </div>
+          <figure id="fig-3">
+            <SystemDiagram />
+            <figcaption>
+              <strong>Figure 3.</strong> The OPM system. Each domain is a unit
+              of ordinary asynchronous RL, with its own trainer and its own
+              rollout engines, sized by its rollout cost. Verifiers, sandboxes
+              and the anchor scorer are shared. A coordinator merges the
+              trainers whenever one has drifted its ceiling and sends the merged
+              model back to all of them.
+            </figcaption>
+          </figure>
+          <div className="am-prose">
+            <p>
+              <a className="am-ref" href="#table-2">Table 2</a> compares the
+              five recipes as systems rather than as optimizers. OPM pays in
+              training states and in merges; in return it is the only recipe
+              that keeps every domain’s optimizer separate during training and
+              lets one domain be added or rolled back without touching the
+              others.
+            </p>
+            <div className="am-table" id="table-2">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Recipe</th>
+                    <th>Training states</th>
+                    <th>Rollout engines</th>
+                    <th>Waits for</th>
+                    <th>Own optimizer per domain</th>
+                    <th>Add or fix one domain</th>
+                    <th>Extra cost</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Multi-task RL</td>
+                    <td>1</td>
+                    <td>one pool, mixed batches</td>
+                    <td>every domain’s quota, every step</td>
+                    <td>no</td>
+                    <td>re-mix the quotas; a broken domain reaches every weight</td>
+                    <td>none</td>
+                  </tr>
+                  <tr>
+                    <td>Cascade RL</td>
+                    <td>1</td>
+                    <td>one domain at a time</td>
+                    <td>the stage in progress</td>
+                    <td>per stage</td>
+                    <td>a new stage, which forgets earlier ones</td>
+                    <td>none</td>
+                  </tr>
+                  <tr>
+                    <td>Merge-after</td>
+                    <td>
+                      <Tex>n</Tex>
+                    </td>
+                    <td>one pool per specialist</td>
+                    <td>nothing until the end</td>
+                    <td>yes</td>
+                    <td>retrain one specialist, merge again</td>
+                    <td>one merge</td>
+                  </tr>
+                  <tr>
+                    <td>MOPD</td>
+                    <td>
+                      <Tex>n</Tex>, then 1 plus <Tex>n</Tex> teachers
+                    </td>
+                    <td>one pool per specialist, then a student pool</td>
+                    <td>the specialists, then the student</td>
+                    <td>in the specialist stage</td>
+                    <td>retrain one specialist, distil again</td>
+                    <td>a second rollout stage in every domain</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <strong>OPM</strong>
+                    </td>
+                    <td>
+                      <Tex>n</Tex>, time-sliceable
+                    </td>
+                    <td>one group per trainer</td>
+                    <td>the next rendezvous</td>
+                    <td>yes</td>
+                    <td>start or roll back one trainer at a rendezvous</td>
+                    <td>a merge per rendezvous, about ten minutes at 9B</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <p style={{ fontSize: '14px' }}>
+              <strong>Table 2.</strong> The five recipes as systems, for{' '}
+              <Tex>n</Tex> domains. A training state is a full copy of weights,
+              master weights and optimizer moments, about 16 bytes per
+              parameter; Making the merge cheap discusses how to bring OPM’s
+              closer to one.
+            </p>
+          </div>
+
+          {/* ------------------------------------------------------------ */}
           <SectionTitle label="Making the merge cheap" id="engineering" />
           <div className="am-prose">
             <p>
@@ -959,7 +1094,7 @@ export default function OnPolicyMergingPost() {
               worse than the sum up to estimation error, and no quadratic
               assumption is needed for that (<a className="am-ref" href="#prop-5">Proposition 5</a>, <a className="am-ref" href="#app-c">Appendix C</a>).
             </p>
-            <div className="am-table" id="table-2">
+            <div className="am-table" id="table-3">
               <table>
                 <thead>
                   <tr>
@@ -1038,7 +1173,7 @@ export default function OnPolicyMergingPost() {
               </table>
             </div>
             <p style={{ fontSize: '14px' }}>
-              <strong>Table 2.</strong> Held-out KL residual{' '}
+              <strong>Table 3.</strong> Held-out KL residual{' '}
               <Tex>{T`\sum_i\mathrm{KL}(P^i_{\theta_i}\|P^i_{\rm merge})`}</Tex>{' '}
               in nats, for two trainers branched from the 9B model (math, 40
               steps; instruction following, 30 steps) with drifts of 76.4 and
@@ -1060,13 +1195,13 @@ export default function OnPolicyMergingPost() {
             </p>
           </div>
 
-          <figure id="fig-3">
+          <figure id="fig-4">
             <ResidualChart />
             <figcaption>
-              <strong>Figure 3.</strong> Held-out KL residual of the guarded
+              <strong>Figure 4.</strong> Held-out KL residual of the guarded
               merge after one to ten CG iterations, for three damping factors{' '}
               <Tex>{T`\gamma`}</Tex> along the path from the summed update (data
-              of <a className="am-ref" href="#table-2">Table 2</a>). Dashed lines mark the sum (13.35 nats) and the
+              of <a className="am-ref" href="#table-3">Table 3</a>). Dashed lines mark the sum (13.35 nats) and the
               average (30.7); not merging at all leaves 125.3. At the default
               finite-difference step every damped step stays below the sum, and the residual is lowest at three
               iterations with <Tex tail=",">{T`\gamma=\tfrac12`}</Tex> the
@@ -1244,7 +1379,7 @@ export default function OnPolicyMergingPost() {
               </li>
               <li>
                 【need experiment: token subsampling at 5/10/20/50%. Error of{' '}
-                <Tex tail=",">{T`F_iv`}</Tex> <a className="am-ref" href="#table-2">Table 2</a> residual, time.】
+                <Tex tail=",">{T`F_iv`}</Tex> <a className="am-ref" href="#table-3">Table 3</a> residual, time.】
               </li>
               <li>
                 【need experiment: subspace solve (global, per layer, per expert)
@@ -1305,7 +1440,7 @@ export default function OnPolicyMergingPost() {
               for the instruction-following specialist and 0.037 for the agent,
               against 0.26 for task arithmetic.
             </p>
-            <div className="am-table" id="table-3">
+            <div className="am-table" id="table-4">
               <table>
                 <thead>
                   <tr>
@@ -1416,7 +1551,7 @@ export default function OnPolicyMergingPost() {
               </table>
             </div>
             <p style={{ fontSize: '14px' }}>
-              <strong>Table 3.</strong> One-shot merges of the five released
+              <strong>Table 4.</strong> One-shot merges of the five released
               Qwen3-4B specialists of <CiteT k="wu2026" />, mean over 32 samples
               per prompt, in percent. AIME pools the 2025 and 2026 problems (60
               in all), and LiveCodeBench is v6. The mean weights the five
@@ -1433,7 +1568,7 @@ export default function OnPolicyMergingPost() {
             <p>
               <span className="am-runin">On benchmarks it beats task arithmetic and MOPD.</span>{' '}
               On the domain-balanced mean of{' '}
-              <a className="am-ref" href="#table-3">Table 3</a>, the one-shot OPM
+              <a className="am-ref" href="#table-4">Table 4</a>, the one-shot OPM
               merge is 1.26 points above task arithmetic and 0.78 above the
               released MOPD model, with no rollouts beyond the 256 per domain
               behind the Fisher. Paired intervals for this mean are{' '}
@@ -1568,7 +1703,7 @@ export default function OnPolicyMergingPost() {
             </div>
           </div>
           <Placeholder
-            label="Table 4"
+            label="Table 5"
             status="pending main runs (A1–A4, 3 seeds)"
           >
             <p>
@@ -1614,7 +1749,7 @@ export default function OnPolicyMergingPost() {
               </table>
             </div>
           </div>
-          <Placeholder label="Table 5" status="pending main runs (ledger)">
+          <Placeholder label="Table 6" status="pending main runs (ledger)">
             <p>
               Cost per arm from the shared ledger, seed 1: environment rollouts
               per domain (matched by design), student rollouts, teacher-scoring
@@ -1641,11 +1776,11 @@ export default function OnPolicyMergingPost() {
               predicts at LLM scale is open.
             </p>
           </div>
-          <Placeholder label="Table 6 and Figure 4" status="pending main runs">
+          <Placeholder label="Table 7 and Figure 5" status="pending main runs">
             <p>
-              <a className="am-ref" href="#table-6">Table 6</a>: per-domain score of each arm normalised to that domain’s
+              <a className="am-ref" href="#table-7">Table 7</a>: per-domain score of each arm normalised to that domain’s
               specialist (above 1 means the domain benefits from the others),
-              A1–A4, 3 seeds. <a className="am-ref" href="#fig-4">Figure 4</a>: at every rendezvous of A4, the estimated{' '}
+              A1–A4, 3 seeds. <a className="am-ref" href="#fig-5">Figure 5</a>: at every rendezvous of A4, the estimated{' '}
               <Tex>{T`T_j`}</Tex> against the realised held-out reward gap
               between the summed update and the OPM merge, one point per domain
               and rendezvous; sign agreement reported in the caption.
@@ -1714,7 +1849,7 @@ export default function OnPolicyMergingPost() {
             </div>
           </div>
           <Placeholder
-            label="Figure 5 and Table 7"
+            label="Figure 6 and Table 8"
             status="pending frequency sweep"
           >
             <p>
@@ -1725,7 +1860,7 @@ export default function OnPolicyMergingPost() {
               with A2’s one-shot OPM merge.
               Horizontal axis: rendezvous per run (log scale). Vertical axes:
               mean and worst normalised score, with A1 and A2 as horizontal
-              bands. <a className="am-ref" href="#table-7">Table 7</a> adds in-domain benefit from other domains, the
+              bands. <a className="am-ref" href="#table-8">Table 8</a> adds in-domain benefit from other domains, the
               score on competitive code, which no arm trains on, and merge
               cost.
             </p>
@@ -1756,12 +1891,12 @@ export default function OnPolicyMergingPost() {
               range is independent of theirs.
             </p>
           </div>
-          <Placeholder label="Figure 6 and Table 8" status="pending demo 1">
+          <Placeholder label="Figure 7 and Table 9" status="pending demo 1">
             <p>
               Code score against rollouts after the branch point for A1 and A4,
               with the code specialist as a reference line; below it, the
               per-domain change on the eight existing domains over the same
-              window. <a className="am-ref" href="#table-8">Table 8</a>: rollouts and wall-clock to reach 90% of the code
+              window. <a className="am-ref" href="#table-9">Table 9</a>: rollouts and wall-clock to reach 90% of the code
               specialist’s gain, maximum drop on an existing domain, extra
               GPU-hours.
             </p>
@@ -1782,7 +1917,7 @@ export default function OnPolicyMergingPost() {
               them per round.
             </p>
           </div>
-          <Placeholder label="Figure 7 and Table 9" status="pending demo 2">
+          <Placeholder label="Figure 8 and Table 10" status="pending demo 2">
             <p>
               Per-domain scores over training for A1 and A4 with the fault
               window shaded, plus tool-call validity and response length. Table

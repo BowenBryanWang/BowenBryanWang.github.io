@@ -1,0 +1,112 @@
+/* Figure 3: system diagram (SystemDiagram.tsx) */
+.am-scope .am-sys {
+  max-width: 640px;
+  margin: 0 auto;
+  font-size: 14px;
+  line-height: 1.35;
+  color: var(--ink);
+  text-align: center;
+}
+.am-scope .am-sys-title {
+  font-weight: 700;
+  font-size: 15px;
+}
+.am-scope .am-sys-sub {
+  color: var(--ink-soft);
+  font-size: 13px;
+  margin-top: 0.15em;
+}
+.am-scope .am-sys-coord {
+  border: 1.5px solid var(--accent);
+  background: var(--accent-soft);
+  border-radius: 8px;
+  padding: 0.6em 0.9em;
+}
+.am-scope .am-sys-coord .am-sys-title {
+  color: var(--accent);
+}
+.am-scope .am-sys-wire {
+  display: flex;
+  justify-content: center;
+  gap: 1.6em;
+  flex-wrap: wrap;
+  font-size: 12.5px;
+  color: var(--ink-faint);
+  padding: 0.45em 0;
+}
+.am-scope .am-sys-units {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.9rem;
+}
+.am-scope .am-sys-unit {
+  position: relative;
+  border: 1px dashed var(--rule);
+  border-radius: 8px;
+  padding: 0.55em 0.55em 0.65em;
+  background: var(--paper-deep);
+  --c: var(--ink);
+}
+.am-scope .am-sys-d1 {
+  --c: var(--forest);
+}
+.am-scope .am-sys-d2 {
+  --c: var(--indigo);
+}
+.am-scope .am-sys-d3 {
+  --c: var(--ochre);
+}
+.am-scope .am-sys-unit-name {
+  font-weight: 700;
+  color: var(--c);
+  margin-bottom: 0.4em;
+}
+.am-scope .am-sys-box {
+  border: 1px solid var(--c);
+  border-radius: 6px;
+  background: var(--surf-halo);
+  padding: 0.45em 0.4em;
+}
+.am-scope .am-sys-step {
+  font-size: 12px;
+  color: var(--ink-faint);
+  padding: 0.3em 0;
+}
+.am-scope .am-sys-dots {
+  position: absolute;
+  left: -0.75rem;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  color: var(--ink-faint);
+  font-size: 16px;
+}
+.am-scope .am-sys-shared {
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+  padding: 0.6em 0.9em;
+}
+@media (max-width: 640px) {
+  .am-scope .am-sys-units {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.6rem;
+  }
+  .am-scope .am-sys-dots {
+    display: none;
+  }
+}
+
+/* Table 2: seven columns, a little wider than the text on desktop */
+.am-scope #table-2 table {
+  font-size: 14px;
+  min-width: 720px;
+}
+.am-scope #table-2 td:first-child,
+.am-scope #table-2 th:first-child {
+  white-space: nowrap;
+}
+@media (min-width: 1024px) {
+  .am-scope #table-2 {
+    margin-left: -1.5rem;
+    margin-right: -1.5rem;
+  }
+}

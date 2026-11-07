@@ -1105,7 +1105,7 @@ export default function Appendix() {
             model holds, <Tex>{T`\kappa`}</Tex> 0.87–1.0. With a finite-difference
             step of 0.3, CG with the full step gave 112.7 nats after two
             iterations and 214.7 after three; with step 0.01 the numbers are those
-            of <a className="am-ref" href="#table-2">Table 2</a>. The per-trainer residuals at the chosen point (three
+            of <a className="am-ref" href="#table-3">Table 3</a>. The per-trainer residuals at the chosen point (three
             iterations, <Tex tail=")">{T`\gamma=\tfrac12`}</Tex> are 3.0 and 5.5
             nats, against 5.2 and 8.1 for the sum.
           </p>
@@ -1344,7 +1344,7 @@ export default function Appendix() {
             0.95, responses up to 16,384 tokens, non-thinking mode, their scorers
             for each benchmark, and a local sandbox for LiveCodeBench. Our base,
             MOPD and IF-specialist IFBench scores (30.7 / 46.7 / 48.9) reproduce
-            the published 30.3 / 47.3 / 49.0. <a className="am-ref" href="#table-3">Table 3</a> reports AIME 2025 and 2026
+            the published 30.3 / 47.3 / 49.0. <a className="am-ref" href="#table-4">Table 4</a> reports AIME 2025 and 2026
             pooled, LiveCodeBench v6 only and a domain-balanced mean; the paired
             differences quoted with ± in this appendix are on the eight-benchmark
             mean of Wu et al., which weights AIME and LiveCodeBench twice. Our task-arithmetic point is
@@ -1916,7 +1916,7 @@ export default function Appendix() {
             precision. The same release also shows the
             conflicting regime outside the merge: in their evaluation, the IF
             specialist trained alone lowers BFCL from 63.9 to 54.1, and the agent and code specialists lose
-            about 2 points on AIME25 <Cite k="wu2026" />. <a className="am-ref" href="#table-6">Table 6</a> and <a className="am-ref" href="#fig-4">Figure 4</a>{' '}
+            about 2 points on AIME25 <Cite k="wu2026" />. <a className="am-ref" href="#table-7">Table 7</a> and <a className="am-ref" href="#fig-5">Figure 5</a>{' '}
             measure which regime each of the eight main domains falls in.
           </p>
           <p>
