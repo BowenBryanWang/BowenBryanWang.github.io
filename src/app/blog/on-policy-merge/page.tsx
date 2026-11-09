@@ -32,13 +32,13 @@ function Key({ children }: { children: ReactNode }) {
 }
 
 export const metadata: Metadata = {
-  title: 'On-Policy Merge Stabilizes Multi-Task Reinforcement Learning',
+  title: 'On-Policy Merge',
   description:
     'One on-policy RL trainer per domain, merged during training at the point closest in KL to every trainer on its own fresh rollouts. The closed form, why it decouples domains and what that costs, how to make a merge take ten minutes on a 9B model, and results against multi-task RL, merging after training and multi-teacher on-policy distillation.',
 }
 
 const POST = {
-  title: 'On-Policy Merge Stabilizes Multi-Task Reinforcement Learning',
+  title: 'On-Policy Merge',
   subtitle:
     'Frontier models are post-trained with RL on many domains, and every current way of combining those domains pays somewhere: mixed batches let domains interfere, merging finished specialists loses what they learned, and multi-teacher distillation needs a second round of rollouts and stops at its teachers. On-Policy Merge gives each domain its own on-policy trainer and merges them during training, at the point closest in KL to every trainer on its own fresh rollouts, whenever one has drifted far enough. We derive the merge, show what it guarantees and what it gives up, make it take about ten minutes on a 9B model, and test it.',
   author: 'Bowen Wang',
@@ -67,7 +67,7 @@ const TOC: TocItem[] = [
 
 const BIBTEX = `@article{wang2026onpolicymerge,
   author  = {Bowen Wang},
-  title   = {On-Policy Merge Stabilizes Multi-Task Reinforcement Learning},
+  title   = {On-Policy Merge},
   journal = {bowenwang.me},
   year    = {2026},
   month   = nov,
@@ -78,11 +78,7 @@ function PostHero() {
   return (
     <header className="mb-8 mt-4">
       <h1 className="text-center text-[1.9rem] font-bold leading-[1.2] tracking-tight text-zinc-900 dark:text-zinc-100 sm:text-[clamp(1.9rem,4.4vw,2.6rem)]">
-        <span className="sm:whitespace-nowrap">On-Policy Merge Stabilizes</span>{' '}
-        <br className="hidden sm:inline" />
-        <span className="sm:whitespace-nowrap">
-          Multi-Task Reinforcement Learning
-        </span>
+        On-Policy Merge
       </h1>
       <div className="mt-6 text-center text-[17px] text-zinc-800 dark:text-zinc-200">
         {POST.author}

@@ -2,7 +2,7 @@
 const TARGET = '/blog/on-policy-merge'
 
 export const metadata = {
-  title: 'On-Policy Merge Stabilizes Multi-Task Reinforcement Learning',
+  title: 'On-Policy Merge',
   alternates: { canonical: TARGET },
   robots: { index: false },
 }

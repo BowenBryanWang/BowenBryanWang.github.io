@@ -19,7 +19,7 @@ interface BlogPost {
 const posts: BlogPost[] = [
   {
     slug: 'on-policy-merge',
-    title: 'On-Policy Merge Stabilizes Multi-Task Reinforcement Learning',
+    title: 'On-Policy Merge',
     date: '2026-11-05',
     description:
       'One on-policy RL trainer per domain, merged during training at the point closest in KL to every trainer on its own fresh rollouts. Why the merge decouples domains and what that costs, how to make it take ten minutes on a 9B model, one-shot results on released 4B specialists, and the comparison with multi-task RL, merging after training and MOPD.',
