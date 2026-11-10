@@ -24,13 +24,14 @@ const posts: BlogPost[] = [
     description:
       'One on-policy RL trainer per domain, merged during training at the point closest in KL to every trainer on its own fresh rollouts. Why the merge decouples domains and what that costs, how to make it take ten minutes on a 9B model, one-shot results on released 4B specialists, and the comparison with multi-task RL, merging after training and MOPD.',
   },
-  {
-    slug: 'multitask-rl-done-right',
-    title: "Filtering Doesn't Change Your Mix. Fixing the Mix Does.",
-    date: '2026-11-04',
-    description:
-      'Multi-task RL done right, part one. In multi-environment RL, zero-advantage filtering leaves environment weights intact; holding the post-filter mix multiplies them by one over the acceptance rate, and per-sequence normalization reweights environments by inverse length. A pre-registered plan with a ledger rule and a free log check.',
-  },
+  // hidden from the blog index (draft, not finished)
+  // {
+  //   slug: 'multitask-rl-done-right',
+  //   title: "Filtering Doesn't Change Your Mix. Fixing the Mix Does.",
+  //   date: '2026-11-04',
+  //   description:
+  //     'Multi-task RL done right, part one. In multi-environment RL, zero-advantage filtering leaves environment weights intact; holding the post-filter mix multiplies them by one over the acceptance rate, and per-sequence normalization reweights environments by inverse length. A pre-registered plan with a ledger rule and a free log check.',
+  // },
   // hidden from the blog index
   // {
   //   slug: 'anticausal-masks',

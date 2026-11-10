@@ -16,6 +16,7 @@ export const metadata: Metadata = {
   title: "Filtering Doesn't Change Your Mix. Fixing the Mix Does.",
   description:
     'Multi-task RL done right, part one: in multi-environment GRPO training, zero-advantage filtering leaves environment weights intact, while the common fix of holding the post-filter mix multiplies them by one over the acceptance rate, and per-sequence loss normalization silently reweights environments by inverse length. A pre-registered research plan.',
+  robots: { index: false },
 }
 
 const POST = {
