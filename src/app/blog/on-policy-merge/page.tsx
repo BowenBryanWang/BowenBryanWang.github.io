@@ -198,9 +198,9 @@ export default function OnPolicyMergingPost() {
               Fisher, which fades on exactly the behaviour a trainer has become
               confident about. Applied once to finished specialists, tens to
               hundreds of nats apart, it still works: merging five released 4B
-              RL specialists with no training and no student rollouts beats
-              task arithmetic by 1.3 points and the released MOPD model by 0.8
-              points on a domain-balanced benchmark mean. But it leaves part of
+              RL specialists with no training and no student rollouts beats the
+              released MOPD model on five of six benchmarks and task arithmetic
+              on four, and task arithmetic by 10 points on IFBench. But it leaves part of
               each specialist behind, and nothing corrects what it misses.
             </p>
             <p>
@@ -1347,7 +1347,6 @@ export default function OnPolicyMergingPost() {
                     <th className="am-num">IFEval</th>
                     <th className="am-num">IFBench</th>
                     <th className="am-num">BFCL v3</th>
-                    <th className="am-num">Mean</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -1359,7 +1358,6 @@ export default function OnPolicyMergingPost() {
                     <td className="am-num">83.7</td>
                     <td className="am-num">30.7</td>
                     <td className="am-num">63.8</td>
-                    <td className="am-num">57.54</td>
                   </tr>
                   <tr>
                     <td>Specialist, own domain</td>
@@ -1369,7 +1367,6 @@ export default function OnPolicyMergingPost() {
                     <td className="am-num am-heat" style={{ ['--h' as string]: 0.89 }}>89.6</td>
                     <td className="am-num am-heat" style={{ ['--h' as string]: 0.74 }}>48.9</td>
                     <td className="am-num am-heat" style={{ ['--h' as string]: 0.44 }}>72.4</td>
-                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.29 }}>64.30</td>
                   </tr>
                   <tr>
                     <td>Task arithmetic, λ = 0.6</td>
@@ -1379,7 +1376,6 @@ export default function OnPolicyMergingPost() {
                     <td className="am-num am-heat" style={{ ['--h' as string]: 0.51 }}>88.2</td>
                     <td className="am-num am-heat" style={{ ['--h' as string]: 0.02 }}>40.4</td>
                     <td className="am-num am-heat" style={{ ['--h' as string]: 0.00 }}>71.7</td>
-                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.24 }}>64.15</td>
                   </tr>
                   <tr>
                     <td>Mixed RL (released)</td>
@@ -1389,7 +1385,6 @@ export default function OnPolicyMergingPost() {
                     <td className="am-num am-heat" style={{ ['--h' as string]: 0.00 }}>86.3</td>
                     <td className="am-num am-heat" style={{ ['--h' as string]: 0.00 }}>40.2</td>
                     <td className="am-num am-heat" style={{ ['--h' as string]: 0.00 }}>71.7</td>
-                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.00 }}>63.42</td>
                   </tr>
                   <tr>
                     <td>MOPD (released)</td>
@@ -1399,7 +1394,6 @@ export default function OnPolicyMergingPost() {
                     <td className="am-num am-heat" style={{ ['--h' as string]: 0.76 }}>89.1</td>
                     <td className="am-num am-heat" style={{ ['--h' as string]: 0.55 }}>46.7</td>
                     <td className="am-num am-heat" style={{ ['--h' as string]: 0.56 }}>72.6</td>
-                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.40 }}>64.63</td>
                   </tr>
                   <tr>
                     <td>Sum, λ = 1</td>
@@ -1409,7 +1403,6 @@ export default function OnPolicyMergingPost() {
                     <td className="am-num am-heat" style={{ ['--h' as string]: 0.89 }}>89.6</td>
                     <td className="am-num am-heat" style={{ ['--h' as string]: 0.77 }}>49.3</td>
                     <td className="am-num am-heat" style={{ ['--h' as string]: 0.44 }}>72.4</td>
-                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.85 }}>65.99</td>
                   </tr>
                   <tr>
                     <td>
@@ -1421,7 +1414,6 @@ export default function OnPolicyMergingPost() {
                     <td className="am-num am-heat" style={{ ['--h' as string]: 0.86 }}>89.5</td>
                     <td className="am-num am-heat" style={{ ['--h' as string]: 0.87 }}>50.5</td>
                     <td className="am-num am-heat" style={{ ['--h' as string]: 1.00 }}><strong>73.3</strong></td>
-                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.66 }}>65.41</td>
                   </tr>
                   <tr>
                     <td>OPM merge, 30 CG iterations</td>
@@ -1431,7 +1423,6 @@ export default function OnPolicyMergingPost() {
                     <td className="am-num am-heat" style={{ ['--h' as string]: 0.73 }}>89.0</td>
                     <td className="am-num am-heat" style={{ ['--h' as string]: 0.90 }}>50.8</td>
                     <td className="am-num am-heat" style={{ ['--h' as string]: 0.81 }}>73.0</td>
-                    <td className="am-num am-heat" style={{ ['--h' as string]: 0.80 }}>65.83</td>
                   </tr>
                   <tr>
                     <td>OPM merge, 10 iterations, deployed in fp32</td>
@@ -1441,7 +1432,6 @@ export default function OnPolicyMergingPost() {
                     <td className="am-num am-heat" style={{ ['--h' as string]: 1.00 }}><strong>90.0</strong></td>
                     <td className="am-num am-heat" style={{ ['--h' as string]: 1.00 }}><strong>52.0</strong></td>
                     <td className="am-num am-heat" style={{ ['--h' as string]: 0.50 }}>72.5</td>
-                    <td className="am-num am-heat" style={{ ['--h' as string]: 1.00 }}><strong>66.44</strong></td>
                   </tr>
                 </tbody>
               </table>
@@ -1450,38 +1440,36 @@ export default function OnPolicyMergingPost() {
               <strong>Table 3.</strong> One-shot merges of the five released
               Qwen3-4B specialists of <CiteT k="wu2026" />, mean over 32 samples
               per prompt, in percent. AIME pools the 2025 and 2026 problems (60
-              in all), and LiveCodeBench is v6. The mean weights the five
-              domains equally: math (AIME), science (GPQA-Diamond), code (LCB
-              v6), instruction following (the average of IFEval and IFBench)
-              and tool use (BFCL v3). Within each column, darker shading is a
+              in all), and LiveCodeBench is v6. The domains are math (AIME),
+              science (GPQA-Diamond), code (LCB v6), instruction following
+              (IFEval and IFBench) and tool use (BFCL v3). Within each column, darker shading is a
               higher score and bold is the highest; the base model is left
               unshaded as the reference. All merged models are deployed in bf16
               except the last row. The specialist row takes each benchmark from
-              its own domain’s specialist. Run-to-run noise, measured by
-              evaluating a bit-identical model twice, is about 0.3 points on the
-              eight-benchmark mean of <CiteT k="wu2026" />.
+              its own domain’s specialist. Per-benchmark paired intervals are{' '}
+              <Pending>being recomputed</Pending>.
             </p>
             <p>
               <span className="am-runin">On benchmarks it beats task arithmetic and MOPD.</span>{' '}
-              On the domain-balanced mean of{' '}
-              <a className="am-ref" href="#table-3">Table 3</a>, the one-shot OPM
-              merge is 1.26 points above task arithmetic and 0.78 above the
-              released MOPD model, with no rollouts beyond the 256 per domain
-              behind the Fisher. Paired intervals for this mean are{' '}
-              <Pending>being recomputed</Pending>; on the eight-benchmark mean of{' '}
-              <CiteT k="wu2026" />, which counts AIME and LiveCodeBench twice,
-              the same gaps are 1.68 ± 0.42 and 1.11 ± 0.40 over prompts. The
-              clearest single case is IFBench: 50.5, against 40.4 for task
-              arithmetic and 48.9 for the instruction-following specialist
-              itself. Deploying the same merge in fp32 adds about a point more
-              (<a className="am-ref" href="#findings">Side findings</a>).
+              In <a className="am-ref" href="#table-3">Table 3</a>, the one-shot
+              OPM merge scores above task arithmetic on four of the six
+              benchmarks and above the released MOPD model on five, with no
+              rollouts beyond the 256 per domain behind the Fisher. The gains
+              are largest where the domains barely overlap: on IFBench it scores
+              50.5, against 40.4 for task arithmetic, 46.7 for MOPD and 48.9 for
+              the instruction-following specialist itself, and on LiveCodeBench
+              65.6 against 63.8 and 63.9. It trails task arithmetic on AIME
+              (55.2 against 57.1) and GPQA (63.0 against 63.9), the domains where
+              the next paragraph shows the others’ updates help. Deploying the
+              same merge in fp32 raises five of the six scores again (
+              <a className="am-ref" href="#findings">Side findings</a>).
             </p>
             <p>
               <span className="am-runin">Where domains help each other, the sum wins.</span>{' '}
-              At the same bf16 precision, plain summation beats the OPM merge by
-              0.58 points, mostly on AIME, although its KL residual is almost
-              four times larger; with 30 CG iterations the gap shrinks to 0.16,
-              within run-to-run noise. This is{' '}
+              At the same bf16 precision, plain summation beats the OPM merge on
+              AIME by 4.0 points and on GPQA by 1.5, although its KL residual is
+              almost four times larger; with 30 CG iterations the AIME gap
+              shrinks to 2.3. This is{' '}
               <a className="am-ref" href="#thm-1">Theorem 1</a> at work, not a
               failure of the metric. Math, science and code help each other: the
               summed model beats every reasoning specialist on its own benchmark,
@@ -1562,8 +1550,8 @@ export default function OnPolicyMergingPost() {
 
           <Placeholder label="Headline paragraph" status="pending main runs">
             <p>
-              Mean and worst-domain normalised score of A4 against A1–A3 at
-              matched rollouts, three seeds, with confidence intervals; one
+              Per-domain scores of A4 against A1–A3 at matched rollouts, with
+              confidence intervals: on which domains A4 wins and loses, and one
               sentence per baseline on where the gap comes from.
             </p>
           </Placeholder>
@@ -1582,17 +1570,15 @@ export default function OnPolicyMergingPost() {
                     <th className="am-num">τ²</th>
                     <th className="am-num">AIME26</th>
                     <th className="am-num">IFBench</th>
-                    <th className="am-num">Mean</th>
-                    <th className="am-num">Worst</th>
                   </tr>
                 </thead>
                 <tbody>
-                  <PendingRow label="Base" n={10} />
-                  <PendingRow label="Specialists, own domain" n={10} />
-                  <PendingRow label="A1 · Multi-task RL" n={10} />
-                  <PendingRow label="A2 · Merge-after, best" n={10} />
-                  <PendingRow label="A3 · MOPD" n={10} />
-                  <PendingRow label={<strong>A4 · OPM</strong>} n={10} />
+                  <PendingRow label="Base" n={8} />
+                  <PendingRow label="Specialists, own domain" n={8} />
+                  <PendingRow label="A1 · Multi-task RL" n={8} />
+                  <PendingRow label="A2 · Merge-after, best" n={8} />
+                  <PendingRow label="A3 · MOPD" n={8} />
+                  <PendingRow label={<strong>A4 · OPM</strong>} n={8} />
                 </tbody>
               </table>
             </div>
@@ -1604,8 +1590,7 @@ export default function OnPolicyMergingPost() {
             <p>
               Per-domain scores: SWE-bench Verified, Terminal-Bench 2.1, MiMo
               Cyber (mini), MiMo General (mini), BrowseComp-Plus, τ²-Bench,
-              AIME26, IFBench. Mean and worst columns are normalised from base
-              (0) to each domain’s specialist (1). Mean ± 95% CI over 3 seeds.
+              AIME26, IFBench, each with a 95% confidence interval.
               Secondary benchmarks per domain (SWE-bench Pro, HMMT Feb 26,
               IFEval, BFCL v4, τ³-Bench) and the held-out suite (MMLU-Pro, GPQA,
               HLE) go in <a className="am-ref" href="#app-f">Appendix F</a>.
@@ -1661,8 +1646,8 @@ export default function OnPolicyMergingPost() {
               <Tex>{T`J_j(\text{sum})-J_j(\text{OPM})`}</Tex> should be the sign
               of the transfer term <Tex tail=",">{T`T_j`}</Tex> which each
               trainer can estimate from its own batch with one forward-mode pass
-              per rollout. OPM should match or beat multi-task RL on the worst
-              domain where domains conflict, and trail it on domains that help
+              per rollout. OPM should match or beat multi-task RL on domains
+              that conflict with the others, and trail it on domains that help
               each other (knowledge work and tool use, or math and held-out
               reasoning) unless trainer learning rates are raised. In an
               exact-gradient check the correlation between <Tex>{T`T_j`}</Tex>{' '}
@@ -1715,8 +1700,6 @@ export default function OnPolicyMergingPost() {
                 <thead>
                   <tr>
                     <th>Rendezvous per run</th>
-                    <th className="am-num">Mean</th>
-                    <th className="am-num">Worst</th>
                     <th className="am-num">In-domain benefit</th>
                     <th className="am-num">Untrained domain</th>
                     <th className="am-num">Merge cost</th>
@@ -1725,19 +1708,19 @@ export default function OnPolicyMergingPost() {
                 <tbody>
                   <PendingRow
                     label="1 (one-shot OPM merge, end of run)"
-                    n={5}
+                    n={3}
                   />
-                  <PendingRow label="≈ 4" n={5} />
+                  <PendingRow label="≈ 4" n={3} />
                   <PendingRow
                     label="Merge-then-polish (4 rendezvous in the last 20%)"
-                    n={5}
+                    n={3}
                   />
-                  <PendingRow label="≈ 16" n={5} />
-                  <PendingRow label="≈ 32" n={5} />
-                  <PendingRow label="A1 · Multi-task RL (reference)" n={5} />
+                  <PendingRow label="≈ 16" n={3} />
+                  <PendingRow label="≈ 32" n={3} />
+                  <PendingRow label="A1 · Multi-task RL (reference)" n={3} />
                   <PendingRow
                     label="A2 · Merge-after, best (reference)"
-                    n={5}
+                    n={3}
                   />
                 </tbody>
               </table>
@@ -1753,9 +1736,8 @@ export default function OnPolicyMergingPost() {
               merge-then-polish (independent specialists, then four rendezvous
               in the last 20% of the budget); the one-rendezvous end coincides
               with A2’s one-shot OPM merge.
-              Horizontal axis: rendezvous per run (log scale). Vertical axes:
-              mean and worst normalised score, with A1 and A2 as horizontal
-              bands. <a className="am-ref" href="#table-7">Table 7</a> adds in-domain benefit from other domains, the
+              Horizontal axis: rendezvous per run (log scale). One panel per
+              domain, showing its score, with A1 and A2 as horizontal bands. <a className="am-ref" href="#table-7">Table 7</a> adds in-domain benefit from other domains, the
               score on competitive code, which no arm trains on, and merge
               cost.
             </p>
@@ -1857,15 +1839,14 @@ export default function OnPolicyMergingPost() {
               <span className="am-runin">There is a bf16 floor.</span> Casting
               an fp32 specialist to bf16 moves its policy by 25–40% of its whole
               RL drift, measured in KL on its own rollouts. The same merged
-              model scores 1.0 points higher (1.30 ± 0.34 on the eight-benchmark
-              mean) deployed in fp32 than in
-              bf16. Any merge, trigger or residual threshold has to sit above
+              model deployed in fp32 instead of bf16 scores higher on five of six
+              benchmarks, by 2.6 points on AIME. Any merge, trigger or residual threshold has to sit above
               this floor, and scoring has to run in true fp32.
             </p>
             <p>
               <span className="am-runin">KL residual is not reward loss.</span>{' '}
               The sum has the largest KL residual of any merge and the best
-              benchmark mean at bf16. Behind this is an exact decomposition: a
+              bf16 scores on AIME and GPQA. Behind this is an exact decomposition: a
               return change is the reward-weighted log-likelihood ratio plus a
               term bounded by the KL. To first order it is{' '}
               <Tex tail=",">{T`\rho\,\sigma\sqrt{2\varepsilon}`}</Tex> with{' '}
