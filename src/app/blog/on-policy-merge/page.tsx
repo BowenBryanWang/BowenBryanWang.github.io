@@ -225,8 +225,8 @@ export default function OnPolicyMergingPost() {
               and code.
               What OPM buys is a per-domain guarantee at a measurable price: one
               model copy per domain, and a merge that needs no environment
-              interaction and takes about ten minutes for two 9B trainers and
-              under an hour for eight.
+              interaction and takes about five minutes for two 9B trainers and
+              about an hour for eight.
             </p>
             <p>
               The rest of the post places OPM among the existing recipes,
@@ -838,7 +838,7 @@ export default function OnPolicyMergingPost() {
               the guarantees hold approximately, as closely as that residual is
               small, which is why the main runs log it at every rendezvous. In
               our 9B run the held-out residual, summed over trainers, was 0.12
-              to 0.51 of their drift, the same order as the one-shot 4B merge.{' '}
+              to 0.51 of their drift over the first five rendezvous, the same order as the one-shot 4B merge.{' '}
               <a className="am-ref" href="#app-b">Appendix B</a> gives the
               status and proof of every statement, and lists what is not
               claimed.
@@ -953,10 +953,13 @@ export default function OnPolicyMergingPost() {
               GPU memory, made every product three times slower. The guarded
               merge below uses four products and four forward passes and takes
               about ten minutes with two trainers. With eight trainers, as in
-              our main run, a rendezvous took 48–57 minutes and about 11
-              GPU-hours, including 18–22 minutes for five preconditioned CG
-              iterations, 1–2 minutes of line search and up to 17 minutes
-              waiting for the slowest trainer to arrive. Everything that follows is about shrinking{' '}
+              our main run, a rendezvous took 37–70 minutes. Each of the first
+              five took 48–57 minutes and about 11 GPU-hours, including 18–22
+              minutes for five preconditioned CG iterations, 1–2 minutes of line
+              search and up to 17 minutes waiting for the slowest trainer to
+              arrive; the longest included a second solve after the guard
+              rejected the first. Two 9B trainers merge in 3–19 minutes, 5 at
+              the median over 29 merges. Everything that follows is about shrinking{' '}
               <Tex tail=".">{T`c_{\rm FVP}N_F`}</Tex>
             </p>
             <p>
@@ -1085,12 +1088,17 @@ export default function OnPolicyMergingPost() {
               Jacobi-preconditioned variant: five CG iterations from the sum, a
               central logit step of 0.03 and{' '}
               <Tex tail=".">{T`\gamma\in\{0,\tfrac12,1\}`}</Tex> With eight
-              trainers it cut the held-out residual by 51–78% relative to the sum
-              at every rendezvous, and the full step was always best, so
-              preconditioning appears to remove the overshoot. At two of the five
-              rendezvous the plain sum was further from the trainers than not
+              trainers it cut the held-out residual by 44–78% relative to the sum
+              at all seven rendezvous so far, and the full step was best at six
+              of them, so preconditioning appears to remove most of the
+              overshoot. At two of the first five rendezvous the plain sum was further from the trainers than not
               merging at all, 1.51 and 1.04 times the no-merge residual: summing
               updates during training can be worse than not merging (<a className="am-ref" href="#table-c2">Table C2</a>).
+              The guard also earned its place in that run. At the seventh
+              rendezvous the full solve put a trainer above its ceiling at every
+              step size, so the guard set the math trainer’s update aside for
+              the next rendezvous, solved again over the other trainers and
+              installed the result at half its length, 44% below the sum.
             </p>
           </div>
 
@@ -1137,8 +1145,11 @@ export default function OnPolicyMergingPost() {
               takes most of the saving: our run computes the Fisher only on the
               first 2,048 action tokens of each rollout, 22% of a math
               rollout’s tokens, at almost no loss in quality. Within that prefix,
-              sampling by entropy saves only the vocabulary head, because the
-              forward and backward passes still run over the whole context.
+              subsampling does not pay. On the <a className="am-ref" href="#table-2">Table 2</a> test case, keeping 5–50%
+              of the prefix tokens, by entropy or uniformly, left the time per
+              product unchanged (17–19 s against 18 s with every token), because
+              the forward and backward passes still run over the whole context,
+              and raised the residual from 8.3 to 8.6–11.7 nats.
             </p>
             <p>
               <Key>Exact, cheaper products.</Key> The finite difference is both
@@ -1151,7 +1162,7 @@ export default function OnPolicyMergingPost() {
               as long as the merge’s own arithmetic stays in fp32, above the
               bf16 floor. The risk is engineering: forward-mode differentiation
               has to pass through fused attention and expert kernels, which few
-              training stacks support today.
+              training stacks support today. We leave it to future work.
             </p>
             <p>
               <Key>A subspace solve.</Key> CG searches the whole parameter
@@ -1173,9 +1184,13 @@ export default function OnPolicyMergingPost() {
               feasible. The subspace solution is also a better starting point
               for CG than the sum, and a rendezvous can warm-start from the
               previous one. One caution from our 9B run: 99.5–99.7% of the CG
-              correction to the sum lay outside the span of the updates, so a
-              subspace solve can reweight the updates but cannot reproduce that
-              correction; how much residual it leaves is under test.
+              correction to the sum lay outside the span of the updates, so one
+              coefficient per update can only rescale the updates. Finer blocks
+              recover much of the correction. On the <a className="am-ref" href="#table-2">Table 2</a> test case a global
+              subspace solve recovered 48% of CG’s reduction of the residual,
+              one coefficient per parameter type 51%, one per layer 70% and one
+              per layer and type 72%, for two Fisher-vector products against
+              about eight for CG.
             </p>
             <p>
               <Key>Experts.</Key> Mixture-of-experts layers give the
@@ -1288,25 +1303,6 @@ export default function OnPolicyMergingPost() {
               the trainer that learns.
             </p>
           </div>
-          <Placeholder label="Experiments to run" status="need experiment">
-            <ul>
-              <li>
-                【need experiment: token subsampling at 5/10/20/50% within the
-                2,048-token prefix. Error of <Tex tail=",">{T`F_iv`}</Tex>{' '}
-                <a className="am-ref" href="#table-2">Table 2</a> residual,
-                time.】
-              </li>
-              <li>
-                【need experiment: subspace solve (global, by parameter type, by
-                layer) against the sum and the preconditioned CG merge.】
-              </li>
-              <li>
-                【need experiment: JVP–VJP products. Cost per token against the
-                finite difference, and whether unpreconditioned CG still
-                overshoots.】
-              </li>
-            </ul>
-          </Placeholder>
 
           {/* ------------------------------------------------------------ */}
           <SectionTitle
@@ -1526,10 +1522,14 @@ export default function OnPolicyMergingPost() {
               and evaluation, and no reference-KL penalty. The budget is matched
               in environment rollouts per domain, counting MOPD’s student
               rollouts. GPU-hours and wall-clock are reported separately. All
-              arms are reported at their final checkpoints, although held-out
-              math declines late in training under continued math RL, with or
-              without merging.
-              <a className="am-ref" href="#app-f">Appendix F</a> gives every detail.
+              arms are reported at their final checkpoints except in math, where
+              held-out math declines late in training under continued math RL,
+              with or without merging. The math specialist, which A2 merges and
+              A3 distils from, is taken at step 210, chosen on held-out math, and
+              OPM’s math trainer stops at step 228. Multi-task RL cannot stop one
+              domain alone and is reported at its final checkpoint; final-step
+              math scores for every arm are in <a className="am-ref" href="#app-f">Appendix F</a>, which also gives every
+              other detail.
             </p>
             <ul>
               <li>
@@ -1544,7 +1544,9 @@ export default function OnPolicyMergingPost() {
                 the full budget and merged once. We report the best of task
                 arithmetic with <Tex>{T`\lambda\in\{0.4,0.6,0.8,1.0\}`}</Tex>{' '}
                 (chosen on held-out reward), DARE, TIES, the closed-form merge
-                of <CiteT k="liu2026" />, and a one-shot OPM merge.
+                of <CiteT k="liu2026" /> (whose linearisation error at eight
+                domains, 0.42, is outside the 0.10 the paper allows), and a
+                one-shot OPM merge.
               </li>
               <li>
                 <strong>A3 · MOPD.</strong> The same eight specialists as
@@ -1585,15 +1587,25 @@ export default function OnPolicyMergingPost() {
                   <tr>
                     <td>Base</td>
                     <td className="am-num"><Pending>–</Pending></td>
+                    <td className="am-num">12.8</td>
+                    <td className="am-num">84.5</td>
                     <td className="am-num"><Pending>–</Pending></td>
-                    <td className="am-num">85.8 ± 2.5</td>
-                    <td className="am-num"><Pending>–</Pending></td>
-                    <td className="am-num">4.9 ± 0.6</td>
+                    <td className="am-num">11.0</td>
                     <td className="am-num">72.5 ± 3.8</td>
-                    <td className="am-num">43.1 ± 7.4</td>
-                    <td className="am-num">26.9 ± 2.1</td>
+                    <td className="am-num">65.3 ± 6.4</td>
+                    <td className="am-num">27.8</td>
                   </tr>
-                  <PendingRow label="Specialists, own domain" n={8} />
+                  <tr>
+                    <td>Specialists, own domain</td>
+                    <td className="am-num"><Pending>–</Pending></td>
+                    <td className="am-num">23.4</td>
+                    <td className="am-num">94.7</td>
+                    <td className="am-num">40.5*</td>
+                    <td className="am-num"><Pending>–</Pending></td>
+                    <td className="am-num">61.0</td>
+                    <td className="am-num"><Pending>–</Pending></td>
+                    <td className="am-num">68.5</td>
+                  </tr>
                   <PendingRow label="A1 · Multi-task RL" n={8} />
                   <PendingRow label="A2 · Merge-after, best" n={8} />
                   <PendingRow label="A3 · MOPD" n={8} />
@@ -1625,9 +1637,8 @@ export default function OnPolicyMergingPost() {
               scoring of every student token. OPM’s is its merges, which need no
               environment interaction: a few Fisher-vector products per trainer
               on cached rollouts and four forward passes for the line search.
-              Measured so far, a rendezvous of eight 9B trainers takes 48–57
-              minutes and about 11 GPU-hours, up to a sixth of a round’s
-              wall-clock.
+              Measured so far, a rendezvous of the eight-domain 9B run takes
+              37–70 minutes.
             </p>
             <div className="am-table">
               <table>
@@ -1845,8 +1856,8 @@ export default function OnPolicyMergingPost() {
             <p>
               <span className="am-runin">Trade-offs.</span> Every rendezvous
               costs a merge and a synchronisation, since every trainer waits for
-              the merged model. The merge takes about ten minutes for two 9B
-              trainers and close to an hour for eight, because each trainer
+              the merged model. The merge takes about five minutes for two 9B
+              trainers and about an hour for eight, because each trainer
               computes Fisher products on its own rollouts. Meeting often buys locality, calibrated weights and
               repair, and pays for them in merges; merge-then-polish pays for
               only a few. Memory grows with the number of trainers, one model
@@ -1865,7 +1876,7 @@ export default function OnPolicyMergingPost() {
               long-response domains get more weight in shared directions. OPM
               keeps one model copy per domain in memory. The Fisher is estimated
               from a subsample, and the evidence for the guarded merge comes
-              from one two-domain test. In the one-shot merge, a stale metric
+              from one two-domain test and seven rendezvous of one 9B run. In the one-shot merge, a stale metric
               tied the on-policy one on benchmarks. In the 9B run the merge did
               not hold small-drift trainers in place: it moved the
               software-engineering and terminal trainers by more than their own

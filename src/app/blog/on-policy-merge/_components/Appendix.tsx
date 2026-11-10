@@ -1202,7 +1202,7 @@ export default function Appendix() {
                   <td>Only the next rendezvous; units never wait for each other between rendezvous.</td>
                   <td>Yes, throughout training.</td>
                   <td>Start, retune or roll back one trainer at a rendezvous; the others carry on.</td>
-                  <td>A merge per rendezvous: about ten minutes with two trainers at 9B, close to an hour with eight.</td>
+                  <td>A merge per rendezvous: about five minutes with two trainers at 9B, about an hour with eight.</td>
                 </tr>
               </tbody>
             </table>
@@ -1214,8 +1214,12 @@ export default function Appendix() {
             in nats at each rendezvous of the eight-domain 9B run. “No merge”
             is the trainers’ total drift from the anchor; the merge is the
             preconditioned CG solve at step size{' '}
-            <Tex tail=".">{T`\gamma`}</Tex> Trainers that had finished their
-            budget took part with their final weights.
+            <Tex tail=".">{T`\gamma`}</Tex> “Trainers” counts those still
+            training; trainers that had finished their budget took part with
+            their final weights. Rendezvous 6 and 7 installed the merge at half
+            its length. At rendezvous 7 the full solve failed the per-trainer
+            check at every step size; the row reports the solve without the math
+            trainer, whose update waited for the next rendezvous.
           </p>
           <div className="am-table">
             <table>
@@ -1236,6 +1240,8 @@ export default function Appendix() {
                 <tr><td>3</td><td className="am-num">7</td><td className="am-num">2,122</td><td className="am-num">928</td><td className="am-num">453</td><td className="am-num"><strong>249</strong></td><td className="am-num">−73%</td></tr>
                 <tr><td>4</td><td className="am-num">7</td><td className="am-num">1,128</td><td className="am-num">595</td><td className="am-num">293</td><td className="am-num"><strong>186</strong></td><td className="am-num">−69%</td></tr>
                 <tr><td>5</td><td className="am-num">5</td><td className="am-num">509</td><td className="am-num">528</td><td className="am-num">303</td><td className="am-num"><strong>259</strong></td><td className="am-num">−51%</td></tr>
+                <tr><td>6</td><td className="am-num">6</td><td className="am-num">–</td><td className="am-num">2,092</td><td className="am-num">–</td><td className="am-num"><strong>499</strong></td><td className="am-num">−76%</td></tr>
+                <tr><td>7</td><td className="am-num">4</td><td className="am-num">–</td><td className="am-num">1,071</td><td className="am-num">–</td><td className="am-num"><strong>596</strong></td><td className="am-num">−44%</td></tr>
               </tbody>
             </table>
           </div>
@@ -1792,7 +1798,7 @@ export default function Appendix() {
                   <td>Search</td>
                   <td>ASearcher training data over a local Wikipedia corpus</td>
                   <td>Answer match with aliases</td>
-                  <td>BrowseComp-Plus (bm25s retriever, Qwen3-30B-A3B judge)</td>
+                  <td>BrowseComp-Plus (official settings, Qwen3-32B judge)</td>
                 </tr>
                 <tr>
                   <td>Tool use</td>
@@ -1825,18 +1831,21 @@ export default function Appendix() {
             removed from DAPO. Terminal-Bench runs with network access as in
             the official harness. A
             held-out suite no arm trains on: MMLU-Pro, GPQA and HLE (the older
-            publicly available release, not comparable to published HLE numbers).
-            Base scores are re-measured in our harnesses, with one fixed open
+            publicly available release, scored with the official judge prompt,
+            not comparable to published HLE numbers).
+            Single-turn benchmarks decode up to the official cap of 81,920 new
+            tokens. Base scores are re-measured in our harnesses, with one fixed open
             harness per agentic domain for every arm. Knowledge work uses the 220
             GDPval-AA tasks, judged our own way, so the scores are not
             comparable to the Artificial Analysis leaderboard. Each arm produces
             its deliverable files in a port of their Stirrup harness, with web
-            search through our own search API. One judge, Claude Opus 5, which
-            is not among our training judges, scores each deliverable against
+            search through our own search API. One judge, Claude Haiku 5.5, scores each deliverable against
             its rubric and compares deliverables pairwise; we report the rubric
             score, a Bradley–Terry Elo with the base model at 1000, and the
             head-to-head win rate between arms, with intervals bootstrapped over
-            tasks. The judge is a closed-API model, a reproducibility caveat.
+            tasks. On the gold deliverables it agrees with Claude Opus 5 on 94%
+            of rubric criteria (κ = 0.82) and is the stricter of the two. The
+            judge is a closed-API model, a reproducibility caveat.
           </p>
           <p>
             <span className="am-runin">Shared RL recipe.</span> slime, run
@@ -1964,9 +1973,9 @@ export default function Appendix() {
             <p>
               Secondary benchmarks per domain (SWE-bench Pro, HMMT Feb 26, IFEval,
               BFCL v4 non-agentic) and the held-out suite (MMLU-Pro, GPQA-Diamond,
-              HLE) for base, specialists and A1–A4, seed 1. Base so far: IFEval
-              66.3 ± 1.6, BFCL v4 60.9 ± 1.8, MMLU-Pro 75.4 ± 0.4, GPQA-Diamond
-              59.9 ± 2.7, HLE 1.8 ± 0.3.
+              HLE) for base, specialists and A1–A4, seed 1, and final-step math
+              scores for every arm. Base so far: IFEval 67.0, BFCL v4 60.9 ± 1.8,
+              MMLU-Pro 75.7, GPQA-Diamond 65.5, HLE 3.0 ± 0.8.
             </p>
           </Placeholder>
 
