@@ -1207,6 +1207,38 @@ export default function Appendix() {
               </tbody>
             </table>
           </div>
+          <p>
+            <span className="am-runin" id="table-c2">Table C2.</span> Held-out
+            KL residual{' '}
+            <Tex>{T`\sum_i\mathrm{KL}(P^i_{\theta_i}\|P^i_{\rm merge})`}</Tex>{' '}
+            in nats at each rendezvous of the eight-domain 9B run. “No merge”
+            is the trainers’ total drift from the anchor; the merge is the
+            preconditioned CG solve at step size{' '}
+            <Tex tail=".">{T`\gamma`}</Tex> Trainers that had finished their
+            budget took part with their final weights.
+          </p>
+          <div className="am-table">
+            <table>
+              <thead>
+                <tr>
+                  <th>Rendezvous</th>
+                  <th className="am-num">Trainers</th>
+                  <th className="am-num">No merge</th>
+                  <th className="am-num">Sum (γ = 0)</th>
+                  <th className="am-num">γ = ½</th>
+                  <th className="am-num">γ = 1</th>
+                  <th className="am-num">vs sum</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>1</td><td className="am-num">8</td><td className="am-num">1,999</td><td className="am-num">3,024</td><td className="am-num">1,374</td><td className="am-num"><strong>652</strong></td><td className="am-num">−78%</td></tr>
+                <tr><td>2</td><td className="am-num">8</td><td className="am-num">3,151</td><td className="am-num">2,692</td><td className="am-num">1,236</td><td className="am-num"><strong>677</strong></td><td className="am-num">−75%</td></tr>
+                <tr><td>3</td><td className="am-num">7</td><td className="am-num">2,122</td><td className="am-num">928</td><td className="am-num">453</td><td className="am-num"><strong>249</strong></td><td className="am-num">−73%</td></tr>
+                <tr><td>4</td><td className="am-num">7</td><td className="am-num">1,128</td><td className="am-num">595</td><td className="am-num">293</td><td className="am-num"><strong>186</strong></td><td className="am-num">−69%</td></tr>
+                <tr><td>5</td><td className="am-num">5</td><td className="am-num">509</td><td className="am-num">528</td><td className="am-num">303</td><td className="am-num"><strong>259</strong></td><td className="am-num">−51%</td></tr>
+              </tbody>
+            </table>
+          </div>
         </details>
 
         {/* ============================================================ */}
@@ -1908,8 +1940,9 @@ export default function Appendix() {
             one-shot OPM merge. A3 MOPD: per-token advantage teacher minus student
             log-probability, clipped to ±5, 50 steps of 1,024 prompts with one
             rollout each; student rollouts count toward the budget. A4 OPM: eight trainers, drift measured on about one rollout in
-            eight, a per-token ceiling, blocking rendezvous, and the guarded
-            merge with five Jacobi-preconditioned CG iterations from the sum, a
+            eight, a per-token ceiling, the Fisher on the first 2,048 action
+            tokens of each rollout, blocking rendezvous, and the guarded merge
+            with five Jacobi-preconditioned CG iterations from the sum, a
             central finite-difference logit step of 0.03,{' '}
             <Tex>{T`\gamma\in\{0,\tfrac12,1\}`}</Tex> on held-out true KL,
             and a check of every trainer’s held-out residual against its

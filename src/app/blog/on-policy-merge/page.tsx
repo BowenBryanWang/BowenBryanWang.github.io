@@ -734,12 +734,26 @@ export default function OnPolicyMergingPost() {
               <Key>The merge preserves behaviour, not reward</Key>, and it pays
               for that wherever such drift would have been harmless.
             </p>
-            <Placeholder label="Gradient diagnostics" status="need experiment">
+            <p>
+              In our 9B runs the three channels behave very differently. Policy
+              gradients of different domains have cosines of at most 0.02 at a
+              common point, no larger than the cosine between two halves of one
+              domain’s batch: at this scale a policy gradient is mostly sampling
+              noise. The trainers’ updates are closer still to orthogonal, at
+              most 0.0023 between any two of the eight at every rendezvous. Yet
+              the other trainers’ summed updates moved the small-drift
+              software-engineering trainer by 6–14 times its own drift and the
+              terminal trainer by 5–6 times, while instruction following saw
+              only 0.14–0.35 of its own. The global clip never fired: over 110
+              steps of the eight-domain multi-task run, the largest pre-clip
+              gradient norm was 0.18 against a threshold of 1.0. In our recipe
+              the clip channel is idle, and coupling runs through the shared
+              update and Adam’s second moment.
+            </p>
+            <Placeholder label="Adam coupling" status="need experiment">
               <p>
-                【need experiment: gradient coupling. For each pair of domains in
-                the main runs, the Euclidean and Adam-preconditioned gradient
-                cosines next to the Fisher visibility; in the multi-task run, how
-                often the global clip triggers and how much the shared second
+                【need experiment: in the multi-task run, the Adam-preconditioned
+                gradient cosines between domains and how much the shared second
                 moment lowers each domain’s effective learning rate.】
               </p>
             </Placeholder>
@@ -845,8 +859,8 @@ export default function OnPolicyMergingPost() {
               the specialists is still 16% of how far they drifted. In practice
               the guarantees hold approximately, as closely as that residual is
               small, which is why the main runs log it at every rendezvous. In
-              our 9B run the held-out residual, summed over trainers, was 0.10
-              to 0.38 of their drift, the same order as the one-shot 4B merge.{' '}
+              our 9B run the held-out residual, summed over trainers, was 0.12
+              to 0.51 of their drift, the same order as the one-shot 4B merge.{' '}
               <a className="am-ref" href="#app-b">Appendix B</a> gives the
               status and proof of every statement, and lists what is not
               claimed.
@@ -962,8 +976,9 @@ export default function OnPolicyMergingPost() {
               merge below uses four products and four forward passes and takes
               about ten minutes with two trainers. With eight trainers, as in
               our main run, a rendezvous took 48–57 minutes and about 11
-              GPU-hours, since every trainer computes products on its own
-              rollouts. Everything that follows is about shrinking{' '}
+              GPU-hours, including 18–22 minutes for five preconditioned CG
+              iterations, 1–2 minutes of line search and up to 17 minutes
+              waiting for the slowest trainer to arrive. Everything that follows is about shrinking{' '}
               <Tex tail=".">{T`c_{\rm FVP}N_F`}</Tex>
             </p>
             <p>
@@ -1091,9 +1106,13 @@ export default function OnPolicyMergingPost() {
               test case, two domains on one model. The main run uses a
               Jacobi-preconditioned variant: five CG iterations from the sum, a
               central logit step of 0.03 and{' '}
-              <Tex tail=".">{T`\gamma\in\{0,\tfrac12,1\}`}</Tex> There the
-              full step was the best choice at every rendezvous, so
-              preconditioning appears to remove the overshoot.
+              <Tex tail=".">{T`\gamma\in\{0,\tfrac12,1\}`}</Tex> With eight
+              trainers it cut the held-out residual by 51–78% relative to the sum
+              at every rendezvous, and the full step was always best, so
+              preconditioning appears to remove the overshoot. At two of the five
+              rendezvous the plain sum was further from the trainers than not
+              merging at all, 1.51 and 1.04 times the no-merge residual: summing
+              updates during training can be worse than not merging (<a className="am-ref" href="#table-c2">Table C2</a>).
             </p>
           </div>
 
@@ -1136,9 +1155,12 @@ export default function OnPolicyMergingPost() {
               probability proportional to <Tex tail=",">{T`1-\sum_ap_a^2`}</Tex>{' '}
               weight each by the inverse of that probability so the estimate
               stays unbiased, and keep only the top few logits of each token to
-              trim the vocabulary head. If the Fisher is as concentrated as the
-              gradient, this cuts <Tex>{T`c_{\rm FVP}N_F`}</Tex> several-fold at
-              little cost in accuracy.
+              trim the vocabulary head. In practice a simpler rule already
+              takes most of the saving: our run computes the Fisher only on the
+              first 2,048 action tokens of each rollout, 22% of a math
+              rollout’s tokens, at almost no loss in quality. Within that prefix,
+              sampling by entropy saves only the vocabulary head, because the
+              forward and backward passes still run over the whole context.
             </p>
             <p>
               <Key>Exact, cheaper products.</Key> The finite difference is both
@@ -1174,7 +1196,8 @@ export default function OnPolicyMergingPost() {
               for CG than the sum, and a rendezvous can warm-start from the
               previous one. One caution from our 9B run: 99.5–99.7% of the CG
               correction to the sum lay outside the span of the updates, so a
-              subspace solve recovers the coefficients but not that correction.
+              subspace solve can reweight the updates but cannot reproduce that
+              correction; how much residual it leaves is under test.
             </p>
             <p>
               <Key>Experts.</Key> Mixture-of-experts layers give the
@@ -1186,7 +1209,17 @@ export default function OnPolicyMergingPost() {
               condition of its own. A merge that flips the top-<Tex>k</Tex>{' '}
               choice for many tokens moves them onto different experts, outside
               any quadratic model, so the fraction of flipped routes belongs next
-              to <Tex>{T`\kappa`}</Tex> among the per-rendezvous diagnostics.
+              to <Tex>{T`\kappa`}</Tex> among the per-rendezvous diagnostics. A
+              proxy test on Qwen3-30B-A3B shows how tight this is: a
+              perturbation of only{' '}
+              <Tex>{T`7\times10^{-5}`}</Tex> nats per token already changed the
+              top-8 expert set for 2% of token–layer pairs, and about 7% at a
+              rendezvous-sized KL, where KL grows almost linearly with step size
+              and <Tex>{T`\kappa`}</Tex> stops being meaningful. A merge for
+              mixture-of-experts models will need to be routing-aware. The cost
+              side is benign: the product takes about 12 training passes per
+              token on that model against 13 on the 9B dense one, so it follows
+              active parameters.
             </p>
             <p>
               <Key>Memory.</Key> Memory is the larger frontier cost. A
@@ -1254,7 +1287,10 @@ export default function OnPolicyMergingPost() {
               they are stale by the merge’s displacement. The importance weights
               the trainer already applies handle that, as long as the per-token
               KL a merge introduces stays within the range those weights are
-              tuned for. This gives a concrete reason to bound a merge per token
+              tuned for. Measured on held-out rollouts, a rendezvous of our 9B
+              run moved each trainer by 0.0002–0.0026 nats per token, about half
+              to one step of the trainers’ own train–inference KL; the plain sum
+              would have moved them 3–5 times as far. This gives a concrete reason to bound a merge per token
               rather than per rollout. Our 9B run takes the simpler route and
               drops groups sampled entirely by the pre-merge weights.
             </p>
@@ -1277,36 +1313,19 @@ export default function OnPolicyMergingPost() {
           <Placeholder label="Experiments to run" status="need experiment">
             <ul>
               <li>
-                【need experiment: cost baseline. Overhead terms for one
-                rendezvous at 9B and on the largest MoE available, with{' '}
-                <Tex>{T`c_{\rm FVP}`}</Tex> for finite differences, bf16 and
-                JVP–VJP.】
+                【need experiment: token subsampling at 5/10/20/50% within the
+                2,048-token prefix. Error of <Tex tail=",">{T`F_iv`}</Tex>{' '}
+                <a className="am-ref" href="#table-2">Table 2</a> residual,
+                time.】
               </li>
               <li>
-                【need experiment: token subsampling at 5/10/20/50%. Error of{' '}
-                <Tex tail=",">{T`F_iv`}</Tex> <a className="am-ref" href="#table-2">Table 2</a> residual, time.】
+                【need experiment: subspace solve (global, by parameter type, by
+                layer) against the sum and the preconditioned CG merge.】
               </li>
               <li>
-                【need experiment: subspace solve (global, per layer, per expert)
-                against the sum and guarded CG, at 9B and on the 4B merge.】
-              </li>
-              <li>
-                【need experiment: JVP–VJP products. Does CG still overshoot?】
-              </li>
-              <li>
-                【need experiment: per-token KL of each rendezvous against the
-                run’s staleness and mismatch KL; snapshot merge applied 0, 2 and
-                5 steps late.】
-              </li>
-              <li>
-                【need experiment: top-<Tex>k</Tex> routing flip rate per merge
-                against <Tex tail=".">{T`\kappa`}</Tex>】
-              </li>
-              <li>
-                【need experiment: time-sliced trainers. 2, 4 and 8 trainers on
-                one training pool with host-resident states, bf16 updates and
-                bf16 Adam moments: step time, swap time and peak GPU memory,
-                against one multi-task trainer.】
+                【need experiment: JVP–VJP products. Cost per token against the
+                finite difference, and whether unpreconditioned CG still
+                overshoots.】
               </li>
             </ul>
           </Placeholder>
