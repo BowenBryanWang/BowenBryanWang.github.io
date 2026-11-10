@@ -34,13 +34,13 @@ function Key({ children }: { children: ReactNode }) {
 export const metadata: Metadata = {
   title: 'On-Policy Merge',
   description:
-    'One on-policy RL trainer per domain, merged during training at the point closest in KL to every trainer on its own fresh rollouts. The closed form, why it decouples domains and what that costs, how to make a merge take ten minutes on a 9B model, and results against multi-task RL, merging after training and multi-teacher on-policy distillation.',
+    'One on-policy RL trainer per domain, merged during training at the point closest in KL to every trainer on its own fresh rollouts. The closed form, why it decouples domains and what that costs, what a merge costs at 9B, and results against multi-task RL, merging after training and multi-teacher on-policy distillation.',
 }
 
 const POST = {
   title: 'On-Policy Merge',
   subtitle:
-    'Frontier models are post-trained with RL on many domains, and every current way of combining those domains pays somewhere: mixed batches let domains interfere, merging finished specialists loses what they learned, and multi-teacher distillation needs a second round of rollouts and stops at its teachers. On-Policy Merge gives each domain its own on-policy trainer and merges them during training, at the point closest in KL to every trainer on its own fresh rollouts, whenever one has drifted far enough. We derive the merge, show what it guarantees and what it gives up, make it take about ten minutes on a 9B model, and test it.',
+    'Frontier models are post-trained with RL on many domains, and every current way of combining those domains pays somewhere: mixed batches let domains interfere, merging finished specialists loses what they learned, and multi-teacher distillation needs a second round of rollouts and stops at its teachers. On-Policy Merge gives each domain its own on-policy trainer and merges them during training, at the point closest in KL to every trainer on its own fresh rollouts, whenever one has drifted far enough. We derive the merge, show what it guarantees and what it gives up, measure what it costs at 9B, and test it.',
   author: 'Bowen Wang',
   date: 'Nov 5, 2026',
   reading: 'Research · 35 min read',
@@ -57,7 +57,6 @@ const TOC: TocItem[] = [
   { label: 'Making the merge cheap', href: '#engineering' },
   { label: 'A first test on released specialists', href: '#oneshot' },
   { label: 'Main results', href: '#results' },
-  { label: 'How often to merge', href: '#frequency' },
   { label: 'Side findings', href: '#findings' },
   { label: 'Discussion', href: '#discussion' },
   { label: 'Citation', href: '#citation' },
@@ -222,11 +221,12 @@ export default function OnPolicyMergingPost() {
               removes transfer of both signs, so OPM is not a faster optimizer:
               when domains help each other, summing their updates does better,
               and at the same bf16 precision plain summation beats the one-shot
-              merge by 0.6, as the theory predicts for math, science and code.
+              merge on AIME and GPQA, as the theory predicts for math, science
+              and code.
               What OPM buys is a per-domain guarantee at a measurable price: one
-              model copy per domain, and a merge that takes about ten minutes on
-              a 9B model with a guarded solver and needs no environment
-              interaction.
+              model copy per domain, and a merge that needs no environment
+              interaction and takes about ten minutes for two 9B trainers and
+              under an hour for eight.
             </p>
             <p>
               The rest of the post places OPM among the existing recipes,
@@ -487,8 +487,7 @@ export default function OnPolicyMergingPost() {
               first-order reward cost does not shrink with frequency, and where
               the domains’ Fishers do not overlap, frequency changes nothing. How
               often to merge is therefore a trade-off against the cost of a
-              merge, which the engineering section makes small and the frequency
-              sweep measures.
+              merge, which the engineering section measures.
             </p>
             <p>
               <span className="am-runin">The loop.</span> OPM runs one ordinary
@@ -845,7 +844,9 @@ export default function OnPolicyMergingPost() {
               do not quite: even after 30 CG iterations, the merged model’s KL to
               the specialists is still 16% of how far they drifted. In practice
               the guarantees hold approximately, as closely as that residual is
-              small, which is why the main runs log it at every rendezvous.{' '}
+              small, which is why the main runs log it at every rendezvous. In
+              our 9B run the held-out residual, summed over trainers, was 0.10
+              to 0.38 of their drift, the same order as the one-shot 4B merge.{' '}
               <a className="am-ref" href="#app-b">Appendix B</a> gives the
               status and proof of every statement, and lists what is not
               claimed.
@@ -959,7 +960,10 @@ export default function OnPolicyMergingPost() {
               and keeping the CG vectors in CPU memory, a tempting way to save
               GPU memory, made every product three times slower. The guarded
               merge below uses four products and four forward passes and takes
-              about ten minutes. Everything that follows is about shrinking{' '}
+              about ten minutes with two trainers. With eight trainers, as in
+              our main run, a rendezvous took 48–57 minutes and about 11
+              GPU-hours, since every trainer computes products on its own
+              rollouts. Everything that follows is about shrinking{' '}
               <Tex tail=".">{T`c_{\rm FVP}N_F`}</Tex>
             </p>
             <p>
@@ -1083,10 +1087,13 @@ export default function OnPolicyMergingPost() {
               four forward passes. The full CG step never beats the half step,
               five or more iterations make things worse, and a large
               finite-difference step of 0.3 blows the full step’s residual up to
-              113 nats after two iterations and 215 after three. This guarded
-              merge is the default in all our training runs. It is one test
-              case, two domains on one model, and the main runs log the residual
-              for every <Tex>{T`\gamma`}</Tex> at every rendezvous.
+              113 nats after two iterations and 215 after three. It is one
+              test case, two domains on one model. The main run uses a
+              Jacobi-preconditioned variant: five CG iterations from the sum, a
+              central logit step of 0.03 and{' '}
+              <Tex tail=".">{T`\gamma\in\{0,\tfrac12,1\}`}</Tex> There the
+              full step was the best choice at every rendezvous, so
+              preconditioning appears to remove the overshoot.
             </p>
           </div>
 
@@ -1148,8 +1155,8 @@ export default function OnPolicyMergingPost() {
             </p>
             <p>
               <Key>A subspace solve.</Key> CG searches the whole parameter
-              space, but the trainers’ updates already span most of what a merge
-              needs. Restricting the merge to{' '}
+              space, but the trainers’ updates are a natural low-dimensional
+              basis for a merge. Restricting the merge to{' '}
               <Tex>{T`\bar\theta+\sum_kc_k\Delta_k`}</Tex> turns (2) into an{' '}
               <Tex>{T`n\times n`}</Tex> linear system whose entries,{' '}
               <Tex tail=",">{T`\sum_i\Delta_j^\top F_i\Delta_k`}</Tex> are
@@ -1165,7 +1172,9 @@ export default function OnPolicyMergingPost() {
               needs, which is what makes trainers in different clusters
               feasible. The subspace solution is also a better starting point
               for CG than the sum, and a rendezvous can warm-start from the
-              previous one.
+              previous one. One caution from our 9B run: 99.5–99.7% of the CG
+              correction to the sum lay outside the span of the updates, so a
+              subspace solve recovers the coefficients but not that correction.
             </p>
             <p>
               <Key>Experts.</Key> Mixture-of-experts layers give the
@@ -1177,8 +1186,7 @@ export default function OnPolicyMergingPost() {
               condition of its own. A merge that flips the top-<Tex>k</Tex>{' '}
               choice for many tokens moves them onto different experts, outside
               any quadratic model, so the fraction of flipped routes belongs next
-              to <Tex>{T`\kappa`}</Tex> among the diagnostics logged at every
-              rendezvous.
+              to <Tex>{T`\kappa`}</Tex> among the per-rendezvous diagnostics.
             </p>
             <p>
               <Key>Memory.</Key> Memory is the larger frontier cost. A
@@ -1247,14 +1255,16 @@ export default function OnPolicyMergingPost() {
               the trainer already applies handle that, as long as the per-token
               KL a merge introduces stays within the range those weights are
               tuned for. This gives a concrete reason to bound a merge per token
-              rather than per rollout.
+              rather than per rollout. Our 9B run takes the simpler route and
+              drops groups sampled entirely by the pre-merge weights.
             </p>
             <p>
               <Key>Hidden latency.</Key> The merge need not stop training. Solve
               it on a snapshot of the trainers while they keep stepping, then add{' '}
               <Tex>{T`\theta^{+}-\theta_{\rm snapshot}`}</Tex> to every
               trainer. The correction is a few steps stale, which asynchronous
-              RL already tolerates by design.
+              RL already tolerates by design. We have not implemented this: in
+              our runs every trainer waits for the merge.
             </p>
             <p>
               All of this sits on a floor set by the serving stack. Casting an
@@ -1496,7 +1506,7 @@ export default function OnPolicyMergingPost() {
                 Why meet often
               </a>
               : calibrated weights and a next round of RL that repairs the
-              residual. The main experiment and the frequency sweep test that.{' '}
+              residual. The main experiment tests that.{' '}
               <a className="am-ref" href="#app-d">Appendix D</a> has the full
               residual tables, the interference matrix, the other merge
               variants and the evaluation protocol.
@@ -1518,7 +1528,10 @@ export default function OnPolicyMergingPost() {
               one chat template with thinking on, the same verifiers, harnesses
               and evaluation, and no reference-KL penalty. The budget is matched
               in environment rollouts per domain, counting MOPD’s student
-              rollouts. GPU-hours and wall-clock are reported separately.
+              rollouts. GPU-hours and wall-clock are reported separately. All
+              arms are reported at their final checkpoints, although held-out
+              math declines late in training under continued math RL, with or
+              without merging.
               <a className="am-ref" href="#app-f">Appendix F</a> gives every detail.
             </p>
             <ul>
@@ -1572,7 +1585,17 @@ export default function OnPolicyMergingPost() {
                   </tr>
                 </thead>
                 <tbody>
-                  <PendingRow label="Base" n={8} />
+                  <tr>
+                    <td>Base</td>
+                    <td className="am-num"><Pending>–</Pending></td>
+                    <td className="am-num"><Pending>–</Pending></td>
+                    <td className="am-num">85.8 ± 2.5</td>
+                    <td className="am-num"><Pending>–</Pending></td>
+                    <td className="am-num">4.9 ± 0.6</td>
+                    <td className="am-num">72.5 ± 3.8</td>
+                    <td className="am-num">43.1 ± 7.4</td>
+                    <td className="am-num">26.9 ± 2.1</td>
+                  </tr>
                   <PendingRow label="Specialists, own domain" n={8} />
                   <PendingRow label="A1 · Multi-task RL" n={8} />
                   <PendingRow label="A2 · Merge-after, best" n={8} />
@@ -1584,15 +1607,15 @@ export default function OnPolicyMergingPost() {
           </div>
           <Placeholder
             label="Table 4"
-            status="pending main runs (A1–A4, 3 seeds)"
+            status="pending main runs (A1–A4, seed 1)"
           >
             <p>
               Per-domain scores: SWE-rebench, Terminal-Bench 2.1, MiMo
               Cyber (mini), GDPval-AA, BrowseComp-Plus, τ²-Bench,
-              AIME26, IFBench, each with a 95% confidence interval.
+              AIME26, IFBench, each ± its uncertainty over tasks and samples.
               Secondary benchmarks per domain (SWE-bench Pro, HMMT Feb 26,
-              IFEval, BFCL v4, τ³-Bench) and the held-out suite (MMLU-Pro, GPQA,
-              HLE) go in <a className="am-ref" href="#app-f">Appendix F</a>.
+              IFEval, BFCL v4) and the held-out suite (MMLU-Pro, GPQA, HLE) go
+              in <a className="am-ref" href="#app-f">Appendix F</a>.
             </p>
           </Placeholder>
 
@@ -1605,6 +1628,9 @@ export default function OnPolicyMergingPost() {
               scoring of every student token. OPM’s is its merges, which need no
               environment interaction: a few Fisher-vector products per trainer
               on cached rollouts and four forward passes for the line search.
+              Measured so far, a rendezvous of eight 9B trainers takes 48–57
+              minutes and about 11 GPU-hours, up to a sixth of a round’s
+              wall-clock.
             </p>
             <div className="am-table">
               <table>
@@ -1651,94 +1677,17 @@ export default function OnPolicyMergingPost() {
               reasoning) unless trainer learning rates are raised. In an
               exact-gradient check the correlation between <Tex>{T`T_j`}</Tex>{' '}
               and the realised gap was 0.84–0.87 for short rounds and fell to
-              0.27 for long ones, where second-order terms dominate. Whether it
-              predicts at LLM scale is open.
+              0.27 for long ones, where second-order terms dominate. Testing it
+              at 9B needs <Tex>{T`T_j`}</Tex> and the summed update’s reward at
+              every rendezvous, which our run does not record; we leave it to
+              future work.
             </p>
           </div>
-          <Placeholder label="Table 6 and Figure 5" status="pending main runs">
+          <Placeholder label="Table 6" status="pending main runs">
             <p>
-              <a className="am-ref" href="#table-6">Table 6</a>: per-domain score of each arm normalised to that domain’s
+              Per-domain score of each arm normalised to that domain’s
               specialist (above 1 means the domain benefits from the others),
-              A1–A4, 3 seeds. <a className="am-ref" href="#fig-5">Figure 5</a>: at every rendezvous of A4, the estimated{' '}
-              <Tex>{T`T_j`}</Tex> against the realised held-out reward gap
-              between the summed update and the OPM merge, one point per domain
-              and rendezvous; sign agreement reported in the caption.
-            </p>
-          </Placeholder>
-
-          {/* ------------------------------------------------------------ */}
-          <SectionTitle label="How often to merge" id="frequency" />
-          <div className="am-prose">
-            <p>
-              The rendezvous frequency is the one knob that moves OPM along the
-              frequency axis, from merge-after (a single rendezvous at the end)
-              toward multi-task RL. <a className="am-ref" href="#why-meet-often">Why meet often</a> gave four reasons to merge
-              early and one thing frequency cannot fix; this section tests
-              them. Between the two ends sits a cheap compromise,
-              merge-then-polish: the specialists train apart as usual, and a few
-              rendezvous at the end of the run bring them back together. It
-              keeps the training pipeline unchanged and adds the repair that a
-              single merge lacks.
-            </p>
-            <p>
-              In the toy the interval matters sharply. At 50 steps per task,
-              merging every 1, 5, 10, 25 or 50 steps gave 0.97, 0.96, 0.93, 0.34
-              and 0.08. A KL trigger beat a fixed interval with a similar number
-              of rendezvous, 0.987 against 0.88. Frequent rendezvous also passed
-              more transfer into an idle task: under the exact merge, +0.48 at
-              an interval of 1 against −0.21 at 50. The theory attributes this
-              to calibration along shared directions, not to transfer through
-              lossless ones, and part of it is unexplained (<a className="am-ref" href="#app-e">Appendix E</a>).
-              The merge-frequency experiment below measures the same curve on the
-              9B model.
-            </p>
-          </div>
-          <div className="am-prose">
-            <div className="am-table">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Rendezvous per run</th>
-                    <th className="am-num">In-domain benefit</th>
-                    <th className="am-num">Untrained domain</th>
-                    <th className="am-num">Merge cost</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <PendingRow
-                    label="1 (one-shot OPM merge, end of run)"
-                    n={3}
-                  />
-                  <PendingRow label="≈ 4" n={3} />
-                  <PendingRow
-                    label="Merge-then-polish (4 rendezvous in the last 20%)"
-                    n={3}
-                  />
-                  <PendingRow label="≈ 16" n={3} />
-                  <PendingRow label="≈ 32" n={3} />
-                  <PendingRow label="A1 · Multi-task RL (reference)" n={3} />
-                  <PendingRow
-                    label="A2 · Merge-after, best (reference)"
-                    n={3}
-                  />
-                </tbody>
-              </table>
-            </div>
-          </div>
-          <Placeholder
-            label="Figure 6 and Table 7"
-            status="pending frequency sweep"
-          >
-            <p>
-              The merge-frequency curve. A4 with the drift ceiling set for
-              about 1, 4, 16 and 32 rendezvous at a fixed budget, plus
-              merge-then-polish (independent specialists, then four rendezvous
-              in the last 20% of the budget); the one-rendezvous end coincides
-              with A2’s one-shot OPM merge.
-              Horizontal axis: rendezvous per run (log scale). One panel per
-              domain, showing its score, with A1 and A2 as horizontal bands. <a className="am-ref" href="#table-7">Table 7</a> adds in-domain benefit from other domains, the
-              score on competitive code, which no arm trains on, and merge
-              cost.
+              A1–A4, seed 1.
             </p>
           </Placeholder>
 
@@ -1746,8 +1695,9 @@ export default function OnPolicyMergingPost() {
           <SectionTitle label="Side findings" id="findings" />
           <div className="am-prose">
             <p>
-              Measuring merges at the level of policies, in exact fp32, turned
-              up five findings that matter beyond OPM. <a className="am-ref" href="#app-g">Appendix G</a> has the
+              Measuring merges at the level of policies, in exact fp32, and
+              logging every rendezvous of the 9B run turned up findings that
+              matter beyond OPM. <a className="am-ref" href="#app-g">Appendix G</a> has the
               numbers.
             </p>
             <p>
@@ -1758,8 +1708,12 @@ export default function OnPolicyMergingPost() {
               times the code specialist’s own drift. Interference lives in the
               Fisher, which weights directions by how much the policy cares
               about them, and the directions RL moves are thousands of times
-              stiffer than random ones. Cosine similarity of task vectors is a
-              poor guide to whether two specialists can be merged.
+              stiffer than random ones. The same holds inside our 9B run: the
+              eight trainers’ updates had pairwise cosines of at most 0.0023,
+              yet the merge moved the small-drift software-engineering and
+              terminal trainers by 1.6–5.4 times their own drift. Cosine
+              similarity of task vectors is a poor guide to whether two
+              specialists can be merged.
             </p>
             <p>
               <span className="am-runin">
@@ -1804,7 +1758,25 @@ export default function OnPolicyMergingPost() {
               regime. The instruction-following and agent domains barely see
               the others’ updates, so the sum and the OPM merge tie there. The toy’s conflict variants are
               the opposite regime, where OPM wins. Logging <Tex>{T`T_j`}</Tex>{' '}
-              at each rendezvous tells a practitioner which regime a run is in.
+              at each rendezvous would tell a practitioner which regime a run is
+              in.
+            </p>
+            <p>
+              <span className="am-runin">The merge is the sum plus a correction outside the updates.</span>{' '}
+              At every rendezvous of the 9B run the OPM merge differed from the
+              plain sum by 7–8% of the sum’s norm, and 99.5–99.7% of that
+              difference lay outside the span of the trainers’ updates. The
+              merge does not reweight the updates; it adds a direction none of
+              them contains.
+            </p>
+            <p>
+              <span className="am-runin">Scoring infrastructure failures as zero biases agentic evaluation.</span>{' '}
+              When a sandbox or tool server fails, many harnesses score the
+              episode as a wrong answer. Re-queuing such episodes instead moved
+              the 9B base model from 31.9 to 53.9 on our internal
+              software-engineering set, from 6.2 to 9.4 on terminal and from 82.2
+              to 85.9 on cyber. Infrastructure failures are not random across
+              models, so the bias can change rankings, not only levels.
             </p>
           </div>
 
@@ -1822,7 +1794,7 @@ export default function OnPolicyMergingPost() {
               where coupling helps: when domains share skills, multi-task RL or
               the plain sum moves faster along the shared directions, and OPM
               recovers that only through larger trainer steps. The transfer term
-              and visibility, both logged at every rendezvous, tell which
+              and visibility, both computable at a rendezvous, tell which
               situation a run is in.
             </p>
             <p id="modularity">
@@ -1846,9 +1818,10 @@ export default function OnPolicyMergingPost() {
             </p>
             <p>
               <span className="am-runin">Trade-offs.</span> Every rendezvous
-              costs a merge, about ten minutes on a 9B model with the guarded
-              solver, and a synchronisation, since every trainer waits for the
-              merged model. Meeting often buys locality, calibrated weights and
+              costs a merge and a synchronisation, since every trainer waits for
+              the merged model. The merge takes about ten minutes for two 9B
+              trainers and close to an hour for eight, because each trainer
+              computes Fisher products on its own rollouts. Meeting often buys locality, calibrated weights and
               repair, and pays for them in merges; merge-then-polish pays for
               only a few. Memory grows with the number of trainers, one model
               copy per domain, which grouping domains reduces. And decoupling
@@ -1867,7 +1840,11 @@ export default function OnPolicyMergingPost() {
               keeps one model copy per domain in memory. The Fisher is estimated
               from a subsample, and the evidence for the guarded merge comes
               from one two-domain test. In the one-shot merge, a stale metric
-              tied the on-policy one on benchmarks. All results are at 4B and 9B on dense
+              tied the on-policy one on benchmarks. In the 9B run the merge did
+              not hold small-drift trainers in place: it moved the
+              software-engineering and terminal trainers by more than their own
+              drift. Every 9B arm is a single training run (seed 1), so its
+              intervals cover tasks and samples, not seeds. All results are at 4B and 9B on dense
               models; mixture-of-experts models and larger scales are untested.
             </p>
             <p>
@@ -1898,6 +1875,18 @@ export default function OnPolicyMergingPost() {
               detail.
             </p>
             <p>
+              <span className="am-runin">How often to merge.</span> The
+              rendezvous frequency moves OPM between merge-after, one rendezvous
+              at the end, and multi-task RL. In the toy the interval matters
+              sharply: at 50 steps per task, merging every 1, 5, 10, 25 or 50
+              steps gave 0.97, 0.96, 0.93, 0.34 and 0.08, and a KL trigger beat
+              a fixed interval with a similar number of rendezvous, 0.987
+              against 0.88 (<a className="am-ref" href="#app-e">Appendix E</a>). A cheap point between the ends is
+              merge-then-polish: specialists train apart as usual and a few
+              rendezvous at the end bring them back together. Measuring this
+              curve at 9B is future work.
+            </p>
+            <p>
               <span className="am-runin">An extension: grouped OPM.</span>{' '}
               Frontier runs train dozens of domains, and the published evidence
               on how they interact is mixed in a way that looks like structure
@@ -1925,8 +1914,8 @@ export default function OnPolicyMergingPost() {
               through the OPM merge. One group is multi-task RL; one domain per
               group is OPM. <a className="am-ref" href="#thm-1">Theorem 1</a> then holds between groups: each group is
               protected from the others, and nothing is protected inside a
-              group. The quantities that decide the grouping are the ones OPM
-              already logs at every rendezvous, the visibility of one domain’s
+              group. The quantities that decide the grouping can be computed at
+              every rendezvous: the visibility of one domain’s
               update in another’s Fisher and the sign of the transfer term{' '}
               <Tex tail=".">{T`T_j`}</Tex> Domains with positive{' '}
               <Tex>{T`T_j`}</Tex> and high mutual visibility belong together; a
@@ -1944,8 +1933,8 @@ export default function OnPolicyMergingPost() {
               in the on-policy KL geometry gives a merge with a closed form that
               removes cross-domain terms of both signs. It guarantees per-domain
               progress where domains can be separated, costs speed where they
-              agree, and takes about ten minutes on a 9B model once the solver
-              is guarded. Merged once at 4B, it beats task arithmetic and MOPD
+              agree, and takes from minutes to an hour per merge at 9B,
+              depending on the number of trainers. Merged once at 4B, it beats task arithmetic and MOPD
               and loses to the plain sum, for reasons the theory predicts.
               Whether merging often closes that gap, and what OPM buys against
               multi-task RL and MOPD at scale, are what the pending results

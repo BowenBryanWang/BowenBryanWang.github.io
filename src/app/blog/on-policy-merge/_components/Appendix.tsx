@@ -1119,14 +1119,15 @@ export default function Appendix() {
             multiplication by{' '}
             <Tex tail=",">{T`\operatorname{diag}(\pi)-\pi\pi^\top`}</Tex> and a
             backward pass), one all-reduce per iteration sums them, and the line
-            search scores the candidates on held-out rollouts. Rendezvous are
-            non-blocking: a slow trainer contributes its current weights and its
-            latest batch’s Fisher. Each trainer keeps its optimizer moments,
+            search scores the candidates on held-out rollouts. In our runs a
+            rendezvous blocks: every trainer pauses until the merged model is
+            installed, and a trainer that has finished its budget stays in the
+            merge with its final weights. Each trainer keeps its optimizer moments,
             learning rate, batch size, rollout servers and sandboxes; the trainers
-            share only a weight format. Logged at every rendezvous: drift,
-            residual per <Tex tail=",">{T`\gamma`}</Tex> the chosen{' '}
-            <Tex tail=",">{T`\gamma`}</Tex> CG iterations, tokens, wall-clock,{' '}
-            <Tex tail=",">{T`\kappa`}</Tex> and <Tex tail=".">{T`T_j`}</Tex>
+            share only a weight format. Logged at every rendezvous: drift, the
+            held-out residual per trainer for every step size tried, the chosen{' '}
+            <Tex tail=",">{T`\gamma`}</Tex> CG iterations, tokens and
+            wall-clock.
           </p>
           <p>
             <span className="am-runin" id="table-c1">Table C1.</span> The five
@@ -1201,7 +1202,7 @@ export default function Appendix() {
                   <td>Only the next rendezvous; units never wait for each other between rendezvous.</td>
                   <td>Yes, throughout training.</td>
                   <td>Start, retune or roll back one trainer at a rendezvous; the others carry on.</td>
-                  <td>A merge per rendezvous, about ten minutes at 9B.</td>
+                  <td>A merge per rendezvous: about ten minutes with two trainers at 9B, close to an hour with eight.</td>
                 </tr>
               </tbody>
             </table>
@@ -1733,15 +1734,15 @@ export default function Appendix() {
               <tbody>
                 <tr>
                   <td>Software engineering</td>
-                  <td>MiMo-V2.6-RL-oss code split (2,602) and SWE-smith</td>
+                  <td>MiMo-V2.6-RL-oss code split (2,602) and SWE-smith; 932 in the training pool</td>
                   <td>Executed tests in containers</td>
-                  <td>SWE-rebench (tasks after the base model’s release), SWE-bench Pro</td>
+                  <td>SWE-rebench (93 tasks), SWE-bench Pro</td>
                 </tr>
                 <tr>
                   <td>Terminal</td>
-                  <td>FACET-Terminal-Tasks-6k and MiMo terminal tasks (64)</td>
+                  <td>FACET-Terminal-Tasks-6k and MiMo terminal tasks (64); 203 in the training pool</td>
                   <td>Executed test scripts</td>
-                  <td>Terminal-Bench 2.1</td>
+                  <td>Terminal-Bench 2.1, all 89 tasks, 5 trials</td>
                 </tr>
                 <tr>
                   <td>Cyber</td>
@@ -1751,25 +1752,25 @@ export default function Appendix() {
                 </tr>
                 <tr>
                   <td>Knowledge work</td>
-                  <td>MiMo-V2.6-RL-oss general split (925 environments)</td>
+                  <td>MiMo-V2.6-RL-oss general split (925 environments); 761 in the training pool</td>
                   <td>Per-environment checks plus an LLM rubric judge</td>
-                  <td>GDPval-AA (220 tasks), Elo from pairwise judging</td>
+                  <td>GDPval-AA tasks (220), our own judge</td>
                 </tr>
                 <tr>
                   <td>Search</td>
                   <td>ASearcher training data over a local Wikipedia corpus</td>
                   <td>Answer match with aliases</td>
-                  <td>BrowseComp-Plus</td>
+                  <td>BrowseComp-Plus (bm25s retriever, Qwen3-30B-A3B judge)</td>
                 </tr>
                 <tr>
                   <td>Tool use</td>
-                  <td>WorkBench, EnterpriseOps-Gym, EnvScaler (4,743 tasks)</td>
+                  <td>WorkBench and EnterpriseOps-Gym (1,163 tasks)</td>
                   <td>Executable state checks, binary reward</td>
-                  <td>τ²-Bench, τ³-Bench, BFCL v4</td>
+                  <td>τ²-Bench, BFCL v4 (non-agentic categories)</td>
                 </tr>
                 <tr>
                   <td>Math</td>
-                  <td>Polaris, DAPO and Skywork-OR1, filtered</td>
+                  <td>Polaris and DAPO, filtered (61,404 problems)</td>
                   <td>Answer match</td>
                   <td>AIME26, HMMT Feb 26</td>
                 </tr>
@@ -1779,39 +1780,41 @@ export default function Appendix() {
                   <td>Rule checkers</td>
                   <td>IFBench, IFEval</td>
                 </tr>
-                <tr>
-                  <td>Competitive code (held out)</td>
-                  <td>None; no arm trains on it</td>
-                  <td>Unit tests in a sandbox</td>
-                  <td>LiveCodeBench v6</td>
-                </tr>
               </tbody>
             </table>
           </div>
           <p>
-            SWE-rebench tasks come only from pull requests merged after the base
-            model’s release, training repositories are decontaminated against
-            them and against SWE-bench Pro, and one AIME26 duplicate is removed from DAPO. A
+            SWE-rebench tasks are those created after the Qwen3.5-9B base was
+            released (February 2026); the distilled model we train was released
+            later, so exposure through its distillation data cannot be ruled
+            out. Evaluation tasks from repositories in our training pool are
+            removed (110 to 93), training repositories are decontaminated
+            against SWE-bench Verified and Pro, and one AIME26 duplicate is
+            removed from DAPO. Terminal-Bench runs with network access as in
+            the official harness. A
             held-out suite no arm trains on: MMLU-Pro, GPQA and HLE (the older
             publicly available release, not comparable to published HLE numbers).
             Base scores are re-measured in our harnesses, with one fixed open
-            harness per agentic domain for every arm. Knowledge work is scored with
-            GDPval-AA, Artificial Analysis’s version of the 220 public GDPval
-            tasks: each arm produces its deliverable files in their Stirrup
-            harness, a panel of three judge models compares deliverables pairwise,
-            and the comparisons are fitted to an Elo scale. The panel does not
-            include our training judge. Besides each arm’s Elo, we report the
-            head-to-head win rate between arms on the same tasks, which separates
-            small models better than the absolute scale. The judges are
-            closed-API models, a reproducibility caveat.
+            harness per agentic domain for every arm. Knowledge work uses the 220
+            GDPval-AA tasks, judged our own way, so the scores are not
+            comparable to the Artificial Analysis leaderboard. Each arm produces
+            its deliverable files in a port of their Stirrup harness, with web
+            search through our own search API. One judge, Claude Opus 5, which
+            is not among our training judges, scores each deliverable against
+            its rubric and compares deliverables pairwise; we report the rubric
+            score, a Bradley–Terry Elo with the base model at 1000, and the
+            head-to-head win rate between arms, with intervals bootstrapped over
+            tasks. The judge is a closed-API model, a reproducibility caveat.
           </p>
           <p>
             <span className="am-runin">Shared RL recipe.</span> slime, run
-            asynchronously with bounded staleness (at most 4 for reasoning; for
-            agentic domains the rollout-to-step time ratio, with the same rule in
-            every arm). GRPO with groups of 16 (8 for agentic domains) <Cite k="shao2024" />: advantage is
+            asynchronously with a fixed staleness per domain (4 for math and
+            instruction following, 3 for search, 2 for tool use, 8 for the other
+            agentic domains), the same in every arm. GRPO with groups of 16 (8 for agentic domains) <Cite k="shao2024" />: advantage is
             reward minus the group mean with no standard-deviation normalisation,
-            a global token-mean loss, clipping 0.2 / 0.28, train–inference
+            a global token-mean loss, a REINFORCE-style objective with one
+            optimizer step per rollout batch (so the PPO ratio is 1 and clipping
+            is inactive), score centering, train–inference
             mismatch masking with IcePop <Cite k="ling2025" />, zero-variance
             groups dropped, no entropy bonus, no KL penalty.
             Environment-observation tokens are masked out of the loss, the drift
@@ -1837,12 +1840,6 @@ export default function Appendix() {
                 <tr>
                   <td>Instruction following</td>
                   <td className="am-num">16k</td>
-                  <td className="am-num">1</td>
-                  <td className="am-num">–</td>
-                </tr>
-                <tr>
-                  <td>Competitive code</td>
-                  <td className="am-num">32k</td>
                   <td className="am-num">1</td>
                   <td className="am-num">–</td>
                 </tr>
@@ -1886,35 +1883,44 @@ export default function Appendix() {
             </table>
           </div>
           <p>
-            <span className="am-runin">Budget.</span> Agentic domains: 32 prompts
-            × 8 rollouts per step for 200 steps. Math and instruction following:
-            32 × 16 for 300 steps. These define the per-domain rollout budget
-            every arm matches. Learning rates are chosen per trainer type
-            (single-domain, multi-task, MOPD) from{' '}
-            <Tex>{T`\{1,2,4\}\times10^{-6}`}</Tex> on held-out reward, using 15%
-            of the budget on four domains, and frozen before the comparison. Three
-            seeds per arm.
+            <span className="am-runin">Budget.</span> Steps per domain: math
+            and instruction following 300, tool use and search 200, software
+            engineering and knowledge work 110, cyber 80, terminal 60. A step
+            trains on 32 accepted groups (zero-variance groups do not count) of
+            16 rollouts for math and instruction following and 8 for agentic
+            domains. These define the per-domain rollout budget every arm
+            matches; multi-task RL runs 200 steps and covers the same fraction
+            of every domain’s budget at each step. Learning rates were swept
+            over <Tex>{T`\{1,2,4\}\times10^{-6}`}</Tex> on math, instruction
+            following, search and tool use (giving 4, 4, 1 and{' '}
+            <Tex tail=";">{T`4\times10^{-6}`}</Tex> the other four domains use{' '}
+            <Tex tail=",">{T`2\times10^{-6}`}</Tex> and multi-task RL and MOPD{' '}
+            <Tex tail=".">{T`4\times10^{-6}`}</Tex> One seed per arm (seed 1).
           </p>
           <p>
             <span className="am-runin">Arms.</span> A1 multi-task RL: per-domain
             rollout quotas matched to the budget, uniform gradient weights per
-            domain through a ledger rule, deficit scheduling with slow-source
-            replay; a data-proportional mixture as a secondary variant. A2
+            domain through a ledger rule, deficit scheduling, and rollouts that
+            miss a short-batch deadline carried over to the next step. A2
             merge-after: the best of task arithmetic at{' '}
             <Tex>{T`\lambda\in\{0.4,0.6,0.8,1.0\}`}</Tex> chosen on held-out
             reward, DARE-TA, TIES, the closed form of <CiteT k="liu2026" /> and a
             one-shot OPM merge. A3 MOPD: per-token advantage teacher minus student
-            log-probability, clipped to ±5, 30–60 steps, with a two-round variant; student
-            rollouts count toward the budget. A4 OPM: eight trainers, drift measured on about one rollout in
-            eight, a per-token ceiling, non-blocking rendezvous, the guarded merge
-            (finite-difference logit step 0.01, three CG iterations from the sum,{' '}
-            <Tex>{T`\gamma`}</Tex> on held-out true KL), rollouts in flight kept
-            with per-token importance weights.
+            log-probability, clipped to ±5, 50 steps of 1,024 prompts with one
+            rollout each; student rollouts count toward the budget. A4 OPM: eight trainers, drift measured on about one rollout in
+            eight, a per-token ceiling, blocking rendezvous, and the guarded
+            merge with five Jacobi-preconditioned CG iterations from the sum, a
+            central finite-difference logit step of 0.03,{' '}
+            <Tex>{T`\gamma\in\{0,\tfrac12,1\}`}</Tex> on held-out true KL,
+            and a check of every trainer’s held-out residual against its
+            ceiling. Groups sampled entirely by the pre-merge weights are
+            dropped. A trainer that finishes its budget stays in later merges
+            with its final weights.
           </p>
           <p>
             <span className="am-runin">Metrics.</span> Per benchmark, the score
-            with a 95% confidence interval from several samples per task; no
-            average across domains is reported. Cost from one shared ledger:
+            with its uncertainty over tasks and samples; no average across
+            domains is reported. Cost from one shared ledger:
             GPU-hours including teacher scoring and merges, wall-clock, rollouts
             per domain. Secondary: the held-out suite, a cross-domain matrix (each
             arm and specialist on every domain), response length, entropy,
@@ -1924,18 +1930,13 @@ export default function Appendix() {
           <Placeholder label="Table F1" status="pending main runs">
             <p>
               Secondary benchmarks per domain (SWE-bench Pro, HMMT Feb 26, IFEval,
-              BFCL v4, τ³-Bench) and the held-out suite (MMLU-Pro, GPQA, HLE) for
-              base, specialists and A1–A4, 3 seeds.
+              BFCL v4 non-agentic) and the held-out suite (MMLU-Pro, GPQA-Diamond,
+              HLE) for base, specialists and A1–A4, seed 1. Base so far: IFEval
+              66.3 ± 1.6, BFCL v4 60.9 ± 1.8, MMLU-Pro 75.4 ± 0.4, GPQA-Diamond
+              59.9 ± 2.7, HLE 1.8 ± 0.3.
             </p>
           </Placeholder>
-          <Placeholder label="Table F2" status="pending main runs">
-            <p>
-              Ablations at reduced length: sum and average in place of the OPM
-              merge; fixed interval in place of the KL trigger; stale against
-              fresh metric; Fisher sample size; OPM with a reference-KL penalty;
-              the reward-aware merge.
-            </p>
-          </Placeholder>
+
         </details>
 
         {/* ============================================================ */}
@@ -2000,8 +2001,8 @@ export default function Appendix() {
             precision. The same release also shows the
             conflicting regime outside the merge: in their evaluation, the IF
             specialist trained alone lowers BFCL from 63.9 to 54.1, and the agent and code specialists lose
-            about 2 points on AIME25 <Cite k="wu2026" />. <a className="am-ref" href="#table-6">Table 6</a> and <a className="am-ref" href="#fig-5">Figure 5</a>{' '}
-            measure which regime each of the eight main domains falls in.
+            about 2 points on AIME25 <Cite k="wu2026" />. <a className="am-ref" href="#table-6">Table 6</a>{' '}
+            will show which regime each of the eight main domains falls in.
           </p>
           <p>
             <span className="am-runin">The stale metric ties at one shot.</span> A
@@ -2009,7 +2010,7 @@ export default function Appendix() {
             held-out) but the same benchmark mean (−0.22 ± 0.31). In the toy a
             metric that was never refreshed failed badly (0.13 against 0.96)
             because it was used across many rounds. One shot cannot tell the two
-            apart; the main runs log both.
+            apart.
           </p>
         </details>
 
