@@ -1780,8 +1780,8 @@ export default function Appendix() {
                   <td>IFBench, IFEval</td>
                 </tr>
                 <tr>
-                  <td>Competitive code (demo B only)</td>
-                  <td>The code split of Wu et al. (2026)</td>
+                  <td>Competitive code (held out)</td>
+                  <td>None; no arm trains on it</td>
                   <td>Unit tests in a sandbox</td>
                   <td>LiveCodeBench v6</td>
                 </tr>
