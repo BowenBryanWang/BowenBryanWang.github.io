@@ -1826,31 +1826,23 @@ export default function OnPolicyMergingPost() {
               situation a run is in.
             </p>
             <p id="modularity">
-              <span className="am-runin">Adding a domain.</span> Because each
-              domain has its own trainer, OPM can change its set of domains
-              mid-run. A new skill starts as one more trainer from the current
-              anchor and joins at the next rendezvous, while the existing
-              trainers carry on unchanged. Multi-task RL has to re-mix its
-              quotas instead, and every existing domain takes the new gradients
-              from the first step. By idle protection (<a className="am-ref" href="#prop-2">Proposition 2</a>), the existing domains
-              should hold wherever the new trainer’s Fisher range is independent
-              of theirs, and move only along the directions they share.
-            </p>
-            <p>
-              <span className="am-runin">Containing a broken domain.</span> The
-              same structure limits the damage of a fault. If one domain’s
-              reward breaks, say a verifier that pays for any syntactically valid
-              tool call, its trainer drifts fast and reaches its ceiling early.
-              The fault reaches the other domains only through the merge, along
-              Fisher directions they share, and by at most the ceiling per round.
-              The per-rendezvous diagnostics, the drift against the trainer’s own
-              history and the held-out residual against the ceiling, flag that
-              trainer, which can then be rolled back or dropped alone. In
-              multi-task RL the broken gradients have already reached every
-              weight. The protection holds only if the guard is enforced: a merge
-              that admits a trainer the diagnostics have flagged passes its
-              fault on to everyone. Neither case is tested here; both are cheap
-              to run as branches of a main run.
+              <span className="am-runin">Adding a domain, containing a fault.</span>{' '}
+              Because each domain has its own trainer, OPM can change its set of
+              domains mid-run. A new skill starts as one more trainer from the
+              current anchor and joins at the next rendezvous; multi-task RL has
+              to re-mix its quotas instead, and pushes the new gradients into
+              every domain from the first step. By idle protection (<a className="am-ref" href="#prop-2">Proposition 2</a>), the
+              existing domains hold wherever the new trainer’s Fisher range is
+              independent of theirs. The same structure limits a fault. If one
+              domain’s reward breaks, say a verifier that pays for any
+              syntactically valid tool call, the fault reaches the others only
+              through the merge, along the Fisher directions they share and by at
+              most the ceiling per round. The per-rendezvous diagnostics flag
+              that trainer, which can be rolled back or dropped alone, but only
+              if the guard is enforced: a merge that admits a flagged trainer
+              passes its fault on to everyone. In multi-task RL the broken
+              gradients have already reached every weight. Neither case is tested
+              here; both are cheap to run as branches of a main run.
             </p>
             <p>
               <span className="am-runin">Trade-offs.</span> Every rendezvous
