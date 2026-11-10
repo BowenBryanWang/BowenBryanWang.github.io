@@ -700,7 +700,7 @@ export default function OnPolicyMergingPost() {
               share and reward scale of domain 1 (<a className="am-ref" href="#app-b-5">Appendix B.5</a>, which also
               covers forgetting under Cascade RL).
             </p>
-            <p>
+            <p id="gradient-channels">
               <span className="am-runin">In terms of gradients.</span> The
               formula above is only the first of three ways multi-task RL
               couples domains. A shared update adds their gradients, so their
@@ -716,7 +716,8 @@ export default function OnPolicyMergingPost() {
               rate and schedule, which we call <Key>optimizer isolation</Key>;
               it is the mechanism behind item 2 of{' '}
               <a className="am-ref" href="#prop-2">Proposition 2</a> and behind
-              the Adam example above.
+              the Adam example above. We measure each channel in our 9B run in{' '}
+              <a className="am-ref" href="#coupling">Main results</a>.
             </p>
             <p>
               At the merge, the weight a domain gets in a direction is its
@@ -734,29 +735,6 @@ export default function OnPolicyMergingPost() {
               <Key>The merge preserves behaviour, not reward</Key>, and it pays
               for that wherever such drift would have been harmless.
             </p>
-            <p>
-              In our 9B runs the three channels behave very differently. Policy
-              gradients of different domains have cosines of at most 0.02 at a
-              common point, no larger than the cosine between two halves of one
-              domain’s batch: at this scale a policy gradient is mostly sampling
-              noise. The trainers’ updates are closer still to orthogonal, at
-              most 0.0023 between any two of the eight at every rendezvous. Yet
-              the other trainers’ summed updates moved the small-drift
-              software-engineering trainer by 6–14 times its own drift and the
-              terminal trainer by 5–6 times, while instruction following saw
-              only 0.14–0.35 of its own. The global clip never fired: over 110
-              steps of the eight-domain multi-task run, the largest pre-clip
-              gradient norm was 0.18 against a threshold of 1.0. In our recipe
-              the clip channel is idle, and coupling runs through the shared
-              update and Adam’s second moment.
-            </p>
-            <Placeholder label="Adam coupling" status="need experiment">
-              <p>
-                【need experiment: in the multi-task run, the Adam-preconditioned
-                gradient cosines between domains and how much the shared second
-                moment lowers each domain’s effective learning rate.】
-              </p>
-            </Placeholder>
             <p>
               Item 4 of{' '}
               <a className="am-ref" href="#prop-2">Proposition 2</a> deserves a
@@ -1679,6 +1657,35 @@ export default function OnPolicyMergingPost() {
               per domain (matched by design), student rollouts, teacher-scoring
               and merge GPU-hours, total GPU-hours and wall-clock. Also the
               number of OPM rendezvous and the mean wall-clock per merge.
+            </p>
+          </Placeholder>
+
+          <div className="am-prose">
+            <p id="coupling">
+              <span className="am-runin">Where the domains couple.</span> The
+              theory names three channels through which multi-task RL couples
+              domains (<a className="am-ref" href="#gradient-channels">In terms of gradients</a>),
+              and in our 9B runs they behave very differently. Policy
+              gradients of different domains have cosines of at most 0.02 at a
+              common point, no larger than the cosine between two halves of one
+              domain’s batch: at this scale a policy gradient is mostly sampling
+              noise. The trainers’ updates are closer still to orthogonal, at
+              most 0.0023 between any two of the eight at every rendezvous. Yet
+              the other trainers’ summed updates moved the small-drift
+              software-engineering trainer by 6–14 times its own drift and the
+              terminal trainer by 5–6 times, while instruction following saw
+              only 0.14–0.35 of its own. The global clip never fired: over 110
+              steps of the eight-domain multi-task run, the largest pre-clip
+              gradient norm was 0.18 against a threshold of 1.0. In our recipe
+              the clip channel is idle, and coupling runs through the shared
+              update and Adam’s second moment.
+            </p>
+          </div>
+          <Placeholder label="Adam coupling" status="need experiment">
+            <p>
+              【need experiment: in the multi-task run, the Adam-preconditioned
+              gradient cosines between domains and how much the shared second
+              moment lowers each domain’s effective learning rate.】
             </p>
           </Placeholder>
 
