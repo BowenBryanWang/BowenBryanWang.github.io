@@ -256,10 +256,7 @@ export default function OnPolicyMergingPost() {
               gradients, weighted by their token shares in the batch. With plain
               SGD this is exactly the same as running one trainer per domain and
               summing their updates after every step (<a className="am-ref" href="#app-a">Appendix A</a>). Combining
-              every <Tex>K</Tex> steps instead gives periodic summing or
-              averaging, the federated-averaging and DiLoCo family{' '}
-              <Cite k={['mcmahan2017', 'douillard2023']} />. Combining once,
-              after training, gives <strong>merge-after</strong> methods: task
+              once, after training, gives <strong>merge-after</strong> methods: task
               arithmetic, TIES and DARE{' '}
               <Cite k={['ilharco2023', 'yadav2023', 'yu2024']} />. Cascade RL
               trains the domains one after another{' '}
@@ -305,20 +302,6 @@ export default function OnPolicyMergingPost() {
                     <td>
                       Domains interfere through the shared step; weak or slow
                       domains lose their share.
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>
-                      <strong>Periodic sum or average</strong>
-                    </td>
-                    <td>
-                      Every <Tex>K</Tex> steps
-                    </td>
-                    <td>Euclidean</td>
-                    <td>Yes</td>
-                    <td>
-                      The sum presumes no domain sees another’s update; the
-                      average presumes every domain sees every update equally.
                     </td>
                   </tr>
                   <tr>
@@ -1568,7 +1551,7 @@ export default function OnPolicyMergingPost() {
               </li>
               <li>
                 <strong>A3 · MOPD.</strong> The same eight specialists as
-                teachers, with and without an outcome-reward term.
+                teachers.
               </li>
               <li>
                 <strong>A4 · OPM.</strong> Eight trainers, KL-triggered
@@ -1609,7 +1592,6 @@ export default function OnPolicyMergingPost() {
                   <PendingRow label="A1 · Multi-task RL" n={10} />
                   <PendingRow label="A2 · Merge-after, best" n={10} />
                   <PendingRow label="A3 · MOPD" n={10} />
-                  <PendingRow label="A3 · MOPD + outcome reward" n={10} />
                   <PendingRow label={<strong>A4 · OPM</strong>} n={10} />
                 </tbody>
               </table>

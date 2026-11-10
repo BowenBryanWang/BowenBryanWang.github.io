@@ -1896,9 +1896,8 @@ export default function Appendix() {
             <Tex>{T`\lambda\in\{0.4,0.6,0.8,1.0\}`}</Tex> chosen on held-out
             reward, DARE-TA, TIES, the closed form of <CiteT k="liu2026" /> and a
             one-shot OPM merge. A3 MOPD: per-token advantage teacher minus student
-            log-probability, clipped to ±5, 30–60 steps, with an outcome-reward
-            variant and a two-round variant; student rollouts count toward the
-            budget. A4 OPM: eight trainers, drift measured on about one rollout in
+            log-probability, clipped to ±5, 30–60 steps, with a two-round variant; student
+            rollouts count toward the budget. A4 OPM: eight trainers, drift measured on about one rollout in
             eight, a per-token ceiling, non-blocking rendezvous, the guarded merge
             (finite-difference logit step 0.01, three CG iterations from the sum,{' '}
             <Tex>{T`\gamma`}</Tex> on held-out true KL), rollouts in flight kept
