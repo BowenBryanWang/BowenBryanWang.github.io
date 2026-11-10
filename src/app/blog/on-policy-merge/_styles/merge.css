@@ -244,15 +244,14 @@
   border-left-color: var(--forest);
   background: var(--forest-soft);
 }
+/* Callout label, e.g. "Proposition 4 · MOPD": text face, sentence case */
 .am-scope .am-callout .am-callout-label {
-  font-family: Consolas, 'Cascadia Code', 'JetBrains Mono', 'SF Mono',
-    ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 11px;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
+  font-family: inherit;
+  font-size: 1rem;
+  letter-spacing: 0;
   color: var(--accent);
-  margin-bottom: 0.6em;
-  font-weight: 600;
+  margin-bottom: 0.35em;
+  font-weight: 700;
 }
 .am-scope .am-callout.forest .am-callout-label {
   color: var(--forest);
@@ -344,12 +343,9 @@
 /* Status pill (draft notice) */
 .am-scope .am-pill {
   display: inline-block;
-  font-family: Consolas, 'Cascadia Code', 'JetBrains Mono', 'SF Mono',
-    ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 10.5px;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  padding: 0.25em 0.7em;
+  font-family: inherit;
+  font-size: 13px;
+  padding: 0.15em 0.7em;
   border: 1px solid var(--rule);
   border-radius: 999px;
   color: var(--ink-soft);
@@ -430,13 +426,10 @@
   color: var(--ink-soft);
 }
 .am-scope .am-placeholder-label {
-  font-family: Consolas, 'Cascadia Code', 'JetBrains Mono', 'SF Mono',
-    ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 11px;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
+  font-family: inherit;
+  font-size: 15px;
   color: var(--todo);
-  font-weight: 600;
+  font-weight: 700;
 }
 .am-scope .am-placeholder-body {
   margin-top: 0.5em;
