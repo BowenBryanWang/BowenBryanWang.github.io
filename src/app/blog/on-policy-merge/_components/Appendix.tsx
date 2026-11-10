@@ -1753,7 +1753,7 @@ export default function Appendix() {
                   <td>Knowledge work</td>
                   <td>MiMo-V2.6-RL-oss general split (925 environments)</td>
                   <td>Per-environment checks plus an LLM rubric judge</td>
-                  <td>MiMo General (mini), held out by industry</td>
+                  <td>GDPval public set (220 tasks), pairwise against the human deliverable</td>
                 </tr>
                 <tr>
                   <td>Search</td>
@@ -1794,8 +1794,13 @@ export default function Appendix() {
             held-out suite no arm trains on: MMLU-Pro, GPQA and HLE (the older
             publicly available release, not comparable to published HLE numbers).
             Base scores are re-measured in our harnesses, with one fixed open
-            harness per agentic domain for every arm. The knowledge-work judge is
-            a closed-API model, a reproducibility caveat.
+            harness per agentic domain for every arm. GDPval deliverables are
+            graded pairwise against the human expert’s deliverable by a panel of
+            judge models that does not include the training judge; we report the
+            win-plus-tie rate and, between arms, the head-to-head win rate on the
+            same tasks. About half of GDPval assumes web access, and every arm
+            runs it with the same access. The judges are closed-API models, a
+            reproducibility caveat.
           </p>
           <p>
             <span className="am-runin">Shared RL recipe.</span> slime, run
