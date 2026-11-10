@@ -1735,7 +1735,7 @@ export default function Appendix() {
                   <td>Software engineering</td>
                   <td>MiMo-V2.6-RL-oss code split (2,602) and SWE-smith</td>
                   <td>Executed tests in containers</td>
-                  <td>SWE-bench Verified, SWE-bench Pro</td>
+                  <td>SWE-rebench (tasks after the base model’s release), SWE-bench Pro</td>
                 </tr>
                 <tr>
                   <td>Terminal</td>
@@ -1789,8 +1789,9 @@ export default function Appendix() {
             </table>
           </div>
           <p>
-            Training repositories are decontaminated against the SWE-bench
-            evaluation sets, and one AIME26 duplicate is removed from DAPO. A
+            SWE-rebench tasks come only from pull requests merged after the base
+            model’s release, training repositories are decontaminated against
+            them and against SWE-bench Pro, and one AIME26 duplicate is removed from DAPO. A
             held-out suite no arm trains on: MMLU-Pro, GPQA and HLE (the older
             publicly available release, not comparable to published HLE numbers).
             Base scores are re-measured in our harnesses, with one fixed open

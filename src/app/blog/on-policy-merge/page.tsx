@@ -1562,7 +1562,7 @@ export default function OnPolicyMergingPost() {
                 <thead>
                   <tr>
                     <th>Arm</th>
-                    <th className="am-num">SWE-V</th>
+                    <th className="am-num">SWE-rebench</th>
                     <th className="am-num">TB 2.1</th>
                     <th className="am-num">Cyber</th>
                     <th className="am-num">GDPval</th>
@@ -1588,7 +1588,7 @@ export default function OnPolicyMergingPost() {
             status="pending main runs (A1–A4, 3 seeds)"
           >
             <p>
-              Per-domain scores: SWE-bench Verified, Terminal-Bench 2.1, MiMo
+              Per-domain scores: SWE-rebench, Terminal-Bench 2.1, MiMo
               Cyber (mini), GDPval (public set), BrowseComp-Plus, τ²-Bench,
               AIME26, IFBench, each with a 95% confidence interval.
               Secondary benchmarks per domain (SWE-bench Pro, HMMT Feb 26,
