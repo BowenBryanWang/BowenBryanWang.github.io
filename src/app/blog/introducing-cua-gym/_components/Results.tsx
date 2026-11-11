@@ -187,7 +187,7 @@ function Panel({ title, rows }: { title: string; rows: DomainRow[] }) {
       <div className="flex items-center gap-2 mb-1.5">
         <span
           className="text-[11px] font-semibold tracking-tight text-ink"
-          style={{ fontFamily: 'Consolas, "JetBrains Mono", monospace' }}
+          style={{ fontFamily: 'var(--font-mono)' }}
         >
           {title}
         </span>
@@ -226,7 +226,7 @@ function DomainBar({
           'text-[10.5px] truncate',
           highlight ? 'font-semibold text-ink' : 'text-ink-soft',
         ].join(' ')}
-        style={{ fontFamily: 'Consolas, "JetBrains Mono", monospace' }}
+        style={{ fontFamily: 'var(--font-mono)' }}
         title={domain}
       >
         {domain}

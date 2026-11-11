@@ -184,8 +184,7 @@
 
 .cua-gym-scope .font-system .font-mono,
 .cua-gym-scope .font-system .font-mono * {
-  font-family: Consolas, 'Cascadia Code', 'JetBrains Mono', 'SF Mono',
-    ui-monospace, SFMono-Regular, Menlo, monospace !important;
+  font-family: var(--font-mono);
 }
 
 .cua-gym-scope .marker-link {

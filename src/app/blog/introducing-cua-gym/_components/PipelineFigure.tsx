@@ -328,8 +328,7 @@ function ProgressRow({ label, score }: { label: string; score: number }) {
 // macOS-Terminal style traffic lights
 const TRAFFIC = { red: '#FF5F57', yellow: '#FEBC2E', green: '#28C840' };
 
-const CODE_FONT =
-  'Consolas, "Cascadia Code", "JetBrains Mono", "SF Mono", ui-monospace, Menlo, monospace';
+const CODE_FONT = 'var(--font-mono)';
 
 function Card({
   head,
@@ -967,7 +966,7 @@ function Branch({
               fontFamily:
                 l.tone === 'detail'
                   ? `${SERIF}`
-                  : '"JetBrains Mono", monospace',
+                  : 'var(--font-mono)',
               fontStyle: l.tone === 'detail' ? 'italic' : 'normal',
             }}
           >

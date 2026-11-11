@@ -103,8 +103,7 @@
   font-weight: 600;
 }
 .am-scope .am-prose code {
-  font-family: Consolas, 'Cascadia Code', 'JetBrains Mono', 'SF Mono',
-    ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-family: var(--font-mono);
   font-size: 0.86em;
   background: var(--paper-deep);
   border: 1px solid var(--rule);
@@ -229,8 +228,7 @@
   background: var(--forest-soft);
 }
 .am-scope .am-callout .am-callout-label {
-  font-family: Consolas, 'Cascadia Code', 'JetBrains Mono', 'SF Mono',
-    ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-family: var(--font-mono);
   font-size: 11px;
   letter-spacing: 0.16em;
   text-transform: uppercase;
@@ -288,8 +286,7 @@
 /* Status pill (draft notice) */
 .am-scope .am-pill {
   display: inline-block;
-  font-family: Consolas, 'Cascadia Code', 'JetBrains Mono', 'SF Mono',
-    ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-family: var(--font-mono);
   font-size: 10.5px;
   letter-spacing: 0.14em;
   text-transform: uppercase;

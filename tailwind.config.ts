@@ -44,23 +44,11 @@ export default {
         rule: '#E2DDD2',
       },
       fontFamily: {
-        display: [
-          '"Palatino Linotype"',
-          'Palatino',
-          '"Book Antiqua"',
-          'Georgia',
-          'ui-serif',
-          'serif',
-        ],
-        body: [
-          '"Palatino Linotype"',
-          'Palatino',
-          '"Book Antiqua"',
-          'Georgia',
-          'ui-serif',
-          'serif',
-        ],
-        mono: ['Consolas', '"JetBrains Mono"', 'ui-monospace', 'monospace'],
+        display: ['var(--font-serif)'],
+        body: ['var(--font-serif)'],
+        serif: ['var(--font-serif)'],
+        sans: ['var(--font-sans)'],
+        mono: ['var(--font-mono)'],
       },
       maxWidth: {
         prose2: '52rem',

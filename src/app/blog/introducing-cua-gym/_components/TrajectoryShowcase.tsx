@@ -15,8 +15,7 @@ import { TRAJECTORIES, type TrajData, type TrajStep } from '../_lib/trajectories
  * coverage of CUA-Gym is visible at a glance.
  */
 
-const CODE_FONT =
-  'Consolas, "Cascadia Code", "JetBrains Mono", "SF Mono", ui-monospace, monospace';
+const CODE_FONT = 'var(--font-mono)';
 const SHOT_W = 1920;
 const SHOT_H = 1080;
 

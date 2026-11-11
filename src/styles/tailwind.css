@@ -4,9 +4,27 @@
 @import 'tailwindcss/utilities';
 
 @layer base {
+  /* Type follows thinkingmachines.ai: Iowan Old Style for text (preinstalled
+     on macOS and iOS, Georgia elsewhere), a system sans for navigation,
+     captions and tables, and a system monospace for code. */
+  :root {
+    --font-serif: "Iowan Old Style", "Iowan Old Style BT", Georgia, serif;
+    --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  }
   body {
-    font-family: 'Palatino Linotype', Palatino, 'Book Antiqua', Georgia,
-      ui-serif, serif;
+    font-family: var(--font-serif);
+  }
+  nav,
+  figcaption,
+  table {
+    font-family: var(--font-sans);
+  }
+  code,
+  kbd,
+  pre,
+  samp {
+    font-family: var(--font-mono);
   }
 }
 
