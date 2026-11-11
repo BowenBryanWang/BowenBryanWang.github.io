@@ -30,7 +30,7 @@ export default function Appendix() {
       <OpenOnHash />
       <div className="am-prose">
         <p>
-          The appendices hold everything the main text points to. A gives the
+          The appendices contain the material the main text refers to. A gives the
           notation, the derivation and the exact relations between methods. B
           states every theoretical result with its status and proof. C covers
           the merge solver and its cost. D has the one-shot 4B study, E the toy,
@@ -73,7 +73,7 @@ export default function Appendix() {
             The OPM merge is{' '}
             <Tex tail=",">{T`d^\star=(\sum_iF_i)^{+}\sum_iF_i\Delta_i`}</Tex> the
             sum is <Tex tail=",">{T`d_\Sigma=\sum_i\Delta_i`}</Tex> and the
-            others’ update seen from domain <Tex>j</Tex> is{' '}
+            sum of the updates of the domains other than <Tex>j</Tex> is{' '}
             <Tex tail=".">{T`s_j=\sum_{i\ne j}\Delta_i`}</Tex> The transfer term
             is <Tex tail=".">{T`T_j=g_j(\theta_j)^\top s_j`}</Tex> Throughout,{' '}
             <Tex tail=",">{T`A=\sum_iF_i`}</Tex>{' '}
@@ -88,18 +88,23 @@ export default function Appendix() {
               For <Tex tail=",">{T`t<t'`}</Tex>{' '}
               <Tex>{T`\mathbb{E}[s_ts_{t'}^\top]=\mathbb{E}\big[s_t\,\mathbb{E}[s_{t'}\mid h_{t'}]^\top\big]=0`}</Tex>{' '}
               because the score has zero mean given its prefix, so{' '}
-              <Tex>{T`F_i=\mathbb{E}[\sum_ts_ts_t^\top]`}</Tex>: a sum over the
-              tokens of a rollout, not an average. The log-ratio of two rollout
+              <Tex>{T`F_i=\mathbb{E}[\sum_ts_ts_t^\top]`}</Tex>, which is a sum over
+              the tokens of a rollout rather than a per-token average. The
+              log-ratio of two rollout
               probabilities in the same environment is{' '}
               <Tex tail=",">{T`\sum_t\big(\log\pi_{\theta_i}(a_t\mid h_t)-\log\pi_\theta(a_t\mid h_t)\big)`}</Tex>{' '}
               so{' '}
               <Tex>{T`\mathrm{KL}(P^i_{\theta_i}\|P^i_\theta)=\mathbb{E}_{P^i_{\theta_i}}\big[\sum_t\mathrm{KL}(\pi_{\theta_i}(\cdot\mid h_t)\|\pi_\theta(\cdot\mid h_t))\big]`}</Tex>{' '}
-              and the environment terms cancel. The Hessian of a KL at its minimum
+              because the environment’s transition probabilities are the same
+              under both policies and cancel in the ratio. The Hessian of a KL at
+              its minimum
               is the Fisher of its first argument, which gives the quadratic form,
               and the normal equations{' '}
               <Tex>{T`\sum_iF_i(\theta-\theta_i)=0`}</Tex> give (2). The
-              pseudo-inverse picks the minimum-norm solution; directions in{' '}
-              <Tex>{T`\operatorname{null}A`}</Tex> are invisible to every domain.
+              pseudo-inverse picks the minimum-norm solution. A direction{' '}
+              <Tex>v</Tex> in <Tex>{T`\operatorname{null}A`}</Tex> satisfies{' '}
+              <Tex>{T`F_iv=0`}</Tex> for every <Tex tail=",">i</Tex> so it leaves
+              every domain’s action probabilities unchanged to first order.
             </p>
           </details>
 
@@ -120,10 +125,10 @@ export default function Appendix() {
               over the simplex gives the mixture by Gibbs’ inequality. The minimum
               is zero iff all <Tex>{T`\pi_{\theta_i}(\cdot\mid h)`}</Tex> with{' '}
               <Tex>{T`d_i(h)>0`}</Tex> coincide. So a round is lossless iff the
-              trainers agree on every history they share, and (2), the
-              second-order version in logit space with Fishers at the trainers’
-              endpoints, inherits the mixture only while per-context logit moves
-              stay of order one (<a className="am-ref" href="#app-b-6">B.6</a>). ∎
+              trainers’ policies coincide on every history that more than one of
+              them visits, and (2), the second-order version in logit space with
+              Fishers at the trainers’ endpoints, matches the mixture only while
+              per-context logit changes are of order one (<a className="am-ref" href="#app-b-6">B.6</a>). ∎
             </p>
           </details>
 
@@ -253,8 +258,8 @@ export default function Appendix() {
                   <td>One trainer active per stage, others idle, summed</td>
                   <td>Cascade RL: multi-task RL with every share but one at 0</td>
                   <td>
-                    Protection of idle domains; keeping them in an OPM merge gives
-                    a protected cascade (<a className="am-ref" href="#app-b-5">B.5</a>)
+                    The idle domains’ terms in the merge; keeping them in an OPM
+                    merge gives a protected cascade (<a className="am-ref" href="#app-b-5">B.5</a>)
                   </td>
                 </tr>
                 <tr>
@@ -269,14 +274,14 @@ export default function Appendix() {
                   </td>
                   <td>MOPD, to second order</td>
                   <td>
-                    Reward, and reuse of rollouts: a second stage, and a teacher
-                    ceiling
+                    Reward and reuse of rollouts; MOPD adds a second stage and has
+                    a teacher ceiling
                   </td>
                 </tr>
                 <tr>
                   <td>Objective (1) solved in function space</td>
                   <td>Distral, Divide-and-Conquer RL</td>
-                  <td>The closed form: distillation replaces a linear solve</td>
+                  <td>The closed form; distillation replaces the linear solve</td>
                 </tr>
               </tbody>
             </table>
@@ -299,8 +304,8 @@ export default function Appendix() {
               <Tex tail=".">{T`\Delta_j\in\operatorname{range}F_j`}</Tex> Equal
               Fishers give{' '}
               <Tex tail=".">{T`d^\star=(nF)^{+}F\sum_i\Delta_i=\tfrac1n\sum_i\Delta_i`}</Tex>{' '}
-              The rest hold by definition. Numerically: the natural-gradient
-              identity to <Tex tail=",">{T`3\times10^{-14}`}</Tex> the sum and
+              The rest hold by definition. Numerically, the natural-gradient
+              identity holds to <Tex tail=",">{T`3\times10^{-14}`}</Tex> the sum and
               average limits to <Tex>{T`2\times10^{-9}`}</Tex> and{' '}
               <Tex tail=".">{T`4\times10^{-12}`}</Tex> ∎
             </p>
@@ -340,8 +345,8 @@ export default function Appendix() {
             To first order the change is{' '}
             <Tex tail=",">{T`\rho\,\sigma\sqrt{2\varepsilon^{(2)}}`}</Tex> with{' '}
             <Tex>{T`\rho\in[-1,1]`}</Tex> the correlation between reward and the
-            log-ratio. KL is a worst case over rewards. In 2,000 random checks
-            neither bound was violated.
+            log-ratio. The KL bound holds for every reward, so it is the worst
+            case over rewards. In 2,000 random checks neither bound was violated.
           </p>
           <details>
             <summary>Proofs</summary>
@@ -449,8 +454,8 @@ export default function Appendix() {
             Fishers (endpoint, anchor or stale), and trainers whose update depends
             only on their own domain’s gradient and Fisher history, the anchor’s
             policy on domain <Tex>j</Tex> after <Tex>r</Tex> rounds equals that of
-            a solo run of <Tex>{T`rK`}</Tex> steps. Checks: in log-linear problems
-            the OPM error is at most <Tex tail=";">{T`3\times10^{-16}`}</Tex> in a
+            a solo run of <Tex>{T`rK`}</Tex> steps. In numerical checks on
+            log-linear problems the OPM error is at most <Tex tail=";">{T`3\times10^{-16}`}</Tex> in a
             small MLP it scales as <Tex>{T`t^2`}</Tex> and the sum’s change
             matches <Tex>{T`T_j`}</Tex> to about 1% at small <Tex tail=";">t</Tex>{' '}
             the deviation from solo is at most <Tex>{T`2\times10^{-12}`}</Tex> for
@@ -514,9 +519,9 @@ export default function Appendix() {
               <Tex tail=".">{T`\bar\theta^{+}\equiv\theta_j\pmod{N_j}`}</Tex>{' '}
               Induct over steps and rounds: if the anchor is congruent to the solo
               iterate and the trainer’s optimizer state equals the solo state, the
-              trainer sees the same gradients and applies the same updates. Any
+              trainer computes the same gradients and applies the same updates. Any
               full-support Fisher has range <Tex tail=",">{T`N_j^\perp`}</Tex> so
-              endpoint, anchor and stale metrics all work. ∎
+              the result holds with endpoint, anchor and stale metrics. ∎
             </p>
           </details>
 
@@ -539,16 +544,20 @@ export default function Appendix() {
             <Tex tail=".">{T`\tfrac12\|d^\star\|^2_{F_j}=\tfrac12\|\Delta_j\|^2_{F_j}`}</Tex> (d)
             Multi-task RL gives{' '}
             <Tex tail=";">{T`g_j^\top d=\eta(c_j\|g_j\|^2+\sum_{i\ne j}c_ig_i^\top g_j)`}</Tex>{' '}
-            it beats OPM on <Tex>j</Tex> only by spending more drift on{' '}
-            <Tex>j</Tex> that happens to align with reward. Check: own-term share
-            1.000, identity to <Tex tail=".">{T`10^{-14}`}</Tex>
+            it can exceed OPM’s gain on <Tex>j</Tex> only through larger drift
+            on <Tex>j</Tex>, and only to the extent that this drift aligns with
+            reward. In a numerical check the own-term share was 1.000 and the
+            identity held to <Tex tail=".">{T`10^{-14}`}</Tex>
           </p>
           <p>
-            So multi-task natural gradient does pass every gradient through{' '}
+            Multi-task natural gradient passes every gradient through{' '}
             <Tex tail=",">{T`A^{+}`}</Tex> but in a lossless round each piece{' '}
-            <Tex>{T`x_i`}</Tex> is invisible to every other domain. Genuine
-            cross-domain effects appear only in shared directions, and there it
-            averages rather than amplifies.
+            <Tex>{T`x_i`}</Tex> satisfies <Tex>{T`F_jx_i=0`}</Tex> for every{' '}
+            <Tex tail=",">{T`j\ne i`}</Tex> so it leaves every other domain’s
+            action probabilities unchanged to first order. Cross-domain effects
+            occur only in shared directions, and there multi-task natural
+            gradient averages the domains’ gradient components instead of
+            summing them.
           </p>
           <p>
             <strong>Tabular reduction</strong> <Status s="T" />. With tabular
@@ -561,8 +570,8 @@ export default function Appendix() {
             <Cite k="agarwal2021" /> (discounted setting; we do not re-derive
             episodic constants), whereas Euclidean softmax policy gradient can
             take time exponential in the number of states <Cite k="li2021" />. The
-            separation belongs to natural against Euclidean geometry, not to OPM,
-            and holds for exact gradients.
+            separation is due to natural versus Euclidean geometry and is not
+            specific to OPM; it holds for exact gradients.
           </p>
           <details>
             <summary>Proofs</summary>
@@ -592,13 +601,14 @@ export default function Appendix() {
             </p>
           </details>
 
-          <h4 id="app-b-4">B.4 The price</h4>
+          <h4 id="app-b-4">B.4 Amplification, fixed points and the rate floor</h4>
           <p>
             <strong>Proposition 3</strong> <Status s="P" />, in the stated models.
             (A) <em>Amplification against averaging.</em> With <Tex>n</Tex>{' '}
             domains sharing a direction <Tex>u</Tex> with common curvature{' '}
             <Tex>f</Tex> and agreeing objectives, each trainer’s <Tex>K</Tex>{' '}
-            steps solve <Tex>{T`x=1-(1-\eta f)^K`}</Tex> of it. OPM moves{' '}
+            steps remove a fraction <Tex>{T`x=1-(1-\eta f)^K`}</Tex> of the
+            distance to the optimum along it. OPM moves{' '}
             <Tex tail=",">x</Tex> the sum <Tex tail=",">{T`nx`}</Tex> multi-task
             RL <Tex tail=".">{T`1-(1-n\eta f)^K`}</Tex> With an interior optimum
             the per-round error factors are <Tex>{T`1-x`}</Tex> and{' '}
@@ -621,10 +631,10 @@ export default function Appendix() {
             trainer step sizes act as batch shares. Trainers that solve their
             round (quadratic model, <Tex tail=")">{T`F_i=H_i`}</Tex> reach the
             optimum of the unweighted <Tex tail=",">{T`\sum_iJ_i`}</Tex> whatever
-            the speeds. Checks: all predictions to{' '}
+            the speeds. In numerical checks all predictions hold to{' '}
             <Tex tail=";">{T`10^{-11}`}</Tex> OPM with natural-gradient rates
-            (0.09, 0.01) lands exactly where multi-task RL with shares (0.9, 0.1)
-            does.
+            (0.09, 0.01) reaches the same point as multi-task RL with shares
+            (0.9, 0.1).
           </p>
           <p>
             <strong>Rate floor</strong> <Status s="P" />. Assume relative
@@ -678,7 +688,8 @@ export default function Appendix() {
               <Tex>{T`\|\Delta_j\|\le\eta KG`}</Tex> and{' '}
               <Tex tail=",">{T`\|d^\star\|\le n\kappa_c\eta KG`}</Tex> so{' '}
               <Tex>{T`\|d^\star-\Delta_j\|\le(1+n\kappa_c)\eta KG`}</Tex> inside{' '}
-              <Tex tail=",">{T`\operatorname{null}F_j`}</Tex> costing at most{' '}
+              <Tex tail=",">{T`\operatorname{null}F_j`}</Tex> which lowers{' '}
+              <Tex>{T`J_j`}</Tex> by at most{' '}
               <Tex tail=".">{T`\tfrac M2(1+n\kappa_c)^2\eta^2K^2G^2`}</Tex> Sum
               over <Tex tail=",">j</Tex> telescope over <Tex>R</Tex> rounds, and
               divide by <Tex tail=".">{T`n\eta T/2`}</Tex> ∎
@@ -714,8 +725,9 @@ export default function Appendix() {
             <Tex>{T`J_2`}</Tex> from 0.9987 to 0.0735 (accumulated first-order
             term −0.891, remainder −0.034); protected cascade keeps 0.9987 with
             the same <Tex>{T`J_1`}</Tex> of 0.997. The OPM merge is symmetric in
-            the domains; cascade depends on the order and passes positive transfer
-            forward along it, which protection blocks.
+            the domains. Cascade depends on the order of stages and carries
+            positive transfer forward along it; the protected cascade removes
+            that transfer.
           </p>
 
           <h4 id="app-b-6">B.6 The trigger, locality and the choice of δ</h4>
@@ -738,8 +750,8 @@ export default function Appendix() {
             <Tex tail=",">{T`J_j(\bar\theta^{+})\ge J_j(\bar\theta)+G_j-\sqrt{\varepsilon_j/2}`}</Tex>{' '}
             with <Tex tail=".">{T`G_j=J_j(\theta_j)-J_j(\bar\theta)`}</Tex>{' '}
             Without a reference KL, the trainers’ local solution is not a
-            natural-gradient step, and nothing makes drift level off: the trigger
-            is the only thing that caps drift. KL penalties toward a shared model appear in
+            natural-gradient step and no term in the objective bounds drift, so
+            the trigger is the only bound on drift. KL penalties toward a shared model appear in
             federated policy gradient <Cite k="xie2023" />; OPM replaces the
             penalty by the trigger and moves the anchor at every rendezvous.
           </p>
@@ -750,9 +762,9 @@ export default function Appendix() {
             is <Tex tail=",">{T`O(h^3)`}</Tex> and <Tex>{T`O(h^4)`}</Tex> along
             null directions, so over <Tex>R</Tex> rounds it totals{' '}
             <Tex tail=".">{T`O(\ell^3/R^2)`}</Tex> One-shot merging is{' '}
-            <Tex tail=".">{T`R=1`}</Tex> Under real conflict each round leaves
-            a second-order residual whose first-order reward cost does not
-            shrink with merge frequency.
+            <Tex tail=".">{T`R=1`}</Tex> When domains conflict, each round
+            leaves a second-order residual whose first-order effect on reward
+            does not decrease with merge frequency.
           </p>
           <p>
             <strong>Endpoint-Fisher collapse</strong> <Status s="T" /> for the
@@ -773,13 +785,13 @@ export default function Appendix() {
           </p>
           <p>
             <strong>Repair and data validity</strong> <Status s="T" />. After a
-            rendezvous trainers resume on-policy RL, so a round’s residual costs
-            steps rather than final quality: the final bound involves only the
-            last round. Whole-trajectory importance weights have{' '}
+            rendezvous, trainers resume on-policy RL, so a round’s residual slows
+            training but does not limit final quality; the final bound involves
+            only the last round. Whole-trajectory importance weights have{' '}
             <Tex tail=",">{T`\chi^2\ge e^{\mathrm{KL}}-1`}</Tex> so at residuals
-            of tens of nats no trajectory-level reuse is possible, for OPM or
-            anyone else. What makes in-flight reuse possible is per-token
-            importance sampling, as in truncated importance sampling and IcePop{' '}
+            of tens of nats no trajectory-level reuse is possible, for OPM or any
+            other method. In-flight reuse is possible with per-token importance
+            sampling, as in truncated importance sampling and IcePop{' '}
             <Cite k="ling2025" />, where{' '}
             <Tex tail=".">{T`\chi^2_{\rm tok}\approx2\varepsilon_{\rm tok}`}</Tex>{' '}
             One-shot per-token residuals at 4B are 0.01–0.44 nats (sum:
@@ -792,7 +804,8 @@ export default function Appendix() {
             <Tex>{T`\bar\ell_i`}</Tex> the mean response length, or trigger on per-token KL. At 4B,{' '}
             <Tex>{T`\kappa\approx1`}</Tex> toward the merged points at 0.02–0.04
             nats per token. (ii) The Fisher sample needs many more tokens than the
-            effective rank of the subspace in which domains see each other, so it
+            effective rank of the subspace in which the domains’ Fishers overlap,
+            so it
             grows with the drift budget. (iii) Rounds per unit of Fisher path scale
             as <Tex tail=";">{T`\delta^{-1/2}`}</Tex> take the largest{' '}
             <Tex>{T`\delta`}</Tex> meeting (i) and (ii) within the merge-cost
@@ -832,9 +845,9 @@ export default function Appendix() {
             <strong>Cost identity</strong> <Status s="T" />. MOPD’s second stage
             costs{' '}
             <Tex tail=",">{T`\sum_iN^s_i(c^{\rm gen}_i+c^{\rm env}_i+c^{\rm teach}_i)`}</Tex>{' '}
-            including fresh environment interaction. An OPM rendezvous needs none:
-            a few Fisher-vector products per trainer on cached rollouts plus
-            forward passes for the line search.
+            including fresh environment interaction. An OPM rendezvous needs no
+            environment interaction; it uses a few Fisher-vector products per
+            trainer on cached rollouts plus forward passes for the line search.
           </p>
 
           <h4 id="app-b-8">B.8 The transfer predictor and a regime map</h4>
@@ -949,7 +962,8 @@ export default function Appendix() {
               are vacuous above about 2 nats; 4B specialists drift 75–248 nats.
             </li>
             <li>
-              Lossless points are assumed, not shown, at LLM scale. At 4B the
+              At LLM scale, the existence of lossless points is an assumption
+              that we have not verified. At 4B the
               residual after 30 CG iterations is still 15% of drift.
             </li>
             <li>
@@ -957,8 +971,8 @@ export default function Appendix() {
               round-solving trainers; under conflict, step sizes act as weights.
             </li>
             <li>
-              No invariance to rollout length: long-response domains weigh more in
-              shared directions.
+              No invariance to rollout length: domains with longer responses
+              receive more weight in shared directions.
             </li>
             <li>
               Exact gradients and Fishers are assumed except in <a className="am-ref" href="#prop-5">Proposition 5</a> and
@@ -989,9 +1003,9 @@ export default function Appendix() {
             per-rollout log-ratio spread <Tex>s</Tex> and <Tex>M</Tex> rollouts,{' '}
             <Tex tail=".">{T`e=O(s\sqrt{\log|\Gamma|/M})`}</Tex> <em>Proof.</em>{' '}
             <Tex>{T`E(\hat\gamma)\le\hat E(\hat\gamma)+e\le\hat E(0)+e\le E(0)+2e`}</Tex>{' '}
-            by a union bound over sub-Gaussian means. ∎ The guarantee is about
-            total KL, not each domain’s, measured on the trainers’ distributions,
-            and silent about reward. Estimating{' '}
+            by a union bound over sub-Gaussian means. ∎ The guarantee bounds
+            the total KL over domains, measured on the trainers’ distributions;
+            it gives no bound on any single domain’s KL or on reward. Estimating{' '}
             <Tex>{T`\hat E(\gamma)-\hat E(0)`}</Tex> on the same rollouts shrinks{' '}
             <Tex tail=".">s</Tex> Adding a candidate on the anchor side would
             restore the <Tex>{T`n(\delta+\omega)`}</Tex> bound of <a className="am-ref" href="#app-b-6">B.6</a>.
@@ -1004,7 +1018,7 @@ export default function Appendix() {
             true and <Tex>{T`\hat r`}</Tex> the sampled residual of (2) at the
             sum, the first CG step raises the true quadratic iff{' '}
             <Tex tail=";">{T`\hat r^\top r/\|\hat r\|^2<\tfrac12\,\hat r^\top A\hat r/\hat r^\top\hat A\hat r`}</Tex>{' '}
-            likewise for later directions. Two failure sources: estimation noise,
+            likewise for later directions. There are two sources of failure: estimation noise,
             with relative size growing as{' '}
             <Tex tail=",">{T`\sqrt{r_{\rm eff}/N_{\rm tok}}`}</Tex> and curvature
             underestimated along the step. Proof: for{' '}
@@ -1087,7 +1101,7 @@ export default function Appendix() {
           <p>
             Moving the vectors to the GPU took one product on 11k tokens from 66 s
             to 19 s. One product over about 36k tokens takes 100–120 s. Further
-            levers we have not yet adopted: running the vector-Jacobian product in
+            speed-ups we have not yet adopted: running the vector-Jacobian product in
             bf16 (it is linear in the cotangent, and bf16 forward+backward costs
             0.44 against 3.6 in fp32), TF32 finite-difference forwards with fp32
             refinement, subsampling the curvature batch as Hessian-free
@@ -1153,9 +1167,9 @@ export default function Appendix() {
                   <td>Multi-task RL</td>
                   <td>One.</td>
                   <td>One shared pool; every batch mixes all domains.</td>
-                  <td>Every domain’s quota, so the slowest domain sets the pace.</td>
+                  <td>Every domain’s quota, so the slowest domain determines the step time.</td>
                   <td>No: one optimizer state, one clip, one learning rate.</td>
-                  <td>Re-mix the quotas and keep training; a broken domain has already reached every weight.</td>
+                  <td>Re-mix the quotas and keep training; updates from a broken domain are already in every weight.</td>
                   <td>None.</td>
                 </tr>
                 <tr>
@@ -1164,7 +1178,7 @@ export default function Appendix() {
                   <td>One domain at a time.</td>
                   <td>The stage in progress.</td>
                   <td>Per stage, not per domain.</td>
-                  <td>Add a stage; earlier domains are not held in place and can be forgotten.</td>
+                  <td>Add a stage; nothing constrains earlier domains, so they can be forgotten.</td>
                   <td>None.</td>
                 </tr>
                 <tr>
@@ -1175,7 +1189,7 @@ export default function Appendix() {
                   <td>One pool per specialist.</td>
                   <td>Nothing until the single merge at the end.</td>
                   <td>Yes.</td>
-                  <td>Retrain one specialist and merge again, from tens to hundreds of nats apart.</td>
+                  <td>Retrain one specialist and merge again; the specialists are tens to hundreds of nats apart.</td>
                   <td>One merge.</td>
                 </tr>
                 <tr>
@@ -1196,12 +1210,12 @@ export default function Appendix() {
                   </td>
                   <td>
                     <Tex tail=",">n</Tex> which can share one training pool in
-                    turn (Making the merge cheap).
+                    turn (Computing the merge at scale).
                   </td>
                   <td>One engine group per trainer, sized by rollout cost.</td>
                   <td>Only the next rendezvous; units never wait for each other between rendezvous.</td>
                   <td>Yes, throughout training.</td>
-                  <td>Start, retune or roll back one trainer at a rendezvous; the others carry on.</td>
+                  <td>Start, retune or roll back one trainer at a rendezvous; the others continue training.</td>
                   <td>A merge per rendezvous: about five minutes with two trainers at 9B, about an hour with eight.</td>
                 </tr>
               </tbody>
@@ -1219,7 +1233,7 @@ export default function Appendix() {
             their final weights. Rendezvous 6 and 7 installed the merge at half
             its length. At rendezvous 7 the full solve failed the per-trainer
             check at every step size; the row reports the solve without the math
-            trainer, whose update waited for the next rendezvous.
+            trainer, whose update was deferred to the next rendezvous.
           </p>
           <div className="am-table">
             <table>
@@ -1368,8 +1382,8 @@ export default function Appendix() {
             per domain (about 5.7M tokens in total). Against finite differences of{' '}
             <Tex>{T`2\,\mathrm{KL}(\theta\|\theta+\epsilon v)/\epsilon^2`}</Tex>{' '}
             the quadratic form agrees within 1–3% along the math update, 0.05%
-            along the code update and 0.1% along a random direction, which carries
-            5,800 times less curvature. Points: (a) from the sum, 10 iterations;
+            along the code update and 0.1% along a random direction, along which
+            the curvature is 5,800 times smaller. Points: (a) from the sum, 10 iterations;
             (c) continued to 30; (b) from task arithmetic, 10; (d) stale metric,
             Fisher on base-model rollouts, 10.
           </p>
@@ -1451,7 +1465,7 @@ export default function Appendix() {
             The OPM point moves only 3.9% of <Tex>{T`\|\sum_i\tau_i\|`}</Tex> from
             the sum after 10 iterations (6.4% after 20, 8.3% after 30), and
             99.4–99.6% of that move lies outside the span of the five updates;
-            even so it cuts the residual relative to the sum 3.7-fold at 10
+            it reduces the residual relative to the sum 3.7-fold at 10
             iterations and 8-fold at 30. The relative CG residual is 0.13, 0.078
             and 0.068 at 10, 20 and 30 iterations.
           </p>
@@ -1666,7 +1680,7 @@ export default function Appendix() {
             At smaller budgets the positive variants favour multi-task RL more
             strongly. Against multi-task RL at 4× its rate, OPM (CG-10, default
             rate) trails by 0.23 / 0.20 at 10 steps per task, 0.18 / 0.10 at 25
-            and 0.05 / 0.03 at 50 (pos-soft / pos-strong). Under conflict, OPM
+            and 0.05 / 0.03 at 50 (pos-soft / pos-strong). In the conflict variants, OPM
             leads at every budget once both rates are tuned (at 25 steps, 0.980 /
             0.986 for OPM at 4× against 0.762 / 0.776 for the best multi-task
             rate, neg / mixed).
@@ -1690,14 +1704,14 @@ export default function Appendix() {
             <span className="am-runin">A reward-aware merge.</span> Adding the
             trainers’ gradients to the merge,{' '}
             <Tex tail=",">{T`\bar\theta+A^{+}\sum_i(F_i\Delta_i+g_i/\beta_m)`}</Tex>{' '}
-            looks like a way to recover transfer. Because{' '}
+            is a candidate way to recover transfer. Because{' '}
             <Tex tail=",">{T`g_i\in\operatorname{range}F_i`}</Tex> it is exactly
             OPM applied to trainers that each took one extra natural-gradient step
             (numerical identity error at most{' '}
             <Tex tail=")">{T`2.6\times10^{-3}`}</Tex>. Its
-            gain is flat across variants (+0.21 to +0.26 at 10 steps), a step-size
-            effect that OPM with a 4× trainer rate reproduces within about 0.02.
-            It remains an ablation.
+            gain is similar across variants (+0.21 to +0.26 at 10 steps), and OPM
+            with a 4× trainer rate reproduces it within about 0.02, so the gain is a
+            step-size effect. We report it only as an ablation.
           </p>
           <p>
             <span className="am-runin">Guarantees.</span> Pinsker’s bound held in
@@ -1738,8 +1752,8 @@ export default function Appendix() {
             <li>
               A slow task given a fifth of the steps: final success 0.03 under
               multi-task RL, 0.01 under the periodic sum, 0.70 under OPM, from a
-              start of 0.25. If it never trains: 0.01, 0.00 and 0.14, so
-              protection is per round and partial.
+              start of 0.25. If it never trains: 0.01, 0.00 and 0.14, so OPM
+              reduces the slow task’s loss in each round but does not remove it.
             </li>
           </ul>
         </details>
@@ -1829,8 +1843,8 @@ export default function Appendix() {
             removed (110 to 93), training repositories are decontaminated
             against SWE-bench Verified and Pro, and one AIME26 duplicate is
             removed from DAPO. Terminal-Bench runs with network access as in
-            the official harness. A
-            held-out suite no arm trains on: MMLU-Pro, GPQA and HLE (the older
+            the official harness. The
+            held-out suite, on which no arm trains, is MMLU-Pro, GPQA and HLE (the older
             publicly available release, scored with the official judge prompt,
             not comparable to published HLE numbers).
             Single-turn benchmarks decode up to the official cap of 81,920 new
@@ -1845,7 +1859,7 @@ export default function Appendix() {
             head-to-head win rate between arms, with intervals bootstrapped over
             tasks. On the gold deliverables it agrees with Claude Opus 5 on 94%
             of rubric criteria (κ = 0.82) and is the stricter of the two. The
-            judge is a closed-API model, a reproducibility caveat.
+            judge is a closed-API model, which limits reproducibility.
           </p>
           <p>
             <span className="am-runin">Shared RL recipe.</span> slime, run
@@ -1987,27 +2001,27 @@ export default function Appendix() {
             <h3>G. Secondary findings in detail</h3>
           </summary>
           <p>
-            <span className="am-runin">Orthogonal is not independent.</span> At
+            <span className="am-runin">Near-orthogonal updates still interfere.</span> At
             4B, global cosines between task vectors are at most 0.022 and mostly
             below 0.002, yet the off-diagonal interference index has median 0.122
             and maximum 1.78 (<a className="am-ref" href="#app-d">Appendix D</a>). Directions along the specialists’
             updates carry 5,800 times the Fisher curvature of random directions of
-            the same norm. Whether two domains interfere is a property of their
-            Fishers’ overlap, which cosines do not measure; this is the coupling
-            table of <a className="am-ref" href="#app-b-2">B.2</a>.
+            the same norm. Interference between two domains depends on the overlap
+            of their Fishers, which cosines do not measure; the coupling table of{' '}
+            <a className="am-ref" href="#app-b-2">B.2</a> gives this overlap.
           </p>
           <p>
-            <span className="am-runin">Sparsity is a bf16 artefact.</span> On
+            <span className="am-runin">Apparent sparsity comes from bf16 rounding.</span> On
             layer-16 tensors of the 4B specialists, task vectors have{' '}
             <Tex>{T`\|\tau\|/\|\theta\|\approx7\times10^{-4}`}</Tex> per layer and
             a median entry of about <Tex tail=",">{T`1.1\times10^{-5}`}</Tex>{' '}
-            about <Tex>{T`2^{-11}`}</Tex> relative to the weights, exactly the
+            about <Tex>{T`2^{-11}`}</Tex> relative to the weights, which equals the
             rounding step of TF32. In fp32, 99.996% of entries are nonzero. After
             bf16 rounding only 18% are, the rounded task vector has cosine 0.57
             with the true one, and its relative L2 error is 84%. The layer-16
             cosines of <CiteT k="wu2026" /> reproduce exactly (math–science
-            0.0217, math–code 0.0103), so near-orthogonality is real; apparent
-            sparsity is not. Building the merge from bf16 checkpoints instead of
+            0.0217, math–code 0.0103), so the near-orthogonality holds in fp32,
+            while the sparsity appears only after bf16 rounding. Building the merge from bf16 checkpoints instead of
             fp32 raises the median off-diagonal interference from 0.122 to 0.14
             and the maximum from 1.78 to 2.51.
           </p>
@@ -2020,19 +2034,19 @@ export default function Appendix() {
             on AIME, GPQA and LiveCodeBench. Whether fp32 deployment favours the
             OPM merge specifically is open, because the sum was not evaluated in
             fp32. Merges, residuals and triggers must be computed in true fp32;
-            perturbations at the <Tex>{T`2^{-11}`}</Tex> level are invisible to
-            TF32.
+            TF32 rounds away perturbations at the <Tex>{T`2^{-11}`}</Tex>{' '}
+            level.
           </p>
           <p>
-            <span className="am-runin">KL residual is not reward loss.</span> The
+            <span className="am-runin">KL residual and reward loss differ.</span> The
             sum has the largest residual (1.19 of drift in-sample, up to 3.09 on
             code) and the best one-shot mean among bf16 merges. By Lemma 2 the return change is the
             reward-weighted log-ratio plus at most the KL; to first order{' '}
             <Tex tail=",">{T`\rho\sigma\sqrt{2\varepsilon}`}</Tex> with the
             reward–log-ratio correlation <Tex>{T`\rho`}</Tex> estimated at 0.1–0.3
             here. The residual bounds how much of a specialist’s own behaviour is
-            lost, which is the right objective when domains conflict and the wrong
-            one when they help each other.
+            lost. Minimising it is an appropriate objective when domains conflict
+            and an inappropriate one when they help each other.
           </p>
           <p>
             <span className="am-runin">When the sum beats OPM.</span> In the
@@ -2044,15 +2058,15 @@ export default function Appendix() {
             conflicting regime outside the merge: in their evaluation, the IF
             specialist trained alone lowers BFCL from 63.9 to 54.1, and the agent and code specialists lose
             about 2 points on AIME25 <Cite k="wu2026" />. <a className="am-ref" href="#table-6">Table 6</a>{' '}
-            will show which regime each of the eight main domains falls in.
+            will show which regime each of the eight main domains is in.
           </p>
           <p>
-            <span className="am-runin">The stale metric ties at one shot.</span> A
+            <span className="am-runin">A stale Fisher matches the on-policy one in a single merge.</span> A
             Fisher from base-model rollouts gives a worse residual (0.38 vs 0.31
-            held-out) but the same benchmark mean (−0.22 ± 0.31). In the toy a
-            metric that was never refreshed failed badly (0.13 against 0.96)
-            because it was used across many rounds. One shot cannot tell the two
-            apart.
+            held-out) but the same benchmark mean (−0.22 ± 0.31). In the toy, a
+            metric that was never refreshed scored much lower (0.13 against 0.96)
+            because it was used across many rounds. A single merge therefore does
+            not distinguish the stale metric from the fresh one.
           </p>
         </details>
 
@@ -2067,8 +2081,9 @@ export default function Appendix() {
             policy toward it by KL <Cite k="teh2017" />. Divide-and-Conquer RL
             trains one policy per context, periodically distils them into a
             central policy on their own trajectories, and resets them to it{' '}
-            <Cite k="ghosh2018" />. That is objective (1) solved by gradient
-            descent at a fixed interval; the barycenter objective is theirs.
+            <Cite k="ghosh2018" />. This solves objective (1) by gradient
+            descent at a fixed interval, so the barycenter objective comes from
+            their work.
             Policy distillation compresses several task policies into one network{' '}
             <Cite k="rusu2016" />. OPM replaces distillation by its closed form in
             one shared network, and adds the KL trigger and the coupling theory.
@@ -2090,7 +2105,7 @@ export default function Appendix() {
             that MOPD is Fisher merging to second order; <a className="am-ref" href="#app-b-7">B.7</a> adds the lossless
             statement and which Fisher to use. M2A merges a math task vector into a
             software agent only along the null space of agent-critical activations{' '}
-            <Cite k="wang2026b" />, which is the intuition of <a className="am-ref" href="#thm-1">Theorem 1</a> applied
+            <Cite k="wang2026b" />, which applies the idea behind <a className="am-ref" href="#thm-1">Theorem 1</a>{' '}
             once.
           </p>
           <p>
@@ -2117,23 +2132,23 @@ export default function Appendix() {
             <Tex>{T`M(1+n\kappa_c)^2\eta KG^2`}</Tex> (<a className="am-ref" href="#app-b-4">B.4</a>). Federated natural policy
             gradient for multi-task RL aggregates natural gradients for a common
             objective <Cite k="yang2023" />; the tabular reduction in <a className="am-ref" href="#app-b-3">B.3</a> shows
-            why the multi-task Fisher, not an average of directions, is needed
-            when domains visit different states. Federated GRPO with plain
+            why the multi-task Fisher is needed in place of an average of
+            directions when domains visit different states. Federated GRPO with plain
             averaging fell below local-only training under non-IID data{' '}
             <Cite k="guo2026" />. FedKL penalises KL to the global policy{' '}
-            <Cite k="xie2023" />. Synchronising when models drift apart rather
-            than on a clock has been used with parameter distance in supervised
+            <Cite k="xie2023" />. Synchronising when models diverge, instead of on a
+            fixed schedule, has been used with parameter distance in supervised
             decentralised training <Cite k="kamp2018" />; we know of no use of
             trajectory KL to trigger a weight merge.
           </p>
           <p>
             <span className="am-runin">Policy optimisation.</span> The natural
             policy gradient <Cite k="kakade2001" /> and trust-region policy
-            optimisation <Cite k="schulman2015" /> supply the geometry; the return
+            optimisation <Cite k="schulman2015" /> are the source of the Fisher geometry; the return
             bound of <a className="am-ref" href="#app-b-6">B.6</a> is the standard trust-region argument applied to a merge
-            residual. The limitations of the empirical Fisher{' '}
-            <Cite k="kunstner2019" /> are why the metric has to be computed on the
-            trainer’s own samples.
+            residual. Because of the limitations of the empirical Fisher{' '}
+            <Cite k="kunstner2019" />, we compute the metric on the trainer’s own
+            samples.
           </p>
         </details>
       </div>

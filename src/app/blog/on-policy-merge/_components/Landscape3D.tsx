@@ -247,7 +247,7 @@ const START: Record<Key, number> = (() => {
 })()
 const LOOP = ORDER.reduce((s, k) => s + LEN[k], 0)
 // times below are written on a design clock; SPEED maps them to real seconds
-const SPEED = 0.685
+const SPEED = 1.25
 const DUR = `${(LOOP * SPEED).toFixed(2)}s`
 const NAMES: Record<Key, string> = {
   mtrl: 'Multi-task RL',
@@ -403,7 +403,7 @@ function MergeSeg() {
       <Fade t0={tm + 0.4} fade={0.1}>
         <circle cx={m[0]} cy={m[1]} r={7} className="am-fig-ink" />
         <Label at={m} dy={-16} anchor="middle">
-          merge lands on the ridge
+          merged point on a ridge
         </Label>
       </Fade>
     </>
@@ -560,7 +560,7 @@ function OpmSeg() {
       </Fade>
       <Fade t0={tmc + 0.1} fade={0.12} then={[[tmc + 1.6, 1], [tmc + 1.9, 0]]}>
         <Label at={back} dx={0} dy={34} anchor="middle">
-          rolled back at the merge
+          reset to the merged model
         </Label>
       </Fade>
 
@@ -584,7 +584,7 @@ export default function Landscape3D() {
     <svg
       viewBox={`0 0 ${W} ${H}`}
       role="img"
-      aria-label="Five training methods play one after another on the same loss landscape"
+      aria-label="Five training methods, animated one after another on the same loss landscape"
       data-anim-end={(END_FRAME * SPEED).toFixed(2)}
     >
       <g className="am-ls-grid" strokeWidth="0.6" strokeLinejoin="round">

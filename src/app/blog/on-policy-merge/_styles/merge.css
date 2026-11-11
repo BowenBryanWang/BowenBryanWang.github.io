@@ -56,8 +56,8 @@
 }
 
 .am-scope .am-prose {
-  color: var(--ink-soft);
-  font-size: 16px;
+  color: var(--ink);
+  font-size: 17px;
   line-height: 1.75;
 }
 .am-scope .am-prose p {
@@ -119,8 +119,7 @@
   font-weight: 600;
 }
 .am-scope .am-prose code {
-  font-family: Consolas, 'Cascadia Code', 'JetBrains Mono', 'SF Mono',
-    ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-family: var(--font-mono);
   font-size: 0.86em;
   background: var(--paper-deep);
   border: 1px solid var(--rule);
@@ -439,8 +438,7 @@
 }
 .am-scope .am-pending {
   display: inline-block;
-  font-family: Consolas, 'Cascadia Code', 'JetBrains Mono', 'SF Mono',
-    ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-family: var(--font-mono);
   font-size: 0.78em;
   letter-spacing: 0.04em;
   color: var(--todo);
@@ -454,8 +452,7 @@
 
 /* BibTeX block */
 .am-scope .am-bib {
-  font-family: Consolas, 'Cascadia Code', 'JetBrains Mono', 'SF Mono',
-    ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-family: var(--font-mono);
   font-size: 12.5px;
   line-height: 1.55;
   background: var(--paper-deep);

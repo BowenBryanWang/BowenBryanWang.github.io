@@ -301,7 +301,7 @@ export function ParadigmFigure() {
     { y: 66, name: 'Multi-task RL', sub: 'one trainer, mixed batches' },
     { y: 128, name: 'Merge-after', sub: 'weight arithmetic at the end' },
     { y: 200, name: 'MOPD', sub: 'a student imitates the teachers' },
-    { y: 384, name: 'On-Policy Merge', sub: 'train apart, meet often' },
+    { y: 384, name: 'On-Policy Merge', sub: 'separate trainers, frequent merges' },
     { y: 272, name: 'Cascade RL', sub: 'one domain after another' },
   ]
   const divY = 312
@@ -312,7 +312,7 @@ export function ParadigmFigure() {
   const fan = (x0: number, x1: number, y: number, off: number) =>
     `M ${x0} ${y} C ${x0 + 26} ${y}, ${x0 + 22} ${y + off}, ${x0 + 48} ${y + off} L ${x1} ${y + off}`
   const meets = [X0, 292, 340, 402, 486, 598, X1]
-  const DUR = '3.5s'
+  const DUR = '6.3s'
   const SWEEP = 0.78
   const at = (x: number) => ((x - X0) / (X1 - X0)) * SWEEP
   const kt = (...t: number[]) => t.map((v) => Math.min(1, Math.max(0, v)).toFixed(4)).join(';')
@@ -452,7 +452,7 @@ export function ParadigmFigure() {
         rendezvous when a trainer drifts δ nats from the anchor
       </text>
       <text x={X1} y={rows[4].y - 16} textAnchor="end" className="am-fig-text" fontSize="13.5">
-        each stage starts from the last; nothing holds the earlier domains
+        each stage starts from the last; earlier domains are unconstrained
       </text>
 
 
@@ -486,7 +486,7 @@ export function HeadToHeadFigure() {
       yMax={1.0}
       yTicks={[0.4, 0.6, 0.8, 1.0]}
       legendCols={2}
-      note="EXACT TOY · 10 SEEDS · A SIGNAL, NOT A RESULT AT SCALE"
+      note="EXACT TOY · 10 SEEDS · NOT TESTED AT SCALE"
       series={[
         {
           label: 'On-Policy Merge (10 CG iterations, KL trigger 0.1)',
