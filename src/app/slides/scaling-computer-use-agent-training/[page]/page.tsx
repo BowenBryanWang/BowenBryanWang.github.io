@@ -4,7 +4,7 @@
 import SlidesPage from '../page'
 
 export function generateStaticParams() {
-  return Array.from({ length: 32 }, (_, i) => ({ page: `page${i + 1}` }))
+  return Array.from({ length: 26 }, (_, i) => ({ page: `page${i + 1}` }))
 }
 
 export default function PageNRouter({ params }: { params: { page: string } }) {
