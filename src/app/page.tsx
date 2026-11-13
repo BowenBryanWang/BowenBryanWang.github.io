@@ -1,13 +1,8 @@
+import { profileMetadata } from './about/metadata'
+import Profile from './about/Profile'
 
-import About from './about/page'
+export const metadata = profileMetadata
 
-
-
-export default async function Home() {
-
-  return (
-    <>
-      <About />
-    </>
-  )
+export default function Home() {
+  return <Profile />
 }

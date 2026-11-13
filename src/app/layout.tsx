@@ -12,8 +12,6 @@ export const metadata: Metadata = {
     template: '%s - Bowen Wang',
     default: 'Bowen Wang',
   },
-  description:
-    '',
 }
 
 export default function RootLayout({
