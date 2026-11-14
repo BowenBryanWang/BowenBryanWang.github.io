@@ -1,0 +1,260 @@
+/* Figures 5 and 6: main results. Baselines are drawn in ink, the OPM model in
+   the accent colour, so colour marks one thing only. */
+.am-scope .am-rf {
+  width: 100%;
+  height: auto;
+  display: block;
+  font-family: inherit;
+  overflow: visible;
+}
+.am-scope .am-rf-rule {
+  stroke: var(--rule);
+  stroke-width: 1;
+}
+.am-scope .am-rf-axis {
+  stroke: var(--ink-faint);
+  stroke-width: 1;
+}
+.am-scope .am-rf-ref {
+  stroke: var(--ink-faint);
+  stroke-width: 1.25;
+  stroke-dasharray: 5 4;
+}
+.am-scope .am-rf-tick {
+  fill: var(--ink-soft);
+  font-size: 12.5px;
+  font-variant-numeric: tabular-nums;
+}
+.am-scope .am-rf-domain {
+  fill: var(--ink-soft);
+  font-size: 12.5px;
+}
+.am-scope .am-rf-bench {
+  fill: var(--ink);
+  font-size: 14px;
+  font-weight: 600;
+}
+.am-scope .am-rf-domain {
+  font-weight: 400;
+}
+.am-scope .am-rf-line {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 2.25;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+.am-scope .am-rf-pt {
+  fill: var(--accent);
+  stroke: var(--surf-halo);
+  stroke-width: 2;
+}
+.am-scope .am-rf-val {
+  fill: var(--ink);
+  font-size: 12.5px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.am-scope .am-rf-reflabel {
+  fill: var(--ink-soft);
+  font-size: 12.5px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* A full table folded under its figure. */
+.am-scope details.am-fold > summary {
+  font-weight: 600;
+}
+.am-scope details.am-fold .am-table {
+  margin: 0.4em 0 0.8em;
+}
+.am-scope details.am-fold p {
+  margin: 0.6em 0 0.2em;
+}
+
+/* Figure 5: interactive bar charts. Colours validated for colour-vision
+   deficiency on the light (#fdfbf5) and dark (#161412) surfaces. */
+.am-scope {
+  --m-base: #cfc8ba;
+  --m-spec: #8d857b;
+  --m-mtrl: #1f9bb0;
+  --m-ta1: #b07a14;
+  --m-mopd: #4a6fc0;
+  --m-opm: #a8381f;
+}
+.dark .am-scope {
+  --m-base: #5a544d;
+  --m-spec: #9a9288;
+  --m-mtrl: #2a9fb3;
+  --m-ta1: #b98a2a;
+  --m-mopd: #6c8ad6;
+  --m-opm: #d4664d;
+}
+/* The figure may run past the text column to the right, where the legend sits. */
+.am-scope figure.am-wide {
+  width: calc(100% + clamp(0px, (100vw - 100%) / 2 - 32px, 230px));
+  max-width: none;
+}
+.am-scope .am-bars {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.am-scope .am-bars-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 22px 26px;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.am-scope .am-bars svg {
+  min-width: 0;
+  overflow: visible;
+  font-family: inherit;
+}
+.am-scope .am-bars-axis {
+  stroke: var(--ink-faint);
+  stroke-width: 1;
+}
+.am-scope .am-bars-whisk line {
+  stroke: var(--ink);
+  stroke-width: 1.25;
+  stroke-linecap: round;
+}
+.am-scope .am-bars-grid-line {
+  stroke: var(--rule);
+  stroke-width: 1;
+}
+.am-scope .am-bars-tick {
+  fill: var(--ink-soft);
+  font-size: 10.5px;
+  font-variant-numeric: tabular-nums;
+}
+.am-scope .am-bars-val {
+  fill: var(--ink);
+  font-size: 10.5px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.am-scope .am-bars-none {
+  fill: var(--ink-faint);
+  font-size: 11px;
+}
+.am-scope .am-bars-panel g {
+  transition: opacity 0.12s;
+}
+.am-scope .am-bars-dim {
+  opacity: 0.22;
+}
+.am-scope .am-bars-name {
+  margin-top: 4px;
+  padding-left: 11%;
+  text-align: center;
+  font-size: 12px;
+  line-height: 1.35;
+  color: var(--ink-soft);
+}
+.am-scope .am-bars-name strong {
+  display: block;
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 600;
+}
+.am-scope .am-bars-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 6px;
+  order: -1;
+  font-size: 12px;
+}
+.am-scope .am-bars-legend button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 3px 9px 3px 7px;
+  border: 1px solid var(--rule);
+  border-radius: 5px;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.am-scope .am-bars-legend button:hover {
+  background: var(--paper-deep);
+}
+.am-scope .am-bars-legend button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+.am-scope .am-bars-legend button[aria-pressed='false'] {
+  color: var(--ink-faint);
+  border-style: dashed;
+}
+.am-scope .am-bars-legend button[aria-pressed='false'] .am-bars-sw {
+  opacity: 0.25;
+}
+.am-scope .am-bars-sw {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  flex: none;
+}
+.am-scope .am-bars-legend p {
+  flex-basis: 100%;
+  margin: 4px 0 0;
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: var(--ink-soft);
+}
+.am-scope .am-bars-tip {
+  position: absolute;
+  z-index: 5;
+  transform: translate(12px, -110%);
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding: 7px 10px;
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  background: var(--surf-halo);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: var(--ink-soft);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.am-scope .am-bars-tip strong {
+  color: var(--ink);
+}
+/* Wide screens: legend in a column on the right of the panels. */
+@media (min-width: 1180px) {
+  .am-scope .am-bars {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 28px;
+  }
+  .am-scope .am-bars-legend {
+    order: 0;
+    flex: 0 0 168px;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    gap: 5px;
+    padding-top: 6px;
+  }
+  .am-scope .am-bars-legend button {
+    justify-content: flex-start;
+  }
+  .am-scope .am-bars-legend p {
+    margin-top: 8px;
+  }
+}
+@media (max-width: 640px) {
+  .am-scope .am-bars-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px 14px;
+  }
+}

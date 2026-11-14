@@ -229,6 +229,10 @@
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
+/* Result tables: keep "23.6 ± 3.5" on one line; the wrapper scrolls. */
+.am-scope .am-results .am-num {
+  white-space: nowrap;
+}
 
 /* Callouts */
 .am-scope .am-callout {

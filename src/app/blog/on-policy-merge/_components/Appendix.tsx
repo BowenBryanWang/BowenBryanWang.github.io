@@ -2,6 +2,15 @@ import Tex from './Tex'
 import SectionTitle from './SectionTitle'
 import { Cite, CiteT } from './Cite'
 import { Placeholder } from './Placeholder'
+import {
+  MathPublicTable,
+  SecondaryTable,
+  HeldoutFastTable,
+  HeldoutSlowTable,
+  MathSpecialistTable,
+  OtherPublicTable,
+  RelativeTable,
+} from './ResultTables'
 import OpenOnHash from './OpenOnHash'
 
 const T = String.raw
@@ -1788,7 +1797,7 @@ export default function Appendix() {
                   <td>Software engineering</td>
                   <td>MiMo-V2.6-RL-oss code split (2,602) and SWE-smith; 932 in the training pool</td>
                   <td>Executed tests in containers</td>
-                  <td>SWE-rebench (93 tasks), SWE-bench Pro</td>
+                  <td>SWE-bench Pro (642 tasks), SWE-rebench (84 tasks)</td>
                 </tr>
                 <tr>
                   <td>Terminal</td>
@@ -1824,7 +1833,7 @@ export default function Appendix() {
                   <td>Math</td>
                   <td>Polaris and DAPO, filtered (61,404 problems)</td>
                   <td>Answer match</td>
-                  <td>AIME26, HMMT Feb 26</td>
+                  <td>AIME25, AIME26, HMMT Feb 26</td>
                 </tr>
                 <tr>
                   <td>Instruction following</td>
@@ -1840,12 +1849,13 @@ export default function Appendix() {
             released (February 2026); the distilled model we train was released
             later, so exposure through its distillation data cannot be ruled
             out. Evaluation tasks from repositories in our training pool are
-            removed (110 to 93), training repositories are decontaminated
+            removed (110 to 93) and the 84 tasks whose reference patch passes
+            validation are kept, training repositories are decontaminated
             against SWE-bench Verified and Pro, and one AIME26 duplicate is
             removed from DAPO. Terminal-Bench runs with network access as in
             the official harness. The
-            held-out suite, on which no arm trains, is MMLU-Pro, GPQA and HLE (the older
-            publicly available release, scored with the official judge prompt,
+            held-out suite, on which no arm trains, is MMLU-Pro, GPQA and HLE (the
+            1,810 text items with exact-match answers, judged by Qwen3-32B,
             not comparable to published HLE numbers).
             Single-turn benchmarks decode up to the official cap of 81,920 new
             tokens. Base scores are re-measured in our harnesses, with one fixed open
@@ -1952,17 +1962,172 @@ export default function Appendix() {
             <Tex tail=",">{T`2\times10^{-6}`}</Tex> and multi-task RL and MOPD{' '}
             <Tex tail=".">{T`4\times10^{-6}`}</Tex> One seed per arm (seed 1).
           </p>
+          <div className="am-table am-results" id="app-f-budget">
+            <table>
+              <thead>
+                <tr>
+                  <th>Domain</th>
+                  <th className="am-num">Steps</th>
+                  <th className="am-num">Rollouts per step</th>
+                  <th className="am-num">Budget, rollouts</th>
+                  <th className="am-num">Per multi-task step</th>
+                  <th className="am-num">Share</th>
+                  <th className="am-num">Learning rate</th>
+                </tr>
+              </thead>
+              <tbody>
+                {[
+                  ['Math', 300, 512, '4e-6'],
+                  ['Instruction following', 300, 512, '4e-6'],
+                  ['Tool use', 200, 256, '4e-6'],
+                  ['Search', 200, 256, '1e-6'],
+                  ['Software engineering', 110, 256, '2e-6'],
+                  ['Knowledge work', 110, 256, '2e-6'],
+                  ['Cyber', 80, 256, '2e-6'],
+                  ['Terminal', 60, 256, '2e-6'],
+                ].map(([d, steps, per, lr]) => {
+                  const budget = (steps as number) * (per as number)
+                  return (
+                    <tr key={d as string}>
+                      <td>{d}</td>
+                      <td className="am-num">{steps}</td>
+                      <td className="am-num">{per}</td>
+                      <td className="am-num">{budget.toLocaleString('en-US')}</td>
+                      <td className="am-num">{Math.round(budget / 200).toLocaleString('en-US')}</td>
+                      <td className="am-num">{((100 * budget) / 501760).toFixed(1)}%</td>
+                      <td className="am-num">{lr}</td>
+                    </tr>
+                  )
+                })}
+                <tr>
+                  <td>
+                    <strong>All eight</strong>
+                  </td>
+                  <td className="am-num">–</td>
+                  <td className="am-num">–</td>
+                  <td className="am-num">501,760</td>
+                  <td className="am-num">2,509</td>
+                  <td className="am-num">100%</td>
+                  <td className="am-num">4e-6 (multi-task)</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p style={{ fontSize: '14px' }}>
+            The rollout budget of each domain and the mix of one multi-task
+            step. A specialist or an OPM trainer steps on 32 accepted groups
+            of 16 rollouts (math, instruction following) or 8 (agentic
+            domains). Multi-task RL runs 200 steps and takes 1/200 of every
+            domain’s budget per step, so its batch is 2,509 rollouts, of which
+            61% are math and instruction following. The learning rates are
+            those of the specialists.
+          </p>
+          <p id="app-f-recipes">
+            <span className="am-runin">Recipe of each method.</span> Every
+            trainer uses Adam with a constant learning rate and weight decay
+            0.1, on top of the shared recipe above. The table gives the
+            per-domain settings of the specialists and of the trainers of the
+            final OPM run. The OPM run started after the baselines were
+            trained and changes four trainers: lower learning rates for math,
+            software engineering, instruction following and tool use; a KL
+            penalty of <Tex>{T`10^{-4}`}</Tex> and a length cap of 64k tokens
+            instead of 32k for math; and, for software engineering, staleness
+            4 instead of 8 and 300 steps of 16 groups, which is 36% more
+            rollouts than the specialist’s 110 steps of 32 groups. In these four domains the
+            comparison is not at equal recipe.
+          </p>
+          <div className="am-table am-results">
+            <table>
+              <thead>
+                <tr>
+                  <th>Domain</th>
+                  <th className="am-num">Specialist LR</th>
+                  <th className="am-num">Groups × rollouts</th>
+                  <th className="am-num">Steps</th>
+                  <th className="am-num">OPM trainer LR</th>
+                  <th className="am-num">Groups × rollouts</th>
+                  <th className="am-num">Steps</th>
+                </tr>
+              </thead>
+              <tbody>
+                {[
+                  ['Math', '4e-6', '32 × 16', 300, '1e-6', '32 × 16', 300],
+                  ['Instruction following', '4e-6', '32 × 16', 300, '2e-6', '32 × 16', 300],
+                  ['Tool use', '4e-6', '32 × 8', 200, '2e-6', '32 × 8', 200],
+                  ['Search', '1e-6', '32 × 8', 200, '1e-6', '32 × 8', 200],
+                  ['Software engineering', '2e-6', '32 × 8', 110, '1e-6', '16 × 8', 300],
+                  ['Knowledge work', '2e-6', '32 × 8', 110, '2e-6', '32 × 8', 110],
+                  ['Cyber', '2e-6', '32 × 8', 80, '2e-6', '32 × 8', 80],
+                  ['Terminal', '2e-6', '32 × 8', 60, '2e-6', '32 × 8', 60],
+                ].map((r) => (
+                  <tr key={r[0] as string}>
+                    <td>{r[0]}</td>
+                    {r.slice(1).map((c, i) => (
+                      <td key={i} className="am-num">
+                        {c}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <ul>
+            <li>
+              <strong>Specialists.</strong> One run per domain with the
+              settings in the table. They are the inputs of task arithmetic
+              and the other merges, and the teachers of MOPD.
+            </li>
+            <li>
+              <strong>Multi-task RL.</strong> One trainer, learning rate{' '}
+              <Tex tail=",">{T`4\times10^{-6}`}</Tex> 200 steps of 2,509
+              rollouts in the mix of the budget table, with each domain’s
+              length, turn and staleness limits.
+            </li>
+            <li>
+              <strong>Task arithmetic.</strong> The base model plus the sum of
+              the eight specialists’ updates, with{' '}
+              <Tex tail=".">{T`\lambda=1`}</Tex> No training.
+            </li>
+            <li>
+              <strong>TIES and the closed-form merge</strong> (Table F6
+              only). TIES and the merge of <CiteT k="liu2026" /> applied once
+              to the same eight specialists. No training; the closed-form
+              merge takes 82 B200 GPU-hours.
+            </li>
+            <li>
+              <strong>MOPD.</strong> One student, learning rate{' '}
+              <Tex tail=",">{T`4\times10^{-6}`}</Tex> 50 steps of 1,024
+              prompts with one rollout each, per-token advantage clipped to
+              ±5. Reported at iteration 14.
+            </li>
+            <li>
+              <strong>OPM.</strong> Eight trainers with the settings in the
+              table and the merge settings under “Arms” below.
+            </li>
+          </ul>
           <p>
-            <span className="am-runin">Arms.</span> A1 multi-task RL: per-domain
+            <span className="am-runin">Checkpoints.</span> Multi-task RL is
+            reported at step 150 of 200, the checkpoint given by a rule
+            registered before evaluation. MOPD is reported at iteration 14, the
+            last one before its output length diverges; iteration 19 scores
+            higher on held-out math and instruction following. The math
+            specialist is reported at step 60, chosen on in-domain validation,
+            because its scores fall later in training
+            (<a className="am-ref" href="#table-f5">Table F5</a>); the merges
+            and the MOPD teacher use its step 210.
+          </p>
+          <p>
+            <span className="am-runin">Arms.</span> Multi-task RL: per-domain
             rollout quotas matched to the budget, uniform gradient weights per
             domain through a ledger rule, deficit scheduling, and rollouts that
-            miss a short-batch deadline carried over to the next step. A2
-            merge-after: the best of task arithmetic at{' '}
-            <Tex>{T`\lambda\in\{0.4,0.6,0.8,1.0\}`}</Tex> chosen on held-out
-            reward, DARE-TA, TIES, the closed form of <CiteT k="liu2026" /> and a
-            one-shot OPM merge. A3 MOPD: per-token advantage teacher minus student
+            miss a short-batch deadline carried over to the next step.
+            Merge-after: task arithmetic with{' '}
+            <Tex tail=";">{T`\lambda=1`}</Tex> TIES and the closed form of{' '}
+            <CiteT k="liu2026" /> are reported in{' '}
+            <a className="am-ref" href="#table-f6">Table F6</a>. MOPD: per-token advantage teacher minus student
             log-probability, clipped to ±5, 50 steps of 1,024 prompts with one
-            rollout each; student rollouts count toward the budget. A4 OPM: eight trainers, drift measured on about one rollout in
+            rollout each; student rollouts count toward the budget. OPM: eight trainers, drift measured on about one rollout in
             eight, a per-token ceiling, the Fisher on the first 2,048 action
             tokens of each rollout, blocking merges, and the guarded merge
             with five Jacobi-preconditioned CG iterations from the sum, a
@@ -1983,15 +2148,90 @@ export default function Appendix() {
             thinking leakage, tool-call validity, and OPM’s per-merge
             diagnostics.
           </p>
-          <Placeholder label="Table F1" status="pending main runs">
-            <p>
-              Secondary benchmarks per domain (SWE-bench Pro, HMMT Feb 26, IFEval,
-              BFCL v4 non-agentic) and the held-out suite (MMLU-Pro, GPQA-Diamond,
-              HLE) for base, specialists and A1–A4, seed 1, and final-step math
-              scores for every arm. Base so far: IFEval 67.0, BFCL v4 60.9 ± 1.8,
-              MMLU-Pro 75.7, GPQA-Diamond 65.5, HLE 3.0 ± 0.8.
-            </p>
-          </Placeholder>
+          <p>
+            <span className="am-runin">Results.</span> The tables below hold
+            the secondary benchmarks and the held-out sets behind{' '}
+            <a className="am-ref" href="#table-4">Table 4</a>. Every number is
+            transcribed from the project’s results register, snapshot of 14
+            November 2026, and was not recomputed from per-sample data. The
+            uncertainties are over tasks and samples, not over training seeds.
+            MMLU-Pro and GPQA are not in this snapshot. In{' '}
+            <a className="am-ref" href="#table-4">Table 4</a>, SWE-bench Pro is
+            run on all 642 tasks with one sample each and no network access
+            from the sandbox; math pools the 93 problems of AIME25, AIME26 and
+            HMMT Feb 26, with the standard errors of the three sets combined;
+            the cyber set is held out and scored by the training verifier; BFCL
+            is item-level accuracy; and HLE’s standard error is the register’s
+            95% half-width divided by 1.96. The register has no standard errors
+            for BFCL, IFBench and IFEval.
+          </p>
+          <MathPublicTable />
+          <p style={{ fontSize: '14px' }}>
+            <strong>Table F1.</strong> Public math and HLE, in percent. Math is
+            the mean of 32 samples per problem with up to 81,920 output tokens,
+            on 30, 30 and 33 problems, ± the standard error over problems;
+            “Pooled” is the mean over all 93. AIME25 may be in the training
+            data of the base model. HLE is ± the half-width of a 95% interval.
+          </p>
+          <SecondaryTable />
+          <p style={{ fontSize: '14px' }}>
+            <strong>Table F2.</strong> Secondary benchmarks. SWE-rebench is
+            the 84-task subset left after decontamination and validation of
+            the reference patches; with 84 tasks its standard error is about 5
+            points, against 1.7 for SWE-bench Pro. IFEval uses four samples per
+            item and BFCL one. The official BFCL score is a weighted score in
+            [0, 1] and is a different metric from item-level accuracy.
+          </p>
+          <HeldoutFastTable />
+          <HeldoutSlowTable />
+          <p style={{ fontSize: '14px' }}>
+            <strong>Tables F3 and F4.</strong> Held-out sets of the training
+            environments, as mean reward in [0, 1] ± the standard error.
+            Math, instruction following, search and tool use: 256 prompts with
+            4 samples each. Software engineering, terminal and cyber: 64 tasks
+            with 2 samples each. Tool use covers the WorkBench and end-of-game
+            tasks. Cyber is scored by the training verifier. A standard error
+            of zero on 64 tasks does not mean the score is certain. A dash
+            means the evaluation was not run.
+          </p>
+          <MathSpecialistTable />
+          <p style={{ fontSize: '14px' }}>
+            <strong>Table F5.</strong> The math specialist during training, on
+            public math, in percent. Its scores peak early and fall by more
+            than 30 points by the final step. The specialist row of{' '}
+            <a className="am-ref" href="#table-4">Table 4</a> uses step 60; the
+            merges and the MOPD teacher use step 210.
+          </p>
+          <OtherPublicTable />
+          <p style={{ fontSize: '14px' }}>
+            <strong>Table F6.</strong> Two other merges of the same eight
+            specialists on the benchmarks of{' '}
+            <a className="am-ref" href="#fig-5">Figure 5</a>, in percent, with
+            the base model and task arithmetic for reference. TIES scores
+            above task arithmetic on every benchmark where both were run. The
+            closed-form merge of <CiteT k="liu2026" /> is below the base model
+            on SWE-bench Pro, Terminal-Bench 2.1, BrowseComp-Plus and cyber;
+            its linearisation error at eight domains is 0.42, outside the 0.10
+            the paper allows.
+          </p>
+          <p>
+            <a className="am-ref" href="#table-f7">Table F7</a> gives each
+            baseline’s held-out score relative to the specialist of the same
+            domain. A ratio above 1 means the arm scores above the specialist.
+            It does not by itself show transfer: the specialist may be past its
+            best checkpoint, as in math, and a merge also changes the size of
+            each update.
+          </p>
+          <RelativeTable />
+          <p style={{ fontSize: '14px' }}>
+            <strong>Table F7.</strong> Held-out score of each arm divided by
+            the specialist’s score on the same held-out set
+            (<a className="am-ref" href="#table-f3">Tables F3</a> and{' '}
+            <a className="am-ref" href="#table-f4">F4</a>). The math
+            specialist here is the step-210 checkpoint. Point estimates
+            without uncertainty; a dash means the arm was not evaluated on
+            that set.
+          </p>
 
         </details>
 
@@ -2057,8 +2297,9 @@ export default function Appendix() {
             precision. The same release also shows the
             conflicting regime outside the merge: in their evaluation, the IF
             specialist trained alone lowers BFCL from 63.9 to 54.1, and the agent and code specialists lose
-            about 2 points on AIME25 <Cite k="wu2026" />. <a className="am-ref" href="#table-6">Table 6</a>{' '}
-            will show which regime each of the eight main domains is in.
+            about 2 points on AIME25 <Cite k="wu2026" />. <a className="am-ref" href="#table-f7">Table F7</a>{' '}
+            gives each baseline’s score relative to the specialist on the main
+            domains.
           </p>
           <p>
             <span className="am-runin">A stale Fisher matches the on-policy one in a single merge.</span> A
