@@ -151,12 +151,10 @@ export default function OnPolicyMergingPost() {
           {/* ------------------------------------------------------------ */}
           <div className="am-prose">
             <p>
-              A frontier language model is expected to be strong in many
-              domains at once: agentic coding, terminal use, cybersecurity,
-              knowledge work, web search and competition math. Much of this
-              ability comes from reinforcement learning (RL) on each domain, so
-              post-training has to combine RL on many domains into one model.
-              The common
+              Post-training a frontier language model has to combine
+              reinforcement learning (RL) on many domains into one model:
+              agentic coding, terminal use, cybersecurity, knowledge work, web
+              search and competition math. The common
               recipe, multi-task RL, trains all domains in one run with one
               optimizer. Each optimizer step
               is computed from a batch that mixes all domains, so every update
