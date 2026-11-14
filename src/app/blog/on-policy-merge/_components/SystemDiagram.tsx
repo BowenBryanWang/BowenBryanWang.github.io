@@ -18,7 +18,7 @@ export default function SystemDiagram() {
       <div className="am-sys-coord">
         <div className="am-sys-title">Merge coordinator</div>
         <div className="am-sys-sub">
-          tracks each drift D<sub>i</sub> / δ<sub>i</sub>, triggers a rendezvous,
+          tracks each drift D<sub>i</sub> / δ<sub>i</sub>, triggers a merge,
           solves (2) across trainers, broadcasts θ⁺
         </div>
       </div>

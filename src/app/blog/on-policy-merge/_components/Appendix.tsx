@@ -753,7 +753,7 @@ export default function Appendix() {
             natural-gradient step and no term in the objective bounds drift, so
             the trigger is the only bound on drift. KL penalties toward a shared model appear in
             federated policy gradient <Cite k="xie2023" />; OPM replaces the
-            penalty by the trigger and moves the anchor at every rendezvous.
+            penalty by the trigger and moves the anchor at every merge.
           </p>
           <p>
             <strong>Locality</strong> <Status s="P" />, lossless rounds, per-round
@@ -785,7 +785,7 @@ export default function Appendix() {
           </p>
           <p>
             <strong>Repair and data validity</strong> <Status s="T" />. After a
-            rendezvous, trainers resume on-policy RL, so a round’s residual slows
+            merge, trainers resume on-policy RL, so a round’s residual slows
             training but does not limit final quality; the final bound involves
             only the last round. Whole-trajectory importance weights have{' '}
             <Tex tail=",">{T`\chi^2\ge e^{\mathrm{KL}}-1`}</Tex> so at residuals
@@ -810,7 +810,7 @@ export default function Appendix() {
             as <Tex tail=";">{T`\delta^{-1/2}`}</Tex> take the largest{' '}
             <Tex>{T`\delta`}</Tex> meeting (i) and (ii) within the merge-cost
             budget. (iv) Record <Tex>{T`\kappa`}</Tex> and the in-sample against
-            held-out KL gap at each rendezvous to tell estimation failures from
+            held-out KL gap at each merge to tell estimation failures from
             locality failures.
           </p>
 
@@ -845,7 +845,7 @@ export default function Appendix() {
             <strong>Cost identity</strong> <Status s="T" />. MOPD’s second stage
             costs{' '}
             <Tex tail=",">{T`\sum_iN^s_i(c^{\rm gen}_i+c^{\rm env}_i+c^{\rm teach}_i)`}</Tex>{' '}
-            including fresh environment interaction. An OPM rendezvous needs no
+            including fresh environment interaction. An OPM merge needs no
             environment interaction; it uses a few Fisher-vector products per
             trainer on cached rollouts plus forward passes for the line search.
           </p>
@@ -954,7 +954,7 @@ export default function Appendix() {
             </li>
             <li>
               No positive transfer within a round. Frequency does not change this
-              for exact lossless merges (refuted: “frequent rendezvous captures
+              for exact lossless merges (refuted: “frequent merging captures
               transfer”).
             </li>
             <li>
@@ -1106,7 +1106,7 @@ export default function Appendix() {
             0.44 against 3.6 in fp32), TF32 finite-difference forwards with fp32
             refinement, subsampling the curvature batch as Hessian-free
             optimisation and TRPO do <Cite k={['martens2010', 'schulman2015']} />,
-            warm starts across rendezvous, and running the solve on spare GPUs
+            warm starts across merges, and running the solve on spare GPUs
             while training continues.
           </p>
           <p>
@@ -1127,18 +1127,18 @@ export default function Appendix() {
             <span className="am-runin">System.</span> Each trainer is an ordinary
             GRPO trainer with a hook: after each optimizer step it runs the frozen
             anchor on about one rollout in eight to update its drift. At a
-            rendezvous, the merge runs as a collective across trainers: every
+            merge, the merge runs as a collective across trainers: every
             trainer computes its own Fisher-vector products on its own GPUs and
             cached tokens (a forward-mode pass for the change in logits,
             multiplication by{' '}
             <Tex tail=",">{T`\operatorname{diag}(\pi)-\pi\pi^\top`}</Tex> and a
             backward pass), one all-reduce per iteration sums them, and the line
             search scores the candidates on held-out rollouts. In our runs a
-            rendezvous blocks: every trainer pauses until the merged model is
+            merge blocks: every trainer pauses until the merged model is
             installed, and a trainer that has finished its budget stays in the
             merge with its final weights. Each trainer keeps its optimizer moments,
             learning rate, batch size, rollout servers and sandboxes; the trainers
-            share only a weight format. Logged at every rendezvous: drift, the
+            share only a weight format. Logged at every merge: drift, the
             held-out residual per trainer for every step size tried, the chosen{' '}
             <Tex tail=",">{T`\gamma`}</Tex> CG iterations, tokens and
             wall-clock.
@@ -1213,10 +1213,10 @@ export default function Appendix() {
                     turn (Computing the merge at scale).
                   </td>
                   <td>One engine group per trainer, sized by rollout cost.</td>
-                  <td>Only the next rendezvous; units never wait for each other between rendezvous.</td>
+                  <td>Only the next merge; units never wait for each other between merges.</td>
                   <td>Yes, throughout training.</td>
-                  <td>Start, retune or roll back one trainer at a rendezvous; the others continue training.</td>
-                  <td>A merge per rendezvous: about five minutes with two trainers at 9B, about an hour with eight.</td>
+                  <td>Start, retune or roll back one trainer at a merge; the others continue training.</td>
+                  <td>One merge: about five minutes with two trainers at 9B, about an hour with eight.</td>
                 </tr>
               </tbody>
             </table>
@@ -1225,21 +1225,21 @@ export default function Appendix() {
             <span className="am-runin" id="table-c2">Table C2.</span> Held-out
             KL residual{' '}
             <Tex>{T`\sum_i\mathrm{KL}(P^i_{\theta_i}\|P^i_{\rm merge})`}</Tex>{' '}
-            in nats at each rendezvous of the eight-domain 9B run. “No merge”
+            in nats at each merge of the eight-domain 9B run. “No merge”
             is the trainers’ total drift from the anchor; the merge is the
             preconditioned CG solve at step size{' '}
             <Tex tail=".">{T`\gamma`}</Tex> “Trainers” counts those still
             training; trainers that had finished their budget took part with
-            their final weights. Rendezvous 6 and 7 installed the merge at half
-            its length. At rendezvous 7 the full solve failed the per-trainer
+            their final weights. Merges 6 and 7 installed the merge at half
+            its length. At merge 7 the full solve failed the per-trainer
             check at every step size; the row reports the solve without the math
-            trainer, whose update was deferred to the next rendezvous.
+            trainer, whose update was deferred to the next merge.
           </p>
           <div className="am-table">
             <table>
               <thead>
                 <tr>
-                  <th>Rendezvous</th>
+                  <th>Merge</th>
                   <th className="am-num">Trainers</th>
                   <th className="am-num">No merge</th>
                   <th className="am-num">Sum (γ = 0)</th>
@@ -1741,11 +1741,11 @@ export default function Appendix() {
             <li>
               Interval: every 1, 5, 10, 25, 50 steps gave 0.97, 0.96, 0.93, 0.34,
               0.08. With 100 steps per task, a KL trigger of 0.3 nats reached
-              0.987 with 6.6 rendezvous; a fixed interval with 5 rendezvous
+              0.987 with 6.6 merge; a fixed interval with 5 merge
               reached 0.88.
             </li>
             <li>
-              Staleness after a rendezvous at interval 5: median residual 0.0003
+              Staleness after a merge at interval 5: median residual 0.0003
               nats and effective sample size 99.9% for OPM, against 0.059 nats and
               86% for the sum.
             </li>
@@ -1964,7 +1964,7 @@ export default function Appendix() {
             log-probability, clipped to ±5, 50 steps of 1,024 prompts with one
             rollout each; student rollouts count toward the budget. A4 OPM: eight trainers, drift measured on about one rollout in
             eight, a per-token ceiling, the Fisher on the first 2,048 action
-            tokens of each rollout, blocking rendezvous, and the guarded merge
+            tokens of each rollout, blocking merges, and the guarded merge
             with five Jacobi-preconditioned CG iterations from the sum, a
             central finite-difference logit step of 0.03,{' '}
             <Tex>{T`\gamma\in\{0,\tfrac12,1\}`}</Tex> on held-out true KL,
@@ -1980,7 +1980,7 @@ export default function Appendix() {
             GPU-hours including teacher scoring and merges, wall-clock, rollouts
             per domain. Secondary: the held-out suite, a cross-domain matrix (each
             arm and specialist on every domain), response length, entropy,
-            thinking leakage, tool-call validity, and OPM’s per-rendezvous
+            thinking leakage, tool-call validity, and OPM’s per-merge
             diagnostics.
           </p>
           <Placeholder label="Table F1" status="pending main runs">

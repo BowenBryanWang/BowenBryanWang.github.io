@@ -22,7 +22,7 @@ const posts: BlogPost[] = [
     title: 'On-Policy Merge',
     date: '2026-11-05',
     description:
-      'One on-policy RL trainer per domain, merged during training at the point closest in KL to every trainer on its own fresh rollouts. Why the merge decouples domains and what that costs, how to make it take ten minutes on a 9B model, one-shot results on released 4B specialists, and the comparison with multi-task RL, merging after training and MOPD.',
+      'One RL trainer per domain, merged during training by a closed-form, Fisher-weighted formula each time a trainer has moved a fixed KL distance. The domains are trained separately and remain one model throughout, without a shared optimizer or a distillation stage. We derive the merge, show that it removes cross-domain interference to first order, and measure its cost on a 9B model with eight domains.',
   },
   // hidden from the blog index (draft, not finished)
   // {

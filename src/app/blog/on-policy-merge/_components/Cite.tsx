@@ -182,6 +182,13 @@ export const REFS: Record<string, RefEntry> = {
     text: 'H. Brendan McMahan, Eider Moore, Daniel Ramage, Seth Hampson, Blaise Agüera y Arcas. Communication-Efficient Learning of Deep Networks from Decentralized Data. AISTATS 2017. arXiv:1602.05629.',
     url: 'https://arxiv.org/abs/1602.05629',
   },
+  mimo2026flash: {
+    cite: 'Xiaomi LLM-Core',
+    year: '2026',
+    title: 'MiMo-V2-Flash Technical Report',
+    text: 'LLM-Core Xiaomi. MiMo-V2-Flash Technical Report. arXiv:2601.02780, 2026.',
+    url: 'https://arxiv.org/abs/2601.02780',
+  },
   mimo2026: {
     cite: 'Xiaomi LLM-Core',
     year: '2026',

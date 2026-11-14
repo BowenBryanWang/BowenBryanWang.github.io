@@ -153,7 +153,7 @@ function LineChart({
   )
 }
 
-/* Figure 2 (schematic): what a rendezvous does in weight space. */
+/* Figure 2 (schematic): what a merge does in weight space. */
 export function GeometryFigure() {
   const W = 760
   const H = 392
@@ -254,7 +254,7 @@ export function GeometryFigure() {
       <circle cx={X.x} cy={X.y} r={7} fill="none" className="am-fig-ink-stroke" strokeWidth="2" />
       {dot(X, 'am-fig-ink', 3)}
       <text x={X.x - 12} y={X.y - 13} textAnchor="end" className="am-fig-ink" fontSize="12" fontWeight="700">
-        OPM rendezvous point
+        OPM merge point
       </text>
       {/* intersection of the true sets */}
       <circle cx={trueX.x} cy={trueX.y} r={6} fill="none" className="am-fig-ink-stroke" strokeWidth="1.6" strokeDasharray="2 2" />
@@ -449,7 +449,7 @@ export function ParadigmFigure() {
         new student rollouts, teacher logits, no reward
       </text>
       <text x={X1} y={rows[3].y - 32} textAnchor="end" className="am-fig-forest" fontSize="13.5" fontWeight="600">
-        rendezvous when a trainer drifts δ nats from the anchor
+        merge when a trainer drifts δ nats from the anchor
       </text>
       <text x={X1} y={rows[4].y - 16} textAnchor="end" className="am-fig-text" fontSize="13.5">
         each stage starts from the last; earlier domains are unconstrained
