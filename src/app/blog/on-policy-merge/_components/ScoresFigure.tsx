@@ -4,24 +4,30 @@ import { useRef, useState } from 'react'
 
 import { BENCHES, METHODS, score, type BenchKey, type MethodKey } from './results'
 
-// Figure 5: one bar chart per benchmark, one bar per method. The legend on
+// Figure 4: one bar chart per benchmark, one bar per method, each panel on
+// its own axis range (results.ts). The legend on
 // the right switches methods on and off, and a bar or a legend entry under
 // the pointer is highlighted in every panel.
-// Numbers come from results.ts, which also feeds Table 4.
+// Numbers come from results.ts, which also feeds Table 3.
 
-const W = 250
+const W = 196
 const H = 150
-const L = 28 // room for the y-axis labels
-const BASE = 132
-const HEADROOM = 24
+const L = 24 // room for the y-axis labels
+const BASE = 122
+const HEADROOM = 20
 
-/** Round ticks from zero to the panel's top. */
-function ticksOf(top: number) {
-  const step = top >= 100 ? 50 : top >= 40 ? 20 : top >= 20 ? 10 : 5
+/** Round ticks from the panel's bottom to its top. */
+function ticksOf(lo: number, top: number) {
+  const range = top - lo
+  const step = range >= 60 ? 20 : range >= 30 ? 10 : range >= 12 ? 5 : range >= 6 ? 2 : 1
   const out: number[] = []
-  for (let t = 0; t <= top; t += step) out.push(t)
+  for (let t = lo; t <= top; t += step) out.push(t)
   return out
 }
+
+// Figure 4 uses three fills only: the base model light, every other method
+// dark, OPM in its accent colour. The method under a bar is named on the axis.
+const fill = (k: MethodKey) => (k === 'opm' ? 'var(--m-opm)' : k === 'base' ? 'var(--f4-base)' : 'var(--f4-other)')
 
 function barPath(x: number, w: number, yTop: number) {
   const r = Math.min(3, (BASE - yTop) / 2)
@@ -46,8 +52,10 @@ export default function ScoresFigure() {
 
   const shown = METHODS.filter((m) => on.has(m.key))
   const slot = (W - L) / Math.max(shown.length, 1)
-  const barW = Math.min(32, slot - 7)
-  const labelAll = slot >= 28
+  const barW = Math.min(30, slot - 7)
+  const labelAll = slot >= 27
+  // With narrow slots, keep the x labels short and name only OPM's value.
+  const xLabel = (m: (typeof METHODS)[number]) => (slot >= 27 ? m.short : m.short === 'Spec' ? 'Sp' : m.short)
 
   const toggle = (k: MethodKey) =>
     setOn((prev) => {
@@ -73,19 +81,30 @@ export default function ScoresFigure() {
     <div className="am-bars" ref={wrap}>
       <div className="am-bars-grid">
         {BENCHES.map((b) => {
-          const y = (val: number) => BASE - (val / b.top) * (BASE - HEADROOM)
+          const y = (val: number) => BASE - ((val - b.lo) / (b.top - b.lo)) * (BASE - HEADROOM)
           return (
             <div className="am-bars-panel" key={b.key}>
               <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`${b.title}: scores of the selected methods`}>
-                {ticksOf(b.top).map((t) => (
+                {ticksOf(b.lo, b.top).map((t) => (
                   <g key={t}>
-                    {t > 0 ? <line x1={L} x2={W} y1={y(t)} y2={y(t)} className="am-bars-grid-line" /> : null}
+                    {t > b.lo ? <line x1={L} x2={W} y1={y(t)} y2={y(t)} className="am-bars-grid-line" /> : null}
                     <text x={L - 6} y={y(t) + 3.5} textAnchor="end" className="am-bars-tick">
                       {t}
                     </text>
                   </g>
                 ))}
                 <line x1={L} x2={W} y1={BASE} y2={BASE} className="am-bars-axis" />
+                {shown.map((m, k) => (
+                  <text
+                    key={m.key}
+                    x={L + slot * (k + 0.5)}
+                    y={BASE + 13}
+                    textAnchor="middle"
+                    className={`am-bars-x${slot < 27 ? ' am-bars-x-tight' : ''}${m.key === 'opm' ? ' am-bars-x-opm' : ''}${hot !== null && hot !== m.key ? ' am-bars-dim' : ''}`}
+                  >
+                    {xLabel(m)}
+                  </text>
+                ))}
                 {shown.map((m, k) => {
                   const val = score(b.key, m.key)
                   const cx = L + slot * (k + 0.5)
@@ -114,7 +133,7 @@ export default function ScoresFigure() {
                     >
                       {/* hit area: the whole slot */}
                       <rect x={cx - slot / 2} y={0} width={slot} height={BASE} fill="transparent" />
-                      <path d={barPath(cx - barW / 2, barW, y(val.m))} style={{ fill: `var(--m-${m.key})` }} />
+                      <path d={barPath(cx - barW / 2, barW, y(val.m))} style={{ fill: fill(m.key) }} />
                       {val.se !== undefined ? (
                         <g className="am-bars-whisk">
                           <line x1={cx} x2={cx} y1={y(val.m - val.se)} y2={y(hi)} />
@@ -122,8 +141,13 @@ export default function ScoresFigure() {
                           <line x1={cx - 3.5} x2={cx + 3.5} y1={y(val.m - val.se)} y2={y(val.m - val.se)} />
                         </g>
                       ) : null}
-                      {labelAll || hot === m.key ? (
-                        <text x={cx} y={y(hi) - 5} textAnchor="middle" className="am-bars-val">
+                      {labelAll || hot === m.key || m.key === 'opm' ? (
+                        <text
+                          x={cx}
+                          y={y(hi) - 5}
+                          textAnchor="middle"
+                          className={`am-bars-val${m.key === 'opm' ? ' am-bars-val-opm' : ''}`}
+                        >
                           {val.m.toFixed(b.dp)}
                         </text>
                       ) : null}
@@ -153,7 +177,7 @@ export default function ScoresFigure() {
             onFocus={() => on.has(m.key) && setHot(m.key)}
             onBlur={() => setHot(null)}
           >
-            <span className="am-bars-sw" style={{ background: `var(--m-${m.key})` }} />
+            <span className="am-bars-sw" style={{ background: fill(m.key) }} />
             {m.label}
           </button>
         ))}

@@ -1,98 +1,100 @@
-/* Figure 3: system diagram (SystemDiagram.tsx) */
-.am-scope .am-sys {
-  max-width: 640px;
-  margin: 0 auto;
-  font-size: 14px;
-  line-height: 1.35;
-  color: var(--ink);
-  text-align: center;
+/* Figure 3: the OPM system as a flow (SystemDiagram.tsx).
+   A pill is a domain, a hexagon is a set of weights, a rectangle is a process.
+   Ink for training, the accent colour for the merge. */
+.am-scope .am-fl {
+  font-family: inherit;
+  overflow: visible;
 }
-.am-scope .am-sys-title {
+.am-scope .am-fl-head {
+  fill: var(--ink);
+  font-size: 13px;
+  font-weight: 600;
+}
+.am-scope .am-fl-panel {
+  fill: var(--paper-deep);
+}
+.am-scope .am-fl-t {
+  fill: var(--ink);
+  font-size: 12.5px;
+}
+.am-scope .am-fl-b {
   font-weight: 700;
+}
+.am-scope .am-fl-s {
+  fill: var(--ink-soft);
+  font-size: 11.5px;
+}
+.am-scope .am-fl-more {
+  fill: var(--ink-faint);
+  font-size: 18px;
+}
+.am-scope .am-fl-line {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 1.25;
+}
+.am-scope .am-fl-dash {
+  stroke-dasharray: 4 3;
+}
+.am-scope .am-fl-arrow {
+  fill: var(--ink);
+}
+.am-scope .am-fl-acc {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 1.75;
+}
+.am-scope .am-fl-thin {
+  stroke-width: 1;
+}
+.am-scope .am-fl-arrow-acc {
+  fill: var(--accent);
+}
+.am-scope .am-fl-acc-fill {
+  fill: var(--accent);
+}
+.am-scope .am-fl-group {
+  fill: none;
+  stroke: var(--ink-faint);
+  stroke-width: 1;
+  stroke-dasharray: 3 3;
+}
+.am-scope .am-fl-pill {
+  fill: var(--rule);
+}
+.am-scope .am-fl-box {
+  fill: var(--surf-halo);
+  stroke: var(--ink);
+  stroke-width: 1.25;
+}
+.am-scope .am-fl-hex {
+  fill: var(--surf-halo);
+  stroke: var(--ink);
+  stroke-width: 1.25;
+  stroke-linejoin: round;
+}
+.am-scope .am-fl-hex-out {
+  fill: var(--accent);
+  stroke: var(--accent);
+  stroke-width: 1.5;
+  stroke-linejoin: round;
+}
+.am-scope .am-fl-on-acc {
+  fill: var(--surf-halo);
   font-size: 15px;
 }
-.am-scope .am-sys-sub {
-  color: var(--ink-soft);
-  font-size: 13px;
-  margin-top: 0.15em;
+.am-scope .am-fl-merge {
+  fill: var(--surf-halo);
+  stroke: var(--accent);
+  stroke-width: 1.5;
 }
-.am-scope .am-sys-coord {
-  border: 1.5px solid var(--accent);
-  background: var(--accent-soft);
-  border-radius: 8px;
-  padding: 0.6em 0.9em;
+.am-scope .am-fl-stepring {
+  fill: var(--accent);
 }
-.am-scope .am-sys-coord .am-sys-title {
-  color: var(--accent);
-}
-.am-scope .am-sys-wire {
-  display: flex;
-  justify-content: center;
-  gap: 1.6em;
-  flex-wrap: wrap;
-  font-size: 12.5px;
-  color: var(--ink-faint);
-  padding: 0.45em 0;
-}
-.am-scope .am-sys-units {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 0.9rem;
-}
-.am-scope .am-sys-unit {
-  position: relative;
-  border: 1px dashed var(--rule);
-  border-radius: 8px;
-  padding: 0.55em 0.55em 0.65em;
-  background: var(--paper-deep);
-  --c: var(--ink);
-}
-.am-scope .am-sys-d1 {
-  --c: var(--forest);
-}
-.am-scope .am-sys-d2 {
-  --c: var(--indigo);
-}
-.am-scope .am-sys-d3 {
-  --c: var(--ochre);
-}
-.am-scope .am-sys-unit-name {
+.am-scope .am-fl-stepnum {
+  fill: var(--surf-halo);
+  font-size: 10.5px;
   font-weight: 700;
-  color: var(--c);
-  margin-bottom: 0.4em;
-}
-.am-scope .am-sys-box {
-  border: 1px solid var(--c);
-  border-radius: 6px;
-  background: var(--surf-halo);
-  padding: 0.45em 0.4em;
-}
-.am-scope .am-sys-step {
-  font-size: 12px;
-  color: var(--ink-faint);
-  padding: 0.3em 0;
-}
-.am-scope .am-sys-dots {
-  position: absolute;
-  left: -0.75rem;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  color: var(--ink-faint);
-  font-size: 16px;
-}
-.am-scope .am-sys-shared {
-  border: 1px solid var(--rule);
-  border-radius: 8px;
-  padding: 0.6em 0.9em;
-}
-@media (max-width: 640px) {
-  .am-scope .am-sys-units {
-    grid-template-columns: minmax(0, 1fr);
-    gap: 0.6rem;
-  }
-  .am-scope .am-sys-dots {
-    display: none;
-  }
 }
 
 /* Table C1 (Appendix C): seven columns of short sentences */

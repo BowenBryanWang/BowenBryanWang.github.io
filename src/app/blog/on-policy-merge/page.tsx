@@ -13,14 +13,19 @@ import Tex from './_components/Tex'
 import SectionTitle from './_components/SectionTitle'
 import { ParadigmFigure } from './_components/Figures'
 import WeightSpace3D from './_components/WeightSpace3D'
-import ResidualChart from './_components/ResidualChart'
 import SystemDiagram from './_components/SystemDiagram'
 import Landscape3D from './_components/Landscape3D'
 import { Cite, CiteT } from './_components/Cite'
-import { Placeholder, Pending } from './_components/Placeholder'
+import { Placeholder } from './_components/Placeholder'
 import Appendix from './_components/Appendix'
 import { MainResultsTable, OpmAnchorsTable, CostTable } from './_components/ResultTables'
-import { AnchorsFigure } from './_components/ResultFigures'
+import {
+  GeneralFigure,
+  HeroResults,
+  MergeFigure,
+  ResidualFigure,
+  TrajFigure,
+} from './_components/ResultFigures'
 import ScoresFigure from './_components/ScoresFigure'
 import CopyBib from './_components/CopyBib'
 import { Algorithm, Line, K } from './_components/Algorithm'
@@ -35,7 +40,6 @@ function Key({ children }: { children: ReactNode }) {
   return <strong className="am-key">{children}</strong>
 }
 
-const DEV = process.env.NODE_ENV !== 'production'
 
 export const metadata: Metadata = {
   title: 'On-Policy Merge',
@@ -113,28 +117,15 @@ export default function OnPolicyMergingPost() {
                 <Landscape3D />
               </div>
             </div>
+            <HeroResults />
             <figcaption>
-              <strong>Figure 1.</strong> Five ways to train one model on
-              several RL domains. <strong>Left:</strong> when each method
-              combines the domains. <strong>Right:</strong> the methods are
-              animated one at a time on the same loss landscape over a slice of
-              weight space, each starting from a base model high on the left.
-              Small rings mark each domain’s own optimum. Multi-task RL descends
-              on the mixed loss and converges to a local optimum. Cascade RL
-              trains the domains in turn; each stage moves the model away from
-              the points the earlier stages reached, and the final model is far
-              from the global basin. Merge-after averages five finished
-              specialists once, and the merged point lies on a ridge. MOPD
-              distils the same specialists into a new student trained from the
-              base, and the student reaches at most its teachers’ level.{' '}
-              <strong>On-Policy Merge</strong> (OPM) trains the domains
-              separately until one trainer has drifted a KL budget{' '}
-              <Tex>{T`\delta`}</Tex> from the anchor, then merges them, and
-              repeats. Its path passes the local optimum and reaches the global
-              minimum. When one trainer collapses, the next merge replaces its
-              weights with the merged model. The landscape is a schematic of a
-              case in which the domains conflict; when domains help each other,
-              multi-task RL can be faster.
+              <strong>Figure 1.</strong> Top: five ways to train one model on
+              several RL domains, animated on one loss landscape. Bottom:
+              scores at 9B, in percent, on five benchmarks, one per domain;
+              OPM’s bar is its best merge on that benchmark. Each panel has
+              its own scale, and most do not start at zero (
+              <a className="am-ref" href="#fig-4">Figure 4</a> has every method
+              and benchmark).
             </figcaption>
           </figure>
 
@@ -247,41 +238,48 @@ export default function OnPolicyMergingPost() {
             <ol>
               <li>
                 <strong>
-                  OPM outperforms multi-task RL, weight merging and MOPD.
+                  Merged during training, eight domains in one model are ahead
+                  of multi-task RL and level with MOPD.
                 </strong>{' '}
-                We took five publicly released 4B RL specialists and merged
-                them once with the OPM formula, with no training and no new
-                rollouts. The merged model scores above the multi-task RL model
-                and above the MOPD student released with the same specialists
-                on five of six benchmarks each, and above task arithmetic on
-                four. It also stays closer in KL to the specialists than task
-                arithmetic and the MOPD student do. The exception is
-                competition math, where the domains help each other and OPM
-                gives up that transfer.
+                We trained eight domains with a 9B model, one trainer per
+                domain, and merged the trainers during training; the run is
+                still in progress. At its best merge on each benchmark, the
+                merged model is ahead of multi-task RL on instruction
+                following, software engineering, terminal and search, and
+                within noise of it on the other benchmarks. On every public
+                benchmark where both are measured, it scores above the sum of
+                the eight finished specialists and above each domain’s own
+                specialist. Against MOPD it is
+                level on the agentic benchmarks and math, far ahead on
+                instruction following, and behind on function calling. In a
+                separate test we merged five publicly released 4B RL
+                specialists once with the OPM formula, with no training and no
+                new rollouts. That model scores above the multi-task RL model
+                and the MOPD student released with the same specialists on
+                five of six benchmarks each, and above task arithmetic on
+                four. The exception is competition math, where the domains
+                help each other and OPM gives up that transfer.
               </li>
               <li>
                 <strong>
-                  During training at 9B, the merge keeps every domain’s
-                  progress.
+                  The merge keeps every domain’s progress.
                 </strong>{' '}
-                We trained eight domains with a 9B model, one trainer per
-                domain, and merged them seven times. At every merge we measured,
-                on held-out rollouts, how far the merged model was in KL from
+                At each of the 22 merges of the 9B run so far we measured, on
+                held-out rollouts, how far the merged model was in KL from
                 each trainer. Adding the trainers’ updates together gave a
-                model about two to five times further from the trainers than
-                the OPM merge, and at some merges further than the model before
-                the merge. Cross-domain
-                interference is therefore present in a real multi-domain RL
-                run, and the OPM merge removes most of it.
+                model further from the trainers than the OPM merge at every
+                merge, by a median factor of four. Cross-domain interference
+                is therefore present in a real multi-domain RL run, and the
+                OPM merge removes most of it.
               </li>
               <li>
                 <strong>
                   OPM fits frontier-scale training with low overhead.
                 </strong>{' '}
-                In the 9B run with eight domains, all merges together used
-                about 4% of the FLOPs of the training steps, and about 2% when
-                rollouts are counted. A Fisher-vector product touches the same
-                parameters per token as a training step, so this fraction does
+                In the 9B run the merges used 2.4% of the run’s GPU time and
+                needed no rollouts; each paused the trainers taking part for
+                about an hour. A Fisher-vector product touches the same
+                parameters per token as a training step, so the overhead does
                 not grow with model size. For mixture-of-experts models it
                 follows the active parameters: on a 30B model with 3B active
                 parameters, a product costs about the same number of training
@@ -316,8 +314,8 @@ export default function OnPolicyMergingPost() {
               <strong>Cascade RL</strong> trains the domains one after another{' '}
               <Cite k={['wang2025', 'yang2026']} />; it is multi-task RL with
               every share but one set to zero. <strong>Weight merging</strong>{' '}
-              (task arithmetic, TIES, DARE){' '}
-              <Cite k={['ilharco2023', 'yadav2023', 'yu2024']} /> combines
+              (task arithmetic, TIES){' '}
+              <Cite k={['ilharco2023', 'yadav2023']} /> combines
               once, after training, also in weight space.{' '}
               <strong>MOPD</strong> combines once, after training, in policy
               space: the student is trained to match each specialist’s policy
@@ -699,8 +697,10 @@ export default function OnPolicyMergingPost() {
               first-order statement about lossless merges, and real merges are
               not lossless. On the 4B specialists, the merged model’s held-out
               KL to the specialists is still 16% of their drift after 30 CG
-              iterations. In the 9B run it was 0.12 to 0.51 of the drift over
-              the first five merges. At residuals of this size we have no
+              iterations. In the 9B run it was 3% to 28% of the drift over 22
+              merges, with a median of 12%
+              (<a className="am-ref" href="#table-c2">Table C2</a>). At
+              residuals of this size we have no
               bound on the change in return: Pinsker-type bounds say nothing
               above about 2 nats
               (<a className="am-ref" href="#app-b-9">Appendix B.9</a>). What
@@ -768,8 +768,8 @@ export default function OnPolicyMergingPost() {
               orthogonal. In OPM each trainer has its own optimizer state,
               clip, learning rate and schedule, which we call{' '}
               <Key>optimizer isolation</Key>, so none of the three acts between
-              merges. We measure each of them in the 9B run in{' '}
-              <a className="am-ref" href="#coupling">Main results</a>.
+              merges. We measure the first two in the 9B run in{' '}
+              <a className="am-ref" href="#coupling">Side findings</a>.
             </p>
             <p>
               Two further facts concern the trigger and the weights. The
@@ -813,8 +813,11 @@ export default function OnPolicyMergingPost() {
               gradients with shares summing to one moves as far as OPM at the
               same learning rate. OPM therefore has no rate advantage over a
               well-tuned multi-task run, and we do not claim one. A larger
-              trainer learning rate recovers part of the transfer; merging more
-              often does not. In a controlled experiment with four tasks
+              trainer learning rate recovers part of the transfer. Merging more
+              often should not, by{' '}
+              <a className="am-ref" href="#thm-1">Theorem 1</a>; in a
+              controlled experiment it does at an interval of one step, which
+              we have not explained. In that experiment, with four tasks
               sharing a small policy, multi-task RL leads when the tasks help
               each other and OPM leads when they conflict
               (<a className="am-ref" href="#app-e">Appendix E</a>). Domains
@@ -867,8 +870,7 @@ export default function OnPolicyMergingPost() {
           <div className="am-prose">
             <p>
               OPM adds three things to a single-domain RL stack: rollout
-              engines assigned per domain, a stored anchor, and a coordinator
-              (<a className="am-ref" href="#fig-3">Figure 3</a>). Each domain
+              engines assigned per domain, a stored anchor, and a coordinator. Each domain
               runs ordinary asynchronous RL with a trainer, its optimizer state
               and settings, and a group of rollout engines that serve that
               trainer’s current weights. Rollouts must come from the trainer’s
@@ -878,7 +880,12 @@ export default function OnPolicyMergingPost() {
               Verifiers, sandboxes and environments are shared by all domains.
               The anchor is stored in the slot that RL frameworks reserve for a
               reference model, and the coordinator tracks the drifts and runs
-              the merge.
+              the merge.{' '}
+              <a className="am-ref" href="#fig-3">Figure 3</a> shows the full
+              design, in which domains that help each other share a trainer
+              (<a className="am-ref" href="#grouped">grouped OPM</a>) and the
+              merge is solved on snapshots while the trainers keep training
+              (<a className="am-ref" href="#not-tested">merging without a pause</a>).
             </p>
             <p>
               Between merges the trainers never wait for each other, so a slow
@@ -889,10 +896,10 @@ export default function OnPolicyMergingPost() {
               Training pauses during this time. Optimizer states are kept.
               Rollout groups sampled entirely by the pre-merge weights are
               dropped, and the remaining ones are handled by the importance
-              weights that asynchronous RL already applies. On held-out
-              rollouts a merge moved each trainer by 0.0002–0.0026 nats per
-              token, about half to one step of the trainers’ own
-              train–inference KL. A trainer that has finished its budget takes
+              weights that asynchronous RL already applies. On a trainer that
+              did not take part, the largest per-token KL a merge installed
+              was 0.0001 to 0.0034 nats, under the limit of 0.005 that the
+              per-trainer check enforces. A trainer that has finished its budget takes
               part in later merges with its final weights.{' '}
               <a className="am-ref" href="#app-c">Appendix C</a> compares the
               five methods as systems
@@ -902,12 +909,12 @@ export default function OnPolicyMergingPost() {
           <figure id="fig-3">
             <SystemDiagram />
             <figcaption>
-              <strong>Figure 3.</strong> The OPM system. Each domain runs
-              ordinary asynchronous RL, with its own trainer and its own
-              rollout engines, sized by its rollout cost. Verifiers, sandboxes
-              and the anchor scorer are shared. A coordinator merges the
-              trainers whenever the drift of one reaches its threshold and sends the merged
-              model back to all of them.
+              <strong>Figure 3.</strong> The OPM system. Domains that help each
+              other share a trainer. The merge is asynchronous: it is solved
+              on snapshots while the trainers keep training, and each trainer
+              then adds the difference between the merged model and its
+              snapshot. In the 9B run of this post each trainer holds one
+              domain and the trainers pause during the solve.
             </figcaption>
           </figure>
 
@@ -915,11 +922,9 @@ export default function OnPolicyMergingPost() {
           <SectionTitle label="Computing the merge at scale" id="engineering" />
           <div className="am-prose">
             <p>
-              With eight 9B trainers, a merge takes 15–24 minutes of compute
-              per trainer and about 4% of the FLOPs of the training steps
-              between merges. This section describes how the merge is
-              computed, what it costs and how the cost changes with model
-              size.
+              With eight 9B trainers, a merge takes about an hour of
+              wall-clock time, and the merges together 2.4% of the run’s GPU
+              time.
             </p>
             <p>
               <span className="am-runin">Fisher-vector products.</span>{' '}
@@ -976,18 +981,17 @@ export default function OnPolicyMergingPost() {
               </p>
             </div>
             <p>
-              <span className="am-runin">The guarded merge.</span> Plain CG
-              started from the sum of the updates does not work. On two
-              trainers branched from the 9B model, it increased the held-out
-              KL to the trainers after its first iterations
-              (<a className="am-ref" href="#table-2">Table 2</a>). The first CG
-              directions are dominated by the highest-curvature directions of
-              the Fisher, which have about <Tex>{T`10^7`}</Tex> times the
-              curvature of typical ones, and along them the finite-difference
-              product underestimates the curvature, sixteen-fold at a logit
-              step of 0.3 and by 40% at 0.03. With the curvature
-              underestimated, CG steps too far. The <Key>guarded merge</Key>{' '}
-              therefore has three steps:
+              <span className="am-runin">The guarded merge.</span> CG started
+              from the sum of the updates is not safe on its own. Its first
+              directions are the highest-curvature directions of the Fisher,
+              which have about <Tex>{T`10^7`}</Tex> times the curvature of
+              typical ones, and along them the finite-difference product
+              underestimates the curvature, by 40% at a logit step of 0.03 and
+              sixteen-fold at 0.3. With the curvature underestimated, CG steps
+              too far. In a two-trainer test at 9B, five iterations at full
+              step left more held-out KL to the trainers than the plain sum
+              did (<a className="am-ref" href="#table-c3">Table C3</a>). The{' '}
+              <Key>guarded merge</Key> therefore has three steps:
             </p>
             <ol>
               <li>
@@ -1012,136 +1016,14 @@ export default function OnPolicyMergingPost() {
                 again at the next merge.
               </li>
             </ol>
-            <div className="am-table" id="table-2">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Merge</th>
-                    <th className="am-num">
-                      <Tex>{T`\gamma=1`}</Tex>
-                    </th>
-                    <th className="am-num">
-                      <Tex>{T`\gamma=\tfrac12`}</Tex>
-                    </th>
-                    <th className="am-num">
-                      <Tex>{T`\gamma=\tfrac14`}</Tex>
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td>No merge (stay at the anchor)</td>
-                    <td className="am-num" colSpan={3}>
-                      125.3
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>Average of the updates</td>
-                    <td className="am-num" colSpan={3}>
-                      30.7
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>Sum of the updates</td>
-                    <td className="am-num" colSpan={3}>
-                      13.35
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>CG, 1 iteration</td>
-                    <td className="am-num">10.71</td>
-                    <td className="am-num">10.05</td>
-                    <td className="am-num">11.23</td>
-                  </tr>
-                  <tr>
-                    <td>CG, 2 iterations</td>
-                    <td className="am-num">10.44</td>
-                    <td className="am-num">8.74</td>
-                    <td className="am-num">10.11</td>
-                  </tr>
-                  <tr>
-                    <td>
-                      <strong>CG, 3 iterations</strong>
-                    </td>
-                    <td className="am-num">11.10</td>
-                    <td className="am-num">
-                      <strong>8.57</strong>
-                    </td>
-                    <td className="am-num">9.91</td>
-                  </tr>
-                  <tr>
-                    <td>CG, 5 iterations</td>
-                    <td className="am-num">14.07</td>
-                    <td className="am-num">9.34</td>
-                    <td className="am-num">10.08</td>
-                  </tr>
-                  <tr>
-                    <td>CG, 10 iterations</td>
-                    <td className="am-num">21.89</td>
-                    <td className="am-num">11.46</td>
-                    <td className="am-num">10.55</td>
-                  </tr>
-                  <tr>
-                    <td>CG, 3 iterations, finite-difference step 0.3</td>
-                    <td className="am-num">214.66</td>
-                    <td className="am-num">52.73</td>
-                    <td className="am-num">17.40</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-            <p style={{ fontSize: '14px' }}>
-              <strong>Table 2.</strong> Held-out KL residual{' '}
-              <Tex>{T`\sum_i\mathrm{KL}(P^i_{\theta_i}\|P^i_{\rm merge})`}</Tex>{' '}
-              in nats, for two trainers branched from the 9B model (math, 40
-              steps; instruction following, 30 steps) with drifts of 76.4 and
-              49.0 nats. Lower is better. Finite-difference logit step 0.01
-              except in the last row. Values for <Tex>{T`\gamma=0`}</Tex> are
-              the sum.
-            </p>
             <p>
-              <a className="am-ref" href="#table-2">Table 2</a> is the study
-              behind these choices. Without a preconditioner and with a logit
-              step of 0.01, three iterations and{' '}
-              <Tex>{T`\gamma=\tfrac12`}</Tex> reduce the residual by 36%
-              relative to the sum, from 13.35 to 8.57 nats. The full step is
-              never better than the half step, five or more iterations increase
-              the residual, and a logit step of 0.3 fails. This is a single
-              test case with two domains.
+              The 9B run uses a Jacobi preconditioner, built from a Monte
+              Carlo estimate of the Fisher diagonal, with a small damping
+              term, five CG iterations, a logit step of 0.03 and{' '}
+              <Tex tail=".">{T`\gamma\in\{0,\tfrac12,1\}`}</Tex> What the
+              guard chose at each merge of that run is in{' '}
+              <a className="am-ref" href="#table-c2">Table C2</a>.
             </p>
-            <p>
-              The eight-domain 9B run uses a Jacobi preconditioner, built from
-              a Monte Carlo estimate of the Fisher diagonal, with a small
-              damping term, five CG iterations, a logit step of 0.03 and{' '}
-              <Tex tail=".">{T`\gamma\in\{0,\tfrac12,1\}`}</Tex> At each of its
-              seven merges, the guarded merge left 44–78% less held-out KL to
-              the trainers than the sum of their updates
-              (<a className="am-ref" href="#table-c2">Table C2</a>), and{' '}
-              <Tex>{T`\gamma=1`}</Tex> was chosen at six of them. At two of the
-              first five merges the sum was further from the trainers than the
-              anchor, at 1.51 and 1.04 times the anchor’s KL, so summing the
-              updates during training can be worse than not merging. The
-              per-trainer check was recorded but not enforced in the first five
-              merges. At the seventh it left out the math trainer’s update.
-            </p>
-          </div>
-
-          <figure id="fig-4">
-            <ResidualChart />
-            <figcaption>
-              <strong>Figure 4.</strong> Held-out KL residual of the guarded
-              merge after one to ten CG iterations, for three step sizes{' '}
-              <Tex>{T`\gamma`}</Tex> along the path from the summed update (data
-              of <a className="am-ref" href="#table-2">Table 2</a>). Dashed lines mark the sum (13.35 nats) and the
-              average (30.7); not merging gives 125.3. At the default
-              finite-difference step every damped step stays below the sum, and the residual is lowest at three
-              iterations with <Tex tail=",">{T`\gamma=\tfrac12`}</Tex> the
-              default. The full step’s residual rises after two iterations, and
-              with a finite-difference step of 0.3 two of the three settings lie
-              above the plotted range.
-            </figcaption>
-          </figure>
-          <div className="am-prose">
             <p>
               <span className="am-runin">Cost at 9B.</span> A merge with{' '}
               <Tex>m</Tex> CG iterations needs <Tex>{T`m+1`}</Tex> products on{' '}
@@ -1158,8 +1040,9 @@ export default function OnPolicyMergingPost() {
               <Tex>{T`c_{\rm fwd}`}</Tex> are the costs of a product and of a
               forward pass per token, in units of one training token. The
               table gives what we measured on MiMo-V2.6-Distill-Qwen-9B{' '}
-              <Cite k="mimo2026" /> over the first five merges of the
-              eight-domain run.
+              <Cite k="mimo2026" /> over the first 21 merges of the
+              eight-domain run; the two FLOPs rows are estimates from the
+              formula.
             </p>
             <div className="am-table">
               <table>
@@ -1171,24 +1054,28 @@ export default function OnPolicyMergingPost() {
                 </thead>
                 <tbody>
                   <tr>
-                    <td>Compute per trainer, mean</td>
-                    <td>15–24 min</td>
+                    <td>Wall-clock per merge, trainers taking part paused</td>
+                    <td>31–89 min, median 57</td>
                   </tr>
                   <tr>
-                    <td>Compute per trainer, slowest</td>
-                    <td>22–30 min</td>
+                    <td>Wall-clock in merges, total</td>
+                    <td>20.6 h</td>
                   </tr>
                   <tr>
-                    <td>Share of compute in Fisher-vector products</td>
-                    <td>about 85%</td>
+                    <td>GPU time per merge</td>
+                    <td>12–23 GPU-hours on 28–32 GPUs</td>
                   </tr>
                   <tr>
-                    <td>GPU time</td>
-                    <td>8–13 GPU-hours</td>
+                    <td>GPU time in merges, total</td>
+                    <td>344 GPU-hours</td>
                   </tr>
                   <tr>
-                    <td>GPU time relative to the round’s training steps</td>
-                    <td>0.6–0.9</td>
+                    <td>Share of the run’s allocated GPU time</td>
+                    <td>2.4%</td>
+                  </tr>
+                  <tr>
+                    <td>GPU time relative to the trainers’ optimizer steps</td>
+                    <td>0.6</td>
                   </tr>
                   <tr>
                     <td>FLOPs relative to the training steps</td>
@@ -1198,14 +1085,6 @@ export default function OnPolicyMergingPost() {
                     <td>FLOPs relative to rollouts plus training steps</td>
                     <td>about 2%</td>
                   </tr>
-                  <tr>
-                    <td>Wall-clock, all trainers paused</td>
-                    <td>48–57 min</td>
-                  </tr>
-                  <tr>
-                    <td>Share of a round’s wall-clock</td>
-                    <td>6–19%</td>
-                  </tr>
                 </tbody>
               </table>
             </div>
@@ -1213,22 +1092,22 @@ export default function OnPolicyMergingPost() {
               The three measures of cost differ for two reasons. First, a
               product does the arithmetic of about 1.8 gradient passes but
               takes the time of about 16, because it runs in fp32 with finite
-              differences. This is why the merge is 4% of the training FLOPs
-              and 0.6–0.9 of the training GPU time. Second, training steps are
-              a small part of a round. Each trainer GPU ran training steps for
-              29–35 minutes of a round of 5–15 hours and waited for rollouts
-              the rest of the time. The main cost of a merge is therefore the
-              pause, not the compute. About half of the pause is compute; the
-              rest is waiting for the last trainer to finish its step, up to
-              17 minutes, and loading weights. Within the compute, every CG
-              iteration waits for the slowest trainer. Instruction following
-              needs 4.5 minutes, and software engineering and knowledge work
-              need the longest, because their rollouts carry long environment
-              contexts: the cyber trainer’s 115 thousand action tokens come
-              with 970 thousand context tokens. Over all seven merges the
-              pause was 37–70 minutes; the longest included a second solve
-              after the per-trainer check. Two 9B trainers merge in 3–19
-              minutes, with a median of 5 over 29 merges.
+              differences. This is why the merge is about 4% of the training
+              FLOPs and 0.6 of the training GPU time. Second, optimizer steps
+              are a small part of the run: they took 561 of the 14,041
+              GPU-hours allocated, and the rest went to rollout engines and
+              to waiting for rollouts. The main cost of a merge is therefore
+              the pause, not the compute. In an earlier eight-domain run, in
+              which we timed the parts of a merge, about half of the pause
+              was compute; the rest was waiting for the last trainer to
+              finish its step, up to 17 minutes, and loading weights. Within
+              the compute, every CG iteration waits for the slowest trainer.
+              Instruction following needed 4.5 minutes, and software
+              engineering and knowledge work the longest, because their
+              rollouts carry long environment contexts: the cyber trainer’s
+              115 thousand action tokens came with 970 thousand context
+              tokens. Two 9B trainers merge in 3–19 minutes, with a median of
+              5 over 29 merges.
             </p>
             <p>
               <span className="am-runin">Scaling with model size.</span> A
@@ -1262,8 +1141,8 @@ export default function OnPolicyMergingPost() {
                 each trainer when it is ready. The products can run while the
                 trainers’ GPUs wait for rollouts. The correction is then a few
                 steps stale, which is the kind of staleness asynchronous RL
-                already handles for rollouts. This would remove the pause, 6–19%
-                of a round, without extra GPUs. Not implemented.
+                already handles for rollouts. This would remove the pause, about
+                an hour per merge, without extra GPUs. Not implemented.
               </li>
               <li>
                 <strong>Balancing the products across trainers.</strong> Every
@@ -1281,11 +1160,12 @@ export default function OnPolicyMergingPost() {
                 gives one coefficient per block. Each trainer computes one
                 product per update and sends scalars, so no parameter-sized
                 solver state or all-reduce is needed. On the{' '}
-                <a className="am-ref" href="#table-2">Table 2</a> test case,
+                <a className="am-ref" href="#table-c3">Table C3</a> test case,
                 one coefficient per update recovers 48% of CG’s reduction of
                 the residual, one per layer 70%, and one per layer and
-                parameter type 72%. In the 9B run, 99.5–99.7% of CG’s
-                correction to the sum lay outside the span of the updates,
+                parameter type 72%. In the 9B run CG’s correction to the sum lay
+                outside the span of the updates at 13 of the first 17 merges
+                (<a className="am-ref" href="#findings">Side findings</a>),
                 which is why a single coefficient per update is not enough. The
                 subspace solution can also serve as the starting point of CG,
                 and CG can start from the previous merge’s correction, to
@@ -1305,7 +1185,7 @@ export default function OnPolicyMergingPost() {
                 the Fisher to the first 2,048 action tokens of each rollout,
                 22% of a math rollout’s tokens. Sampling tokens further, by the
                 entropy of their next-token distribution, did not help. On the{' '}
-                <a className="am-ref" href="#table-2">Table 2</a> test case,
+                <a className="am-ref" href="#table-c3">Table C3</a> test case,
                 keeping 5–50% of the tokens in the 2,048-token prefix left the
                 time per product unchanged, because the forward and backward
                 passes still run over the whole context, and increased the
@@ -1366,11 +1246,12 @@ export default function OnPolicyMergingPost() {
               model and 1.12 for the sum, and 0.16 after 30 iterations. For a
               domain whose action probabilities the other domains’ updates change
               little, the round is{' '}
-              <Key>close to lossless</Key>. The residual is 0.025 of the drift
-              for the instruction-following specialist and 0.037 for the agent,
+              <Key>close to lossless</Key>. On the prompts the Fisher was
+              estimated on, the residual is 0.025 of the drift for the
+              instruction-following specialist and 0.037 for the agent,
               against 0.26 for task arithmetic.
             </p>
-            <div className="am-table" id="table-3">
+            <div className="am-table" id="table-2">
               <table>
                 <thead>
                   <tr>
@@ -1471,7 +1352,7 @@ export default function OnPolicyMergingPost() {
               </table>
             </div>
             <p style={{ fontSize: '14px' }}>
-              <strong>Table 3.</strong> One-shot merges of the five released
+              <strong>Table 2.</strong> One-shot merges of the five released
               Qwen3-4B specialists of <CiteT k="wu2026" />, mean over 32 samples
               per prompt, in percent. AIME pools the 2025 and 2026 problems (60
               in all), and LiveCodeBench is v6. The domains are math (AIME),
@@ -1480,12 +1361,13 @@ export default function OnPolicyMergingPost() {
               higher score and bold is the highest; the base model is left
               unshaded as the reference. All merged models are deployed in bf16
               except the last row. The specialist row takes each benchmark from
-              its own domain’s specialist. Per-benchmark paired intervals are{' '}
-              <Pending>being recomputed</Pending>.
+              its own domain’s specialist. In paired comparisons over items,
+              every merged model and the MOPD student is above the base model
+              by more than two standard errors on every benchmark.
             </p>
             <p>
               <span className="am-runin">On benchmarks it beats task arithmetic and MOPD.</span>{' '}
-              In <a className="am-ref" href="#table-3">Table 3</a>, the one-shot
+              In <a className="am-ref" href="#table-2">Table 2</a>, the one-shot
               OPM merge scores above task arithmetic on four of the six
               benchmarks and above the released MOPD model on five, using no
               rollouts beyond the 256 per domain used to estimate the Fisher. The
@@ -1553,16 +1435,12 @@ export default function OnPolicyMergingPost() {
               framework (slime), one chat template with thinking on, and the
               same verifiers, harnesses and evaluation. The budget is matched
               in environment rollouts per domain, counting MOPD’s student
-              rollouts. This matches the tokens each arm trains on, not the
-              number of optimizer steps: multi-task RL takes one step per
-              mixed batch of all eight domains, while each OPM trainer and
-              each specialist steps on batches of its own domain. The final
-              OPM run differs from the baselines’ recipe in four trainers: it
-              lowers the learning rate for math, software engineering,
-              instruction following and tool use, adds a KL penalty and a
-              longer length cap for math, and gives software engineering 36%
-              more rollouts. <a className="am-ref" href="#app-f-recipes">Appendix F</a>{' '}
-              lists the recipe of every method.
+              rollouts. The OPM run differs from the baselines’ recipe in four
+              trainers: lower learning rates for math, software engineering,
+              instruction following and tool use, a KL penalty and a longer
+              length cap for math, and 36% more rollouts for software
+              engineering
+              (<a className="am-ref" href="#app-f-recipes">Appendix F</a>).
             </p>
             <ul>
               <li>
@@ -1573,20 +1451,15 @@ export default function OnPolicyMergingPost() {
               </li>
               <li>
                 <strong>Multi-task RL (MTRL).</strong> One trainer on all eight
-                domains, with per-domain rollout quotas matched to the budget,
-                ledger-normalised gradient shares, deficit scheduling with
-                replay for slow domains, and a tuned learning rate. Every step
-                draws the same fraction of each domain’s budget, so 31% of its
-                rollouts are math, 31% instruction following, 10% tool use,
-                10% search, 6% software engineering, 6% knowledge work, 4%
-                cyber and 3% terminal
+                domains, with per-domain rollout quotas matched to the budget
+                and one learning rate for all domains
                 (<a className="am-ref" href="#app-f-budget">Appendix F</a>).
                 Reported: step 150.
               </li>
               <li>
                 <strong>Task arithmetic (TA).</strong> The merge-after
-                baseline: eight specialists trained to the full budget, then
-                merged once. Reported: <Tex tail=",">{T`\lambda=1`}</Tex> the
+                baseline: the eight finished specialists, merged once (the
+                math specialist at step 210 of its 300). Reported: <Tex tail=",">{T`\lambda=1`}</Tex> the
                 plain sum of the eight updates.
               </li>
               <li>
@@ -1594,398 +1467,362 @@ export default function OnPolicyMergingPost() {
                 of one student. Reported: iteration 14.
               </li>
               <li>
-                <strong>OPM.</strong> Eight trainers and the guarded merge
-                described above. A trainer pauses when its drift reaches the
-                cap, the trainers merge when all have paused or a timer
-                expires, and a trainer whose drift is still small at that
-                moment is deferred to a later merge. Reported: the merged
-                model at the end of the run. The run is still training, so the
-                figures below show the model after its fifth merge.
+                <strong>OPM.</strong> Eight trainers and the guarded merge. A
+                trainer pauses when its drift reaches the cap, the trainers
+                merge when all have paused or a timer expires, and a trainer
+                whose drift is still small is deferred to a later merge. The
+                run is still training: 22 merges are complete, and the latest
+                evaluated model is the one after 21. Until the run ends,{' '}
+                <a className="am-ref" href="#fig-4">Figure 4</a> shows for
+                each benchmark the best score among the merges evaluated on
+                it, and <a className="am-ref" href="#fig-6">Figure 6</a>{' '}
+                shows every evaluated merge.
               </li>
             </ul>
-          </div>
-
-          <div className="am-prose">
             <p>
-              <span className="am-runin">Scores.</span>{' '}
-              <a className="am-ref" href="#fig-5">Figure 5</a> compares the
-              methods on nine benchmarks. OPM is shown on the four evaluated
-              so far.
+              <span className="am-runin">Where OPM stands.</span>{' '}
+              <a className="am-ref" href="#fig-4">Figure 4</a> has the scores
+              of every method on twelve benchmarks. OPM is evaluated on
+              eleven; its cyber score is not measured yet. Its bar on each
+              benchmark is the best score among the merges evaluated so far,
+              so the eleven bars do not come from one model.
             </p>
           </div>
 
-          <figure id="fig-5" className="am-wide">
+          <figure id="fig-4">
             <ScoresFigure />
             <figcaption>
-              <strong>Figure 5.</strong> Scores in percent; each panel has its
-              own scale. MTRL is multi-task RL, TA is task arithmetic with{' '}
+              <strong>Figure 4.</strong> Scores in percent. Each panel has its
+              own scale, and most do not start at zero. MTRL is multi-task RL, TA is task arithmetic with{' '}
               <Tex tail=",">{T`\lambda=1`}</Tex> and Specialist is the
-              specialist of the panel’s domain. OPM is the model after five
-              merges.
+              specialist of the panel’s domain. OPM’s bar is its best score
+              among the merges evaluated on that benchmark;{' '}
+              <a className="am-ref" href="#table-3">Table 3</a> names the
+              merge.
             </figcaption>
           </figure>
-
           <div className="am-prose">
             <details className="am-fold">
-              <summary>Table 4 · The numbers of Figure 5, with standard errors</summary>
+              <summary>Table 3 · The numbers of Figure 4, with standard errors</summary>
               <MainResultsTable />
               <p style={{ fontSize: '14px' }}>
-                <strong>Table 4.</strong> The numbers of Figure 5, in percent,
-                ± one standard error. A dash means not evaluated.
+                <strong>Table 3.</strong> The numbers of Figure 4, in percent,
+                ± one standard error. The last row gives the number of merges
+                completed by the model behind each OPM score. A dash means not
+                evaluated.
               </p>
             </details>
             <p>
-              Multi-task RL gains 10.8 points over the base model on
-              Terminal-Bench 2.1, 6.3 on BrowseComp-Plus and 18.4 on math, and
-              raises IFBench from 27.8 to 66.1. MOPD scores above multi-task
-              RL and task arithmetic on SWE-bench Pro, Terminal-Bench 2.1,
-              BrowseComp-Plus, cyber and math, and 18.5 points below multi-task
-              RL on IFBench.
+              Multi-task RL trains the same eight domains in one model and is
+              what OPM would replace. OPM is ahead of it on IFBench, IFEval,
+              SWE-bench Pro, Terminal-Bench and BrowseComp-Plus, each by more
+              than two standard errors in paired comparisons over items, and
+              behind on none. The margins are 14.9 points on IFBench and 8.9
+              on SWE-bench Pro, where multi-task RL ends at the base model’s
+              level. On the other six benchmarks the two are within two
+              standard errors of each other, including AIME 2026, where OPM
+              was 6.7 points behind four merges earlier.
             </p>
             <p>
-              Software engineering moves least. The specialist scores 77.7 on
-              SWE-bench Pro against 74.5 for the base model, and multi-task RL,
-              at 72.6, is within one standard error of the base.
+              MOPD has a different profile. It has the highest BFCL score and
+              the lowest instruction-following scores of the four methods, 33
+              points below OPM on IFBench. On the three agentic benchmarks,
+              AIME 2026 and HLE, OPM and MOPD are within two standard errors
+              of each other. No method leads everywhere: multi-task RL is
+              weakest on software engineering, MOPD on instruction following,
+              and OPM on BFCL, where it makes calls on items that need none
+              (<a className="am-ref" href="#app-g-bfcl">Appendix G</a>).
             </p>
             <p>
-              No method trains on HLE. Multi-task RL and MOPD raise it from
-              5.86 to 10.50, and task arithmetic lowers it to 4.92.
-            </p>
-            {DEV ? (
-              <>
-                <Placeholder label="Figure 7 · does OPM match each baseline?" status="needs the final OPM model">
-                  <p>
-                    【Reader’s question: on which benchmarks is OPM better,
-                    equal or worse? Rows are the benchmarks of Figure 5 plus
-                    GDPval-AA. Three columns: OPM minus multi-task RL, minus
-                    task arithmetic, minus MOPD, as a paired difference over
-                    items with a ± 2 SE interval and a line at zero. The
-                    paragraph gives the count of wins, ties and losses and
-                    names every loss.】
-                  </p>
-                </Placeholder>
-                <Placeholder label="Analysis · abilities no method trains on" status="needs MMLU-Pro and GPQA for every method">
-                  <p>
-                    【Reader’s question: does combining eight domains cost
-                    general ability? Add MMLU-Pro and GPQA to HLE for every
-                    method, and report mean response length and the share of
-                    truncated answers per method.】
-                  </p>
-                </Placeholder>
-              </>
-            ) : null}
-            <p>
-              <span className="am-runin">Merging after training.</span> Task
-              arithmetic is below the base model on SWE-bench Pro (65.9
-              against 74.5), on math (50.7 against 58.9) and on HLE (4.92
-              against 5.86), and above it on Terminal-Bench 2.1,
-              BrowseComp-Plus and cyber. The finished specialists are too far
-              apart for their updates to be summed, which is consistent with
-              the second-order formula being accurate only while the models
-              are close
-              (<a className="am-ref" href="#during-training">Merging during training</a>).{' '}
+              <span className="am-runin">Summing finished specialists fails.</span>{' '}
+              Task arithmetic adds the weight updates of per-domain trainers,
+              which is also where OPM’s merge starts, but it does so once,
+              after the specialists have finished. The result is below the
+              base model on SWE-bench Pro, BFCL, τ²-Bench, AIME 2026 and HLE.
+              OPM is above task arithmetic and above the base model on all
+              eleven benchmarks. Adding updates is accurate only while the
+              models are close
+              (<a className="am-ref" href="#during-training">Merging during training</a>),
+              and finished specialists are not. The sum is far enough off
+              that the math specialist lowers the math score: leaving it out
+              raises the score on the 93 math problems of{' '}
+              <a className="am-ref" href="#table-f1">Table F1</a> by 4.7 ±
+              1.7 points.{' '}
               <a className="am-ref" href="#table-f6">Table F6</a> reports two
               other merges of the same specialists.
             </p>
             <p>
-              A combined model is not bounded by the specialists. On math,
-              multi-task RL and MOPD score 77.3 and 80.5 against 67.9 for the
-              math specialist.
+              <span className="am-runin" id="merges-keep">The guard does the work.</span>{' '}
+              Merging during training keeps the trainers close. It does not
+              make the sum a good merge. After a merge, the KL from a trainer
+              to the merged model, on held-out prompts of the trainer’s own
+              domain, is the part of its update that the merge did not
+              reproduce. <a className="am-ref" href="#fig-5">Figure 5</a>{' '}
+              gives it at every merge, as a share of the trainers’ drift
+              since the previous one.
             </p>
-            {DEV ? (
-              <>
-                <Placeholder label="Figure 8 · how often should the trainers merge?" status="needs the interval study at 9B">
-                  <p>
-                    【Reader’s question: is merging during training better
-                    than merging once at the end, with the same trainers?
-                    x: steps between merges (4, 10, 32, and once at the end);
-                    y: score on math and IFBench of the merged model, with
-                    multi-task RL as a horizontal line. This is the direct
-                    test of the method’s main design choice.】
-                  </p>
-                </Placeholder>
-                <Placeholder label="Analysis · which specialist carries a merge’s gain" status="needs two merges and two evaluations">
-                  <p>
-                    【Reader’s question: where does the gain of a merge over
-                    the specialist come from? Redo task arithmetic
-                    without the software-engineering specialist and score it
-                    on SWE-bench Pro; redo it without the math specialist and
-                    score it on math. One table: merge, left-out specialist,
-                    score, paired difference to the full merge.】
-                  </p>
-                </Placeholder>
-              </>
-            ) : null}
           </div>
 
+          <figure id="fig-5">
+            <MergeFigure />
+            <figcaption>
+              <strong>Figure 5.</strong> KL residual at each of the 22 merges as
+              a share of the trainers’ total drift, for the plain sum of the
+              updates and for the guarded merge. 100% is not merging.
+            </figcaption>
+          </figure>
           <div className="am-prose">
             <p>
-              <span className="am-runin">OPM during training.</span>{' '}
-              <a className="am-ref" href="#fig-6">Figure 6</a> follows the OPM
-              model through its first five merges. By the fifth, instruction
-              following, search and tool use have contributed updates, and
-              math, software engineering, terminal and cyber have mostly been
-              deferred.
+              At each of the 22 merges so far the guarded merge left less
+              residual than the plain sum of the same updates. The sum left a
+              median 54% of the trainers’ drift unreproduced, and up to 77%;
+              the guarded merge left a median 12%, and at most 28%
+              (<a className="am-ref" href="#table-c2">Table C2</a>). Most of
+              the agreement with the trainers therefore comes from the
+              Fisher-weighted solve, not from adding the updates early. The
+              guard rarely had to intervene. It chose the full CG step at 21
+              merges and the half step at one, and the per-trainer check
+              failed three times, each time cleared by raising the CG
+              iterations from 5 to 10 without leaving a trainer out.
+            </p>
+            <p>
+              <span className="am-runin">Each domain moves at its own pace.</span>{' '}
+              Every trainer kept its own learning rate, batch size and step
+              budget, and none waited for another between merges. A merge
+              takes the updates of whichever trainers have drifted far enough
+              since the last one: in the first 21 merges, search and
+              instruction following contributed to 18 each, tool use to 14,
+              and math to 4. <a className="am-ref" href="#fig-6">Figure 6</a>{' '}
+              follows the merged model through these merges.
             </p>
           </div>
 
           <figure id="fig-6">
-            <AnchorsFigure />
+            <TrajFigure />
             <figcaption>
-              <strong>Figure 6.</strong> The OPM model after 0, 1, 3 and 5
-              merges, in percent. Dashed lines are the finished baselines.
+              <strong>Figure 6.</strong> The OPM model against the number of
+              merges completed, in percent; each panel has its own scale.
+              Dashed lines are the finished baselines. A point marks an
+              evaluated merge.
             </figcaption>
           </figure>
-
           <div className="am-prose">
             <details className="am-fold">
-              <summary>Table 5 · The same anchors on five benchmarks</summary>
+              <summary>Table 4 · The OPM model at each evaluated merge</summary>
               <OpmAnchorsTable />
               <p style={{ fontSize: '14px' }}>
-                <strong>Table 5.</strong> The OPM model after 1, 3 and 5
-                merges, in percent. The last row is the paired difference over
-                items.
+                <strong>Table 4.</strong> The OPM model after each evaluated
+                merge, in percent. The truncation rate is the share of AIME 2026
+                attempts that hit the output limit of 81,920 tokens before
+                giving an answer; they count as wrong. BFCL is also given
+                separately for the 2,717 items that need a function call and
+                the 1,124 that need none. A dash means not evaluated.
               </p>
             </details>
             <p>
-              IFBench rises from 27.8 to 60.8, a paired gain of 33.0 ± 2.1
-              points. This is above MOPD at 47.6 and below multi-task RL at
-              66.1.
+              The curves differ in shape because the trainers differ in speed.
+              Instruction following is done early: IFBench passes MOPD by the
+              fifth merge and multi-task RL by the eighth, and changes little
+              after the twelfth. The agentic benchmarks move late.
+              Terminal-Bench rises from 24 to 31 over the 17th and 18th
+              merges, the first two that carried the terminal trainer’s
+              update. Math is last: its trainer had taken 119 of its 300
+              steps at the 22nd merge, when six of the eight trainers had
+              finished, and the math score is still rising. None of this was
+              scheduled.
             </p>
             <p>
-              Math rises by 3.5 ± 0.9 points, to 62.4, with few of the math
-              trainer’s updates merged. Multi-task RL and MOPD are at 77.3 and
-              80.5, so the comparison on math depends on merges that have not
-              happened yet. BFCL rises by 2.5 ± 0.6 points.
-            </p>
-            {DEV ? (
-              <>
-                <Placeholder label="Figure 9 · what each merge wrote" status="needs the merge log of the final run">
-                  <p>
-                    【Reader’s question: are the merges stable, and which
-                    trainers take part? One column per merge, one row per
-                    trainer. A cell says whether the trainer contributed, was
-                    deferred, or was left out by the per-trainer check, shaded
-                    by its drift. Below, per merge: the held-out KL residual
-                    of the guarded merge, of the plain sum of the same
-                    updates, and of not merging, with the chosen{' '}
-                    <Tex tail=".">{T`\gamma`}</Tex> The paragraph gives the
-                    number of merges at which the guarded merge was closer to
-                    the trainers than the sum.】
-                  </p>
-                </Placeholder>
-                <Placeholder label="Figure 10 · what a merge keeps of each trainer’s gain" status="needs evaluations at each merge">
-                  <p>
-                    【Reader’s question: does the merged model keep what each
-                    trainer learned? Per domain, three bars as gain over the
-                    base model on that domain’s held-out set: the specialist,
-                    the OPM trainer before the last merge, and the merged
-                    model. This is the claim of the decoupling theorem, and
-                    the test is hardest on the small-drift domains, software
-                    engineering and terminal.】
-                  </p>
-                </Placeholder>
-                <Placeholder label="Figure 11 · progress against budget, per domain" status="needs the anchors’ budget fractions">
-                  <p>
-                    【Reader’s question: at the same budget, which method is
-                    ahead? Eight panels, one per domain. x: fraction of the
-                    domain’s rollout budget used; y: held-out reward. Three
-                    curves: the OPM anchors, the specialist’s checkpoints, and
-                    multi-task RL at steps 50, 75, 100 and 150.】
-                  </p>
-                </Placeholder>
-                <Placeholder label="Analysis · the math gap" status="needs per-method truncation counts">
-                  <p>
-                    【Reader’s question: why is OPM behind on math? For every
-                    method on the 93 problems: the share of samples cut at
-                    81,920 tokens, accuracy on completed answers, and mean
-                    answer length. For OPM, the same after each merge, with
-                    the norm of the math update merged so far. This separates
-                    three explanations: few math updates merged, longer
-                    reasoning that hits the cap, and a weaker math trainer.】
-                  </p>
-                </Placeholder>
-              </>
-            ) : null}
-            <p>
-              <span className="am-runin">Cost.</span> The methods use compute
-              in different stages. Multi-task RL has no separate combining
-              step. Task arithmetic trains the specialists and then merges
-              them. MOPD adds a second stage with student rollouts in every
-              domain and teacher scoring of every student token. OPM combines
-              by merging, which needs no environment interaction; the cost of
-              one merge is measured in{' '}
-              <a className="am-ref" href="#engineering">Computing the merge at scale</a>.
-              Costs aligned with the reported checkpoints are not available
-              yet.
+              <span className="am-runin">Cost.</span> The merge is cheap in
+              compute and expensive in waiting. Up to its 21st merge the OPM
+              run had been allocated 14,041 B200 GPU-hours. The merges used
+              344 of them, 2.4%, and they need no environment interaction.
+              They also took 20.6 hours of wall-clock time, about an hour
+              each, during which the trainers taking part wait.{' '}
+              <a className="am-ref" href="#table-5">Table 5</a> lists the
+              ledger entries of the other methods.
             </p>
             <details className="am-fold">
-              <summary>Table 6 · Cost ledger entries so far</summary>
+              <summary>Table 5 · Cost ledger entries so far</summary>
               <CostTable />
               <p style={{ fontSize: '14px' }}>
-                <strong>Table 6.</strong> Entries of the cost ledger as of 11
-                November 2026. They are not aligned with the reported
-                checkpoints: the multi-task entry runs to step 175, and an
-                aborted attempt adds 381 H100 GPU-hours; the MOPD entry is an
-                earlier 15-step snapshot. The MOPD and merge-only entries
-                exclude the training of the specialists. GPU-hours include idle
-                time, and H100 and B200 hours are different units.
+                <strong>Table 5.</strong> Entries of the cost ledger, each cut
+                at the reported checkpoint: multi-task RL at step 150, the
+                MOPD student at iteration 14, and OPM at its 21st merge. The
+                MOPD and merge-only entries exclude the training of the
+                specialists. GPU-hours include idle time, and H100 and B200
+                hours are different units.
               </p>
             </details>
-            {DEV ? (
-              <Placeholder label="Figure 12 · what does each method cost?" status="needs the final ledger">
-                <p>
-                  【Reader’s question: how much compute and time does one
-                  model take? Left: one stacked bar per method in wall-clock
-                  hours, split into rollouts, training, combining (merges, or
-                  MOPD’s teacher scoring) and idle time, cut at the reported
-                  checkpoint, with GPU-hours and GPU type beside it. Right:
-                  mean gain over the base model against GPU-hours, one point
-                  per method.】
-                </p>
-              </Placeholder>
-            ) : null}
-            <p id="coupling">
-              <span className="am-runin">Where the domains couple.</span> The
-              theory names three channels through which multi-task RL couples
-              domains (<a className="am-ref" href="#decoupling">What decoupling gives each domain</a>),
-              and in our 9B runs their measured sizes differ widely. Policy
-              gradients of different domains have cosines of at most 0.02 at a
-              common point, no larger than the cosine between two halves of one
-              domain’s batch, so at this scale a policy gradient is mostly sampling
-              noise. The trainers’ updates are even closer to orthogonal, with
-              cosines of at most 0.0023 between any two of the eight at every
-              merge. Even so, the other trainers’ summed updates moved the
-              small-drift software-engineering trainer by 6–14 times its own drift
-              and the terminal trainer by 5–6 times, while they moved instruction
-              following by only 0.14–0.35 of its own. The global clip was never
-              triggered: over 110 steps of the eight-domain multi-task run, the
-              largest pre-clip gradient norm was 0.18 against a threshold of 1.0.
-              In our recipe the clip channel is therefore inactive, and the domains
-              are coupled through the shared update and Adam’s second moment.
-            </p>
-          </div>
-
-          <div className="am-prose">
-            <p>
-              <span className="am-runin">Transfer.</span> <a className="am-ref" href="#thm-1">Theorem 1</a> makes a
-              testable prediction about the domains on which OPM should score
-              lower. Per domain and merge, the sign of{' '}
-              <Tex>{T`J_j(\text{sum})-J_j(\text{OPM})`}</Tex> should be the sign
-              of the transfer term <Tex tail=",">{T`T_j`}</Tex> which each
-              trainer can estimate from its own batch with one forward-mode pass
-              per rollout. OPM should match or beat multi-task RL on domains whose
-              updates conflict with the others’, and trail it on domains with
-              positive transfer between them (knowledge work and tool use, or math
-              and held-out reasoning) unless trainer learning rates are raised. In an
-              exact-gradient check the correlation between <Tex>{T`T_j`}</Tex>{' '}
-              and the realised gap was 0.84–0.87 for short rounds and fell to
-              0.27 for long ones, where second-order terms dominate. Testing it
-              at 9B needs <Tex>{T`T_j`}</Tex> and the summed update’s reward at
-              every merge, which our run does not record; we leave it to
-              future work.
-            </p>
-            {DEV ? (
-              <Placeholder label="Figure 13 · which domains help or hurt each other?" status="needs the cross-domain evaluations">
-                <p>
-                  【Reader’s question: is there transfer or interference
-                  between the domains? An 8 × 8 matrix: row is the specialist,
-                  column is the domain’s held-out set, cell is the gain over
-                  the base model, on a diverging colour scale. Two extra rows
-                  give multi-task RL and OPM.】
-                </p>
-              </Placeholder>
-            ) : null}
           </div>
           {/* ------------------------------------------------------------ */}
           <SectionTitle label="Side findings" id="findings" />
           <div className="am-prose">
             <p>
-              We measured merges at the level of policies, in exact fp32, and
-              logged every merge of the 9B run. Several of the resulting
-              findings apply beyond OPM. <a className="am-ref" href="#app-g">Appendix G</a> has the
-              numbers.
+              Building OPM meant measuring merges at the level of policies, in
+              exact fp32, at every merge of the 9B run. Several of these
+              measurements hold beyond OPM.{' '}
+              <a className="am-ref" href="#app-g">Appendix G</a> gives the 4B
+              measurements in detail.
             </p>
             <p>
+              <span className="am-runin">A specialist is not an upper bound.</span>{' '}
+              On each of the eight benchmarks where both are measured, OPM
+              scores above the specialist of that benchmark’s domain, by 13
+              points on IFBench. MOPD does so on seven of nine, and multi-task RL on
+              three. The tool-use specialist is itself below the base model
+              on both tool benchmarks. A combined model should therefore be
+              judged against the base model and the other combined models,
+              not by how much of each specialist it keeps.
+            </p>
+            <p>
+              <span className="am-runin">Single-domain RL does not keep general ability.</span>{' '}
+              No method trains on MMLU-Pro, GPQA or HLE.{' '}
+              <a className="am-ref" href="#fig-7">Figure 7</a> gives the three
+              as the difference to the base model. Training one domain does
+              not reliably keep these abilities: the knowledge-work specialist
+              loses 9.0 points on GPQA, and the terminal specialist stays at
+              the base model’s level. Combining the domains does keep them.
+              Every combined model gains on MMLU-Pro and GPQA; OPM gains 5.1
+              and 14.2 points, 0.5 and 1.9 fewer than multi-task RL, and 5.1
+              on HLE, level with multi-task RL and MOPD. Along the OPM run the
+              three scores rise with the merges, most of the way by the
+              twelfth. One caution applies to GPQA: its limit of 32k output
+              tokens cuts off 26% of the base model’s answers, so part of
+              every model’s gain there is finishing more answers
+              (<a className="am-ref" href="#table-f8">Table F8</a>).
+            </p>
+          </div>
+
+          <figure id="fig-7">
+            <GeneralFigure />
+            <figcaption>
+              <strong>Figure 7.</strong> MMLU-Pro, GPQA Diamond and HLE as the
+              difference to the base model, in points. The base model’s score
+              is on the zero line. The first eight rows are the specialists. A
+              dash means not evaluated.
+            </figcaption>
+          </figure>
+          <div className="am-prose">
+            <p>
+              <span className="am-runin">The sum wins where domains transfer.</span>{' '}
+              Two per-domain quantities say when: the part of the others’
+              updates that lies in the range of domain <Tex>j</Tex>’s Fisher,
+              its visibility, and the sign of the transfer term{' '}
+              <Tex tail=",">{T`T_j`}</Tex> which each trainer can estimate
+              from its own batch with one forward-mode pass per rollout.{' '}
+              <a className="am-ref" href="#thm-1">Theorem 1</a> predicts that
+              OPM matches or beats a shared update where a domain’s updates
+              conflict with the others’, and trails it where they help. The
+              4B reasoning domains see each other’s updates and transfer
+              positively, and there the sum scores higher. The
+              instruction-following and agent domains barely see the others’
+              updates, and there the sum and OPM tie. At 9B the prediction
+              agrees in sign on instruction following, where OPM is ahead of
+              multi-task RL. On math OPM trailed for most of the run and is
+              now within noise, so that case is open. In an exact-gradient
+              check the correlation between <Tex>{T`T_j`}</Tex> and the
+              realised gap was 0.84–0.87 for short rounds and 0.27 for long
+              ones, where second-order terms dominate. Our run does not
+              record <Tex tail=";">{T`T_j`}</Tex> logging it at each merge
+              would show which regime a run is in.
+            </p>
+            <p id="coupling">
               <span className="am-runin">Near-orthogonal updates still interfere.</span>{' '}
-              The released specialists’ task vectors are nearly orthogonal, with
-              cosines of at most 0.022, yet they interfere strongly. The math
-              specialist’s update moves the code specialist’s policy by 1.78
-              times the code specialist’s own drift. Interference is measured by the
-              Fisher, which weights each direction by how much it changes the
-              policy’s action probabilities, and the Fisher’s curvature along the
-              directions RL moves is thousands of times larger than along random
-              ones. The same holds inside our 9B run: the
-              eight trainers’ updates had pairwise cosines of at most 0.0023,
-              yet the merge moved the small-drift software-engineering and
-              terminal trainers by 1.6–5.4 times their own drift. Cosine
-              similarity of task vectors therefore does not indicate whether two
-              specialists can be merged.
+              The released 4B specialists’ task vectors have cosines of at
+              most 0.022, yet the math specialist’s update moves the code
+              specialist’s policy by 1.78 times that specialist’s own drift.
+              Interference is set by the Fisher, not by the Euclidean angle:
+              along the directions RL moves, the Fisher’s curvature is
+              thousands of times larger than along random ones. The 9B runs
+              show the same. In the multi-task run, policy gradients of
+              different domains have cosines of at most 0.02, no larger than
+              between two halves of one domain’s batch, and the global clip
+              never triggered: over 110 steps the largest pre-clip gradient
+              norm was 0.18 against a threshold of 1.0. Yet in the OPM run,
+              in the merges the software-engineering trainer sat out, the
+              plain sum of the other trainers’ updates would have moved its
+              policy by a median 2.3 times its own drift; the guarded merge
+              moved it by 0.28. Domains in one model are therefore coupled
+              through the shared update itself, not through aligned gradients
+              or the clip, and cosine similarity does not tell whether two
+              updates can be added. We have not measured the further coupling
+              through Adam’s shared second moment.
             </p>
             <p>
-              <span className="am-runin">
-                Apparent sparsity of RL updates comes from bf16 rounding.
-              </span>{' '}
-              In fp32 the specialists’ updates are dense: 99.996% of entries are
-              nonzero, with a median size of about <Tex>{T`2^{-11}`}</Tex>{' '}
-              relative to the weights. Rounding the specialists to bf16 leaves
-              only 18% of the update entries nonzero, and the rounded update has
-              cosine 0.57 with the true one and an 84% relative error. Claims
-              that RL makes sparse updates should be checked against fp32
-              weights.
+              <span className="am-runin">The merge is the sum plus a direction none of the updates contains.</span>{' '}
+              Over the first 17 merges of the 9B run the installed merge
+              differed from the plain sum by 30% to 59% of the sum’s norm. At
+              13 of them that difference lay outside the span of the
+              trainers’ updates, and at the other four 72% to 91% of it did. A
+              reweighting of the updates stays inside their span, so no
+              choice of merge coefficients reproduces it.
             </p>
             <p>
-              <span className="am-runin">Policy change from bf16 casting.</span> Casting
-              an fp32 specialist to bf16 moves its policy by 25–40% of its whole
-              RL drift, measured in KL on its own rollouts. The same merged
-              model deployed in fp32 instead of bf16 scores higher on five of six
-              benchmarks, by 2.6 points on AIME. Any merge, trigger or residual threshold therefore has to be
-              larger than this casting error, and scoring has to run in true fp32.
+              <span className="am-runin">The merge does not serve all trainers equally.</span>{' '}
+              Summed over the merges a trainer joined, the residual is under
+              5% of its drift for search and instruction following and above
+              20% for software engineering and knowledge work
+              (<a className="am-ref" href="#fig-8">Figure 8</a>). We have not
+              established what sets the difference.
             </p>
+          </div>
+
+          <figure id="fig-8">
+            <ResidualFigure />
+            <figcaption>
+              <strong>Figure 8.</strong> KL residual per trainer as a share
+              of its drift, summed over the merges it joined among the first
+              21.
+            </figcaption>
+          </figure>
+          <div className="am-prose">
             <p>
-              <span className="am-runin">KL residual and reward change.</span>{' '}
-              The sum has the largest KL residual of any merge and the best
-              bf16 scores on AIME and GPQA. An exact decomposition accounts for
-              this. A return change equals the reward-weighted log-likelihood
-              ratio plus a term bounded by the KL. To first order it is{' '}
+              <span className="am-runin">A large KL residual does not imply a lower score.</span>{' '}
+              In the 4B merge the sum has the largest KL residual of any
+              merge and the best bf16 scores on AIME and GPQA. An exact
+              decomposition accounts for this. A return change equals the
+              reward-weighted log-likelihood ratio plus a term bounded by the
+              KL; to first order it is{' '}
               <Tex tail=",">{T`\rho\,\sigma\sqrt{2\varepsilon}`}</Tex> with{' '}
               <Tex>{T`\rho`}</Tex> the correlation between reward and the
-              log-ratio, <Tex>{T`\sigma`}</Tex> the reward’s standard deviation
-              and <Tex>{T`\varepsilon`}</Tex> the KL residual. A large residual therefore lowers reward little when{' '}
-              <Tex>{T`\rho\approx0`}</Tex> and raises it when{' '}
-              <Tex tail=".">{T`\rho>0`}</Tex> Pinsker-type bounds are vacuous
-              above about 2 nats, while specialists drift 75–248 nats.
-            </p>
-            <p>
-              <span className="am-runin">When the sum beats OPM.</span> The sum
-              scores higher when domains transfer positively to each other. Two
-              per-domain quantities measure this: the part of the others’ updates
-              that lies in the range of domain{' '}
-              <Tex>j</Tex>’s Fisher (its visibility), and the sign of the transfer term{' '}
-              <Tex tail=".">{T`T_j`}</Tex> The 4B reasoning domains are in this
-              regime. The instruction-following and agent domains have low
-              visibility of the others’ updates, so the sum and the OPM merge tie there. The toy’s conflict variants are
-              in the opposite regime, where OPM scores higher. Logging <Tex>{T`T_j`}</Tex>{' '}
-              at each merge would show which regime a run is
-              in.
-            </p>
-            <p>
-              <span className="am-runin">The merge is the sum plus a correction outside the updates.</span>{' '}
-              At every merge of the 9B run the OPM merge differed from the
-              plain sum by 7–8% of the sum’s norm, and 99.5–99.7% of that
-              difference lay outside the span of the trainers’ updates. A
-              reweighting of the updates would stay inside their span, so the
-              merge mostly adds a direction that none of the updates contains.
+              log-ratio, <Tex>{T`\sigma`}</Tex> the reward’s standard
+              deviation and <Tex>{T`\varepsilon`}</Tex> the KL residual. A
+              large residual therefore costs little reward when{' '}
+              <Tex>{T`\rho\approx0`}</Tex> and adds reward when{' '}
+              <Tex tail=".">{T`\rho>0`}</Tex> Bounds of the Pinsker type
+              cannot settle the question either: they are vacuous above about
+              2 nats, and specialists drift 75–248. The same caution applies
+              to the residuals of the 9B run
+              (<a className="am-ref" href="#fig-8">Figure 8</a>): they are
+              distances between policies, and their cost in reward is not
+              yet measured.
             </p>
             <p>
               <span className="am-runin">Scoring infrastructure failures as zero biases agentic evaluation.</span>{' '}
               When a sandbox or tool server fails, many harnesses score the
-              episode as a wrong answer. Re-queuing such episodes instead moved
-              the 9B base model from 31.9 to 53.9 on our internal
-              software-engineering set, from 6.2 to 9.4 on terminal and from 82.2
-              to 85.9 on cyber. Infrastructure failures are not random across
-              models, so the bias can change the ranking of models as well as
-              their scores.
+              episode as a wrong answer. Re-queuing such episodes instead
+              moved the 9B base model from 31.9 to 53.9 on our internal
+              software-engineering set. Infrastructure failures are not random
+              across models, so the bias can change the ranking of models as
+              well as their scores.
+            </p>
+            <p>
+              <span className="am-runin">RL updates look sparse only after bf16 rounding.</span>{' '}
+              In fp32 the specialists’ updates are dense: 99.996% of entries
+              are nonzero, with a median size of about{' '}
+              <Tex>{T`2^{-11}`}</Tex> relative to the weights. Rounding the
+              specialists to bf16 leaves 18% of the entries nonzero, and the
+              rounded update has cosine 0.57 with the true one. Claims that RL
+              makes sparse updates should be checked against fp32 weights.
+            </p>
+            <p>
+              <span className="am-runin">Casting to bf16 moves a policy by a quarter of its RL drift.</span>{' '}
+              Casting an fp32 specialist to bf16 moves its policy by 25–40%
+              of its whole RL drift, measured in KL on its own rollouts, and
+              the same merged model deployed in fp32 scores higher on five of
+              six benchmarks. Any merge trigger or residual threshold has to
+              be larger than this casting error, and scoring has to run in
+              true fp32.
             </p>
           </div>
 
@@ -1994,126 +1831,68 @@ export default function OnPolicyMergingPost() {
           <div className="am-prose">
             <p>
               <span className="am-runin">When to use it.</span> OPM trains
-              domains separately. This helps when coupling between domains is
-              harmful, as with domains that conflict, many domains with small
-              shares each, rollout latencies that differ by orders of magnitude,
-              domains whose gradient scales differ enough to interfere through a
-              shared clip or Adam state, and teams that want to add, drop, tune
-              or fix a domain without retraining the rest. It is slower when
-              coupling is beneficial. When domains share skills, multi-task RL or
-              the plain sum moves faster along the shared directions, and OPM
-              recovers that only through larger trainer steps. The transfer term
-              and visibility, both computable at a merge, tell which
-              situation a run is in.
+              domains separately, so it pays off where coupling between
+              domains hurts: domains that conflict, many domains with small
+              shares each, rollout latencies that differ by orders of
+              magnitude, gradient scales different enough to interfere through
+              a shared clip or Adam state, and teams that want to add, drop,
+              tune or fix one domain without retraining the rest. It costs
+              where coupling helps. When domains share skills, multi-task RL
+              or the plain sum moves faster along the shared directions, and
+              OPM recovers that only through larger trainer steps; math in our
+              run is the candidate example. The transfer term and visibility,
+              both computable at a merge, tell which case a run is in.
             </p>
             <p id="modularity">
-              <span className="am-runin">Adding a domain, containing a fault.</span>{' '}
-              Because each domain has its own trainer, OPM can change its set of
-              domains mid-run. A new skill starts as one more trainer from the
-              current anchor and joins at the next merge. Multi-task RL has
-              to re-mix its quotas instead, and the new gradients reach every
-              domain from the first step. By idle protection (<a className="am-ref" href="#prop-2">Proposition 2</a>), the
-              existing domains’ policies are unchanged to first order wherever the
-              new trainer’s Fisher range is independent of theirs. The same
-              structure limits how far a fault spreads. If one domain’s reward is
-              faulty, for example a verifier that gives reward for any
-              syntactically valid tool call, the fault reaches the others only
-              through the merge, along the Fisher directions they share and by at
-              most the threshold per round. The per-merge diagnostics flag
-              that trainer, which can then be rolled back or dropped on its own.
-              This requires the guard to be enforced; a merge that admits a
-              flagged trainer passes the fault to every domain. In multi-task RL
-              the faulty gradients have already reached every weight. We have
-              not tested either case; both can be run at low compute cost as
-              branches of a main run.
+              <span className="am-runin">One trainer per domain makes the model modular.</span>{' '}
+              A new skill starts as one more trainer from the current anchor
+              and joins at the next merge. Multi-task RL has to re-mix its
+              quotas instead, and the new gradients reach every domain from
+              the first step. By idle protection
+              (<a className="am-ref" href="#prop-2">Proposition 2</a>), the
+              existing domains’ policies are unchanged to first order wherever
+              the new trainer’s Fisher range is independent of theirs. The
+              same structure contains a fault. If one domain’s reward is
+              faulty, for example a verifier that pays for any syntactically
+              valid tool call, the fault reaches the others only through the
+              merge, along the Fisher directions they share and by at most the
+              threshold per round. The per-merge diagnostics flag that
+              trainer, and it can be rolled back or dropped on its own. This
+              requires the guard to be enforced, since a merge that admits a
+              flagged trainer passes the fault to every domain. We have tested
+              neither case; both can be run cheaply as branches of a main run.
             </p>
             <p>
-              <span className="am-runin">Trade-offs.</span> Every merge
-              costs a merge and a synchronisation, since every trainer waits for
-              the merged model. The merge takes about five minutes for two 9B
-              trainers and 37–70 minutes for eight, because each trainer
-              computes Fisher products on its own rollouts. Frequent merges provide locality, calibrated
-              weights and repair and require many merges; merge-then-polish
-              requires only a few. Memory grows with the number of trainers, one
-              model copy per domain, which grouping domains reduces. Decoupling
-              also loses transfer along shared directions, which a larger trainer
-              learning rate recovers only in part.
-            </p>
-            <p>
-              <span className="am-runin">Synchronisation.</span> Multi-task RL
-              synchronises all domains at every optimizer step, so each step
-              waits for the slowest domain’s episodes or carries them over to the
-              next step. OPM synchronises at a merge, every 5–15 hours in our
-              run, and a merge does not need every trainer. In our run one
-              trainer missed a merge while its machines were down and the
-              other trainers were merged without it; at another merge the guard
-              deferred the math trainer’s update to the next one; and trainers
-              that had finished their budget took part with their final weights.
-              MOPD needs no synchronisation while the specialists train, so they
-              can run at different times on different clusters. Its
-              distillation stage starts only after the last specialist finishes,
-              and it adds student rollouts in every domain and teacher scoring
-              of every student token. OPM’s remaining synchronisation cost is that
-              the trainers taking part in a merge wait for it, 6–19% of a
-              round in our run. Solving the merge on snapshots while the trainers
-              keep training would remove it
+              <span className="am-runin">The price is synchronisation.</span>{' '}
+              Multi-task RL synchronises all domains at every optimizer step,
+              so each step waits for the slowest domain’s episodes or carries
+              them over. MOPD needs no synchronisation while the specialists
+              train, but its distillation starts only after the last
+              specialist finishes, and it adds student rollouts in every
+              domain and teacher scoring of every student token. OPM sits
+              between the two. It synchronises at a merge, every three to four
+              hours in our run, and a merge does not need every
+              trainer, since one whose drift is still small is deferred. What
+              it pays is the wait: the trainers taking part stop while each
+              computes Fisher products on its own rollouts, about an hour with
+              eight trainers and 20.6 hours over the first 21 merges of our
+              run.
+              Solving the merge on snapshots while the trainers keep training
+              would remove the wait
               (<a className="am-ref" href="#not-tested">Not yet tested at scale</a>).
-            </p>
-            <p>
-              <span className="am-runin">Limitations.</span> The guarantees
-              assume lossless rounds, and we have not shown that they exist at
-              LLM scale. In the 4B merge the residual after 30 CG iterations is
-              still 16% of drift on held-out prompts, and the reasoning domains
-              overlap. At
-              realistic drift, the informative guarantees are second-order or are
-              stated in KL rather than in reward. The trajectory Fisher grows with tokens, so
-              long-response domains get more weight in shared directions. OPM
-              keeps one model copy per domain in memory. The Fisher is estimated
-              from a subsample, and the evidence for the guarded merge comes
-              from one two-domain test and seven merges of one 9B run. In the one-shot merge, a stale metric
-              tied the on-policy one on benchmarks. In the 9B run the merge did
-              not keep small-drift trainers in place; it moved the
-              software-engineering and terminal trainers by more than their own
-              drift. Every 9B arm is a single training run (seed 1), so its
-              intervals reflect variation across tasks and samples but not across
-              seeds. All results are at 4B and 9B on dense
-              models; mixture-of-experts models and larger scales are untested.
-            </p>
-            <p>
-              <span className="am-runin">Related work.</span> The barycenter
-              objective comes from Distral and Divide-and-Conquer RL{' '}
-              <Cite k={['teh2017', 'ghosh2018']} />, and policy distillation
-              into one network from <CiteT k="rusu2016" />. The merge operator
-              comes from Fisher merging, RegMean and MaTS{' '}
-              <Cite k={['matena2022', 'jin2023', 'tam2024']} />, all applied
-              once and in supervised settings. <CiteT k="liu2026" /> showed that
-              MOPD is Fisher merging to second order. WARP iterates merging and
-              re-initialisation across parallel RLHF runs on one task{' '}
-              <Cite k="rame2024" />. Co-Evolving Policy Distillation couples
-              per-domain GRPO branches during training through distillation{' '}
-              <Cite k="gu2026" />, and M2A merges a math vector into an agent
-              only along the null space of agent-critical activations{' '}
-              <Cite k="wang2026b" />, which is closely related to <a className="am-ref" href="#thm-1">Theorem 1</a>. Federated
-              learning studies periodic averaging under heterogeneity{' '}
-              <Cite
-                k={['mcmahan2017', 'li2020', 'karimireddy2020', 'wang2020']}
-              />
-              , including function-space aggregation <Cite k="dhawan2024" />,
-              federated GRPO <Cite k="guo2026" /> and federated natural policy
-              gradient for multi-task RL <Cite k="yang2023" />. As far as we
-              know, OPM is the first to use the on-policy trajectory Fisher
-              inside RL, where <a className="am-ref" href="#thm-1">Theorem 1</a> holds, and the first to trigger a
-              weight merge on trajectory KL. <a className="am-ref" href="#app-h">Appendix H</a> discusses each in
-              detail.
+              Memory is the other cost, one model copy per domain, which
+              grouping domains reduces.{' '}
+              <a className="am-ref" href="#fig-3">Figure 3</a> shows the
+              system with both changes.
             </p>
             <p>
               <span className="am-runin">How often to merge.</span> The
               merge frequency moves OPM between merge-after, one merge
               at the end, and multi-task RL. In the toy the result depends
               strongly on the interval. At 50 steps per task, merging every 1, 5,
-              10, 25 or 50 steps gave 0.97, 0.96, 0.93, 0.34 and 0.08, and a KL
-              trigger scored higher than a fixed interval with a similar number of
-              merge, 0.987 against 0.88 (<a className="am-ref" href="#app-e">Appendix E</a>). An intermediate setting that needs few merges is
+              10, 25 or 50 steps gave 0.97, 0.96, 0.93, 0.34 and 0.08. At 100
+              steps per task, a KL trigger scored higher than a fixed interval
+              with a similar number of merges, 0.987 against 0.88 (<a className="am-ref" href="#app-e">Appendix E</a>). An intermediate setting that needs few merges is
               merge-then-polish, in which specialists train separately as usual
               and a few merges at the end merge them. Measuring this
               curve at 9B is future work.
@@ -2161,115 +1940,102 @@ export default function OnPolicyMergingPost() {
               the 9B domains interact.
             </p>
             <p>
-              <span className="am-runin">Conclusion.</span> Combining RL domains
-              requires choosing how often to merge and in which geometry.
-              Merging often in the on-policy KL geometry gives a merge with a
+              <span className="am-runin">Limitations.</span> The guarantees
+              assume lossless rounds, and we have not shown that these exist
+              at LLM scale. In the 4B merge the residual after 30 CG
+              iterations is still 16% of drift on held-out prompts, and in
+              the 9B run it ranges from 3.6% of drift for search to 25.8% for
+              knowledge work. At realistic drift the informative
+              guarantees are second-order, or are stated in KL rather than in
+              reward. The trajectory Fisher grows with tokens, so
+              long-response domains get more weight in shared directions, and
+              it is estimated from a subsample. The evidence for the guarded
+              merge is one two-domain test and the 22 merges of one 9B run,
+              and in the one-shot merge a stale metric tied the on-policy one
+              on benchmarks. The 9B run is not finished, and its math trainer
+              has taken 40% of its steps. The scores in{' '}
+              <a className="am-ref" href="#fig-4">Figure 4</a> are the best
+              merge per benchmark, and no single model has all of them; the
+              latest model is lower on SWE-bench Pro, Terminal-Bench,
+              BrowseComp-Plus, GPQA and BFCL
+              (<a className="am-ref" href="#table-4">Table 4</a>). After 21
+              merges OPM is 6.0 points below MOPD on the 93 math problems; it
+              abstains less on BFCL than the base model and is below it on
+              BFCL’s multi-turn items; and its cyber score is not measured. Every 9B arm is a single training run (seed 1), so
+              its intervals reflect variation across tasks and samples but not
+              across seeds. All results are at 4B and 9B on dense models;
+              mixture-of-experts models and larger scales are untested.
+            </p>
+            <p>
+              <span className="am-runin">Related work.</span> The barycenter
+              objective comes from Distral and Divide-and-Conquer RL{' '}
+              <Cite k={['teh2017', 'ghosh2018']} />, and policy distillation
+              into one network from <CiteT k="rusu2016" />. The merge operator
+              comes from Fisher merging, RegMean and MaTS{' '}
+              <Cite k={['matena2022', 'jin2023', 'tam2024']} />, all applied
+              once and in supervised settings. <CiteT k="liu2026" /> showed that
+              MOPD is Fisher merging to second order. WARP iterates merging and
+              re-initialisation across parallel RLHF runs on one task{' '}
+              <Cite k="rame2024" />. Co-Evolving Policy Distillation couples
+              per-domain GRPO branches during training through distillation{' '}
+              <Cite k="gu2026" />, and M2A merges a math vector into an agent
+              only along the null space of agent-critical activations{' '}
+              <Cite k="wang2026b" />, which is closely related to <a className="am-ref" href="#thm-1">Theorem 1</a>. Federated
+              learning studies periodic averaging under heterogeneity{' '}
+              <Cite
+                k={['mcmahan2017', 'li2020', 'karimireddy2020', 'wang2020']}
+              />
+              , including function-space aggregation <Cite k="dhawan2024" />,
+              federated GRPO <Cite k="guo2026" /> and federated natural policy
+              gradient for multi-task RL <Cite k="yang2023" />. As far as we
+              know, OPM is the first to use the on-policy trajectory Fisher
+              as the metric of a weight merge, where <a className="am-ref" href="#thm-1">Theorem 1</a> holds, and the first to trigger a
+              weight merge on trajectory KL. <a className="am-ref" href="#app-h">Appendix H</a> discusses each in
+              detail.
+            </p>
+            <p>
+              <span className="am-runin">Conclusion.</span> Combining RL
+              domains comes down to two choices: how often to merge, and in
+              which geometry. Merging often in the on-policy KL geometry has a
               closed form that removes cross-domain terms of both signs. It
-              guarantees per-domain progress where domains can be separated, is
-              slower where they agree, and takes from minutes to an hour per
-              merge at 9B, depending on the number of trainers. In a single merge at 4B, it scores above task arithmetic and
-              MOPD and below the plain sum, as the theory predicts. The pending
-              results above will show whether merging often closes that gap and
-              how OPM compares with multi-task RL and MOPD at scale.
+              guarantees per-domain progress where domains can be separated
+              and is slower where they agree. In a single merge at 4B, OPM
+              scores above task
+              arithmetic and MOPD and below the plain sum, as the theory
+              predicts. At 9B, in a run still in training, the model merged
+              from eight separate trainers is, at its best merge on each
+              benchmark, above multi-task RL on instruction following,
+              SWE-bench Pro, Terminal-Bench and BrowseComp-Plus and within
+              noise of it elsewhere. It is level with MOPD on the agentic
+              benchmarks and AIME 2026, far above it on instruction
+              following, and below it on BFCL. At each of 22 merges the
+              guarded merge kept more of every trainer’s update than the sum
+              of the updates did. The merges took 2.4% of the run’s GPU time
+              and about an hour of waiting each. Three things remain open:
+              what the residual left by a merge costs in reward, the end of
+              the run, where the math trainer has 60% of its budget to come,
+              and the two changes that address OPM’s costs, a merge that does
+              not pause the trainers and domains grouped under shared
+              trainers.
             </p>
           </div>
 
-          {/* Author TODO: one place for open experiments and facts to confirm.
+          {/* Author TODO: what is still open before publishing.
               Rendered only in development; readers of the published site do
               not see it. */}
           {process.env.NODE_ENV !== 'production' ? (
             <div id="author-todo">
-          <Placeholder label="Author TODO · efficiency experiments" status="need experiment">
+          <Placeholder label="Author TODO · before publishing" status="need input">
             <ul>
-              <li>
-                【need experiment: asynchronous snapshot merge. Solve the merge
-                on snapshots while the trainers keep stepping, then add{' '}
-                <Tex>{T`\theta^{+}-\theta_{\rm snapshot}`}</Tex> to every
-                trainer. Today every trainer waits 48–57 minutes per merge,
-                6–19% of a round. Report wall-clock overhead per merge,
-                held-out residual and per-token KL at install against the
-                blocking merge, and train reward around installs. Two trainers
-                first, then the 9B run.】
-              </li>
-              <li>
-                【need experiment: run the merge’s products in the trainer GPUs’
-                idle time. Each trainer GPU computes for 29–35 minutes of a 5–15
-                hour round and waits for rollouts the rest of the time. Report
-                extra GPUs needed (target: none) and the effect on rollout-to-train
-                latency.】
-              </li>
-              <li>
-                【need experiment: balance Fisher-vector products across all
-                trainer GPUs by context tokens instead of 64 rollouts per
-                trainer. Merge compute follows the slowest trainer, 22–30 minutes
-                against a mean of 15–24; instruction following finishes in 4.5
-                minutes, while software engineering and knowledge work carry long
-                environment contexts. Report merge compute time and residual.】
-              </li>
-              <li>
-                【need experiment: fewer products per merge. The per-layer and
-                per-type subspace solve as the starting point of CG, followed by
-                one or two iterations, and CG warm-started from the previous
-                merge. Report products per merge and held-out residual
-                against five-iteration preconditioned CG, on the{' '}
-                <a className="am-ref" href="#table-2">Table 2</a> test case first,
-                then at 9B.】
-              </li>
-              <li>
-                【need experiment: each trainer’s Adam second moment as the
-                Jacobi diagonal in place of the Monte Carlo estimate, which takes
-                about 1.5 minutes per merge. Report CG iterations to the same
-                residual.】
-              </li>
-              <li>
-                【need experiment: JVP–VJP products, or bf16 products with fp32
-                accumulation. The fp32 finite-difference product takes the time
-                of about 16 bf16 gradient passes for the FLOPs of about 1.3.
-                Report time per product, residual, and whether unpreconditioned
-                CG still overshoots.】
-              </li>
-              <li>
-                【need experiment: trainers time-sharing one training pool with
-                optimizer states offloaded, since each trainer computes 6–11% of
-                the time. Report training GPUs against multi-task RL and the
-                overhead per step.】
-              </li>
-              <li>
-                【need experiment: cost in FLOPs. Figure 9 split into rollout,
-                training, merge, teacher scoring and idle time per arm, and score
-                against cumulative FLOPs with multi-task RL’s intermediate
-                checkpoints as a curve.】
-              </li>
-            </ul>
-          </Placeholder>
-          <Placeholder label="Author TODO · Adam coupling" status="need experiment">
-            <p>
-              【need experiment: in the multi-task run, the Adam-preconditioned
-              gradient cosines between domains and how much the shared second
-              moment lowers each domain’s effective learning rate.】
-            </p>
-          </Placeholder>
-          <Placeholder label="Author TODO · facts to confirm" status="need input">
-            <ul>
-              <li>【confirm: the values and units of the drift thresholds δ_i used at 9B, how they were chosen, and the number of steps per round.】</li>
-              <li>【confirm: drift and residual are measured on the 2,048-action-token prefix (the logs suggest so).】</li>
-              <li>【confirm: the per-trainer check was not enforced in merges 1–5 and enforced from merge 6.】</li>
-              <li>【confirm: rollouts are sampled at temperature 1 with no top-p or top-k; otherwise diag(p) − ppᵀ is not the Fisher of the sampling policy.】</li>
-              <li>【confirm: the 0.0002–0.0026 nats per token moved by a merge, and which tokens it is normalised by.】</li>
-              <li>【confirm: 4% and 2% FLOPs shares, and 1.8 gradient passes of arithmetic per product.】</li>
-              <li>【confirm: one-shot 4B residual after 30 CG iterations is 16% in the text and 15% in Appendix B.9.】</li>
-              <li>【decide: whether engines are rebalanced between domains at merges; removed from the text until confirmed.】</li>
-              <li>【confirm: SWE-bench Pro is the V2 set, 642 tasks, one sample, no network access. Base scores 74.5%, above published resolve rates for 9B models; say the harness is not comparable to leaderboards.】</li>
-              <li>【confirm: multi-task RL and MOPD have the same HLE entry, 10.50 ± 1.41 (Table F1). Check it is not a copied cell.】</li>
-              <li>【confirm: which validation set chose step 60 for the math specialist; held-out math chose step 210 earlier.】</li>
-              <li>【confirm: SWE-rebench (84 tasks) and the held-out SWE set were run in the sealed harness, and what “gold-valid” removed (93 to 84).】</li>
-              <li>【confirm: A₁, A₃, A₅ are the anchors after merges 1, 3 and 5, and the ± in the paired row of Table 5 is a standard error.】</li>
-              <li>【confirm: the recipe table of Appendix F for the final OPM run (math 1e-6, KL 1e-4, 64k; SWE 16×8×300 at 1e-6, staleness 4; IF and tool use 2e-6), what the math KL penalty is measured against (the base model, or a reference refreshed every 20 steps), and the training data of the SWE trainer.】</li>
-              <li>【need evaluation: IFBench and IFEval for the specialist and the merges; τ²-Bench or BFCL for multi-task RL step 150 and the merges; GDPval-AA for every arm and the final OPM model under one judge. Figure 5 has no tool-use or knowledge-work panel until then.】</li>
-              <li>【confirm: the realised mix of a multi-task step (accepted rollouts per domain) and what the ledger rule sets the gradient weights to; Appendix F gives the planned mix only.】</li>
-              <li>【decide: the rule that picks the reported OPM model (the anchor at the end of the run, or one chosen on a dev set); one anchor for every column.】</li>
-              <li>【note: the body reports task arithmetic with λ = 1 only. TIES scores above it on most benchmarks and the closed form of Liu et al. fails; both are in Table F6.】</li>
-              <li>【decide: the introduction says a merged model typically does not match the specialists and an MOPD student is bounded by its teachers. Table 4 and Table F7 contradict both at 9B.】</li>
+              <li>【TEMPORARY, on request, to see the ceiling: Figure 1, Figure 4, Figure 7 and Table 3 show OPM’s best merge per benchmark (results.ts, OPM_SHOW = “best”). No single model has these scores. Before publishing, set OPM_SHOW to “latest” and rewrite the statements that depend on it: the introduction’s first finding, “Where OPM stands”, “Summing finished specialists fails”, and in Side findings “A specialist is not an upper bound” and the gains in “Single-domain RL does not keep general ability”, the Limitations sentence and the Conclusion. With the latest model (21 merges; agentic after 20) OPM is behind multi-task RL on BFCL (−2.1 ± 0.6) and GPQA (−2.8 ± 1.1), and Terminal-Bench is at the bar (+5.4 ± 2.7).】</li>
+              <li>【need evaluation, blocks publishing: one model with every score (SWE-bench Pro, Terminal-Bench and BrowseComp-Plus after the 21st merge, or the final model); cyber for OPM.】</li>
+              <li>【need experiment, the one open claim: reward kept by a merge. Score a trainer just before a merge and the merged model just after it on that trainer’s held-out set, for software engineering and knowledge work (residual 20% and 26% of drift).】</li>
+              <li>【need data: paired differences for the best-merge scores the text uses without one: BrowseComp-Plus at merge 12, BFCL at merge 8 and τ² at merge 19 against multi-task RL, MOPD and the base model.】</li>
+              <li>【decide: the FLOPs statements in “Cost at 9B” still come from the earlier run’s model: “about 4% of the FLOPs of the training steps, about 2% with rollouts” and “a product does the arithmetic of about 1.8 gradient passes”. The ledger’s model gives 4.9% of all FLOPs for the current run. The measured figure, used in the introduction, Main results and the Conclusion, is 2.4% of allocated GPU time.】</li>
+              <li>【confirm with the experiment side: the definitions of rel_dist_to_sum and frac_disp_outside_delta_span behind “The merge is the sum plus a direction none of the updates contains”; whether the 8,800 H100 GPU-hours of multi-task RL in Table 5 include the aborted attempt; OPM’s total wall-clock to the 21st merge; the training data of the SWE trainer; the realised domain mix of a multi-task step; pairwise cosines of the trainers’ updates in the current run; whether “end-of-game tasks” under Tables F3 and F4 should read EnterpriseOps-Gym.】</li>
+              <li>【when results arrive: the items of “Not yet tested at scale” are being implemented, the asynchronous merge first. Figure 3 shows it as the design, so move it into the measured parts and update “The price is synchronisation” and the Conclusion.】</li>
+              <li>【at the end of the run (math reaches step 300 around 21 November): re-run every benchmark on the final model and replace the best-merge and “after 21 merges” numbers throughout.】</li>
+              <li>【kept out of the text by decision: each merge discards the rollouts in flight, 21–23% of generated tokens; TIES, a merge after training, is above OPM after 21 merges on the 93 math problems, GPQA, MMLU-Pro, HLE and BFCL (Tables F6 and F8), and the body compares with task arithmetic only.】</li>
             </ul>
           </Placeholder>
             </div>

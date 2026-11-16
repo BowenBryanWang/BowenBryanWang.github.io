@@ -115,7 +115,7 @@
   font-weight: 700;
 }
 
-/* Table 3: per-column shading, darker = higher score within the column (one hue) */
+/* Table 2: per-column shading, darker = higher score within the column (one hue) */
 .am-scope {
   --heat-rgb: 19, 120, 138;
 }

@@ -1,4 +1,4 @@
-/* Figures 5 and 6: main results. Baselines are drawn in ink, the OPM model in
+/* Figures 4 to 8: main results. Baselines are drawn in ink, the OPM model in
    the accent colour, so colour marks one thing only. */
 .am-scope .am-rf {
   width: 100%;
@@ -55,6 +55,13 @@
   font-weight: 600;
   font-variant-numeric: tabular-nums;
 }
+.am-scope .am-rf-bar {
+  fill: var(--m-opm);
+}
+.am-scope .am-rf-rowname {
+  fill: var(--ink);
+  font-size: 13.5px;
+}
 .am-scope .am-rf-reflabel {
   fill: var(--ink-soft);
   font-size: 12.5px;
@@ -72,7 +79,7 @@
   margin: 0.6em 0 0.2em;
 }
 
-/* Figure 5: interactive bar charts. Colours validated for colour-vision
+/* Figure 4: interactive bar charts. Colours validated for colour-vision
    deficiency on the light (#fdfbf5) and dark (#161412) surfaces. */
 .am-scope {
   --m-base: #cfc8ba;
@@ -81,6 +88,9 @@
   --m-ta1: #b07a14;
   --m-mopd: #4a6fc0;
   --m-opm: #a8381f;
+  /* Figure 4: base light, the other baselines dark, OPM in --m-opm. */
+  --f4-base: #d6d0c4;
+  --f4-other: #7d766d;
 }
 .dark .am-scope {
   --m-base: #5a544d;
@@ -89,12 +99,11 @@
   --m-ta1: #b98a2a;
   --m-mopd: #6c8ad6;
   --m-opm: #d4664d;
+  --f4-base: #4a453f;
+  --f4-other: #8f877d;
 }
-/* The figure may run past the text column to the right, where the legend sits. */
-.am-scope figure.am-wide {
-  width: calc(100% + clamp(0px, (100vw - 100%) / 2 - 32px, 230px));
-  max-width: none;
-}
+/* The panels fill the text column; on wide screens the legend hangs in the
+   right margin, so the chart stays centred on the text. */
 .am-scope .am-bars {
   position: relative;
   display: flex;
@@ -103,8 +112,8 @@
 }
 .am-scope .am-bars-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 22px 26px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 20px 14px;
   flex: 1 1 auto;
   min-width: 0;
 }
@@ -128,12 +137,27 @@
 }
 .am-scope .am-bars-tick {
   fill: var(--ink-soft);
-  font-size: 10.5px;
+  font-size: 9.5px;
   font-variant-numeric: tabular-nums;
+}
+.am-scope .am-bars-x {
+  fill: var(--ink-soft);
+  font-size: 9px;
+  transition: opacity 0.12s;
+}
+.am-scope .am-bars-x-tight {
+  font-size: 7.6px;
+}
+.am-scope .am-bars-x-opm {
+  fill: var(--m-opm);
+  font-weight: 700;
+}
+.am-scope .am-bars-val-opm {
+  fill: var(--m-opm);
 }
 .am-scope .am-bars-val {
   fill: var(--ink);
-  font-size: 10.5px;
+  font-size: 9.5px;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
 }
@@ -232,14 +256,11 @@
 }
 /* Wide screens: legend in a column on the right of the panels. */
 @media (min-width: 1180px) {
-  .am-scope .am-bars {
-    flex-direction: row;
-    align-items: flex-start;
-    gap: 28px;
-  }
   .am-scope .am-bars-legend {
-    order: 0;
-    flex: 0 0 168px;
+    position: absolute;
+    left: calc(100% + 22px);
+    top: 0;
+    width: 132px;
     flex-direction: column;
     flex-wrap: nowrap;
     gap: 5px;
@@ -252,9 +273,167 @@
     margin-top: 8px;
   }
 }
-@media (max-width: 640px) {
+.am-scope .am-bars-grid.am-bars-cols3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 22px 22px;
+}
+@media (max-width: 860px) {
   .am-scope .am-bars-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+@media (max-width: 640px) {
+  .am-scope .am-bars-grid,
+  .am-scope .am-bars-grid.am-bars-cols3 {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 18px 14px;
   }
+}
+
+/* Trajectory figure: the same panel grid, with lines instead of bars. */
+.am-scope .am-traj-line {
+  fill: none;
+  stroke: var(--m-opm);
+  stroke-width: 2;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+.am-scope .am-traj-pt {
+  fill: var(--m-opm);
+  stroke: var(--surf-halo);
+  stroke-width: 1.5;
+}
+.am-scope .am-traj-ref {
+  stroke-width: 1.5;
+  stroke-dasharray: 5 4;
+}
+.am-scope .am-bars-key {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 3px 9px 3px 7px;
+  white-space: nowrap;
+  color: var(--ink);
+}
+.am-scope .am-bars-key svg {
+  width: 22px;
+  height: 10px;
+  flex: none;
+}
+/* Difference and general-ability figures. */
+.am-scope .am-rf-head {
+  fill: var(--ink);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* Merge figure: paired dots per merge. */
+.am-scope .am-rf-open {
+  fill: var(--surf-halo);
+  stroke: var(--ink-soft);
+  stroke-width: 2;
+}
+.am-scope .am-rf-link {
+  stroke: var(--ink-faint);
+  stroke-width: 2;
+}
+.am-scope .am-rf-dot {
+  stroke: var(--surf-halo);
+  stroke-width: 2;
+}
+.am-scope .am-rf-small {
+  font-size: 11px;
+}
+
+/* Figure 1, lower strip: five benchmarks, four bars each (HeroResults). The
+   strip keeps the width of the text column, like the caption under it. */
+.am-scope .am-hero {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 1rem 1.25rem;
+  margin-top: 1.1rem;
+}
+@media (max-width: 700px) {
+  .am-scope .am-hero {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1rem 0.75rem;
+  }
+}
+@media (min-width: 1024px) {
+  .am-scope .am-hero {
+    max-width: 48rem;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+@media (min-width: 1280px) {
+  .am-scope .am-hero {
+    max-width: var(--col);
+    margin-left: 0;
+    margin-right: 0;
+  }
+}
+.am-scope .am-hero-bars,
+.am-scope .am-hero-labels {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 28px));
+  justify-content: center;
+  gap: 3px;
+}
+.am-scope .am-hero-bars {
+  align-items: end;
+  border-bottom: 1px solid var(--ink-faint);
+}
+.am-scope .am-hero-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.am-scope .am-hero-val {
+  font-size: 10.5px;
+  line-height: 1;
+  margin-bottom: 3px;
+  color: var(--ink-soft);
+  font-variant-numeric: tabular-nums;
+}
+.am-scope .am-hero-bar {
+  display: block;
+  width: 16px;
+  border-radius: 2px 2px 0 0;
+  background: var(--f4-other);
+}
+.am-scope .am-hero-base .am-hero-bar {
+  background: var(--f4-base);
+}
+.am-scope .am-hero-opm .am-hero-bar {
+  background: var(--m-opm);
+}
+.am-scope .am-hero-opm .am-hero-val {
+  color: var(--m-opm);
+  font-weight: 700;
+}
+.am-scope .am-hero-labels {
+  margin-top: 3px;
+  font-size: 9px;
+  line-height: 1.2;
+  text-align: center;
+  color: var(--ink-soft);
+}
+.am-scope .am-hero-labels .am-hero-opm {
+  color: var(--m-opm);
+  font-weight: 700;
+}
+.am-scope .am-hero-name {
+  margin-top: 0.35rem;
+  text-align: center;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--ink);
+  line-height: 1.3;
+}
+.am-scope .am-hero-name span {
+  display: block;
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--ink-soft);
 }

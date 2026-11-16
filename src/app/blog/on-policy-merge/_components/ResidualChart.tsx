@@ -1,4 +1,4 @@
-// Figure 4: held-out KL residual of the guarded merge against CG iterations (data of Table 3).
+// Figure C1: held-out KL residual of the guarded merge against CG iterations (data of Table C3).
 // Static server-rendered SVG; native <title> tooltips on every point.
 
 const ITERS = [1, 2, 3, 5, 10]
@@ -117,10 +117,10 @@ export default function ResidualChart() {
         </g>
       ))}
 
-      {/* the default: 3 iterations, γ = ½ */}
+      {/* the lowest point: 3 iterations, γ = ½ */}
       <circle cx={x(3)} cy={y(8.57)} r={10} className="am-res-pick" />
       <text x={x(3) + 14} y={y(8.57) + 24} className="am-res-pick-label">
-        8.57, the default
+        8.57, lowest
       </text>
     </svg>
   )

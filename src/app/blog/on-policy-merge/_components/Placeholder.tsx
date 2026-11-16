@@ -5,7 +5,7 @@ import type { ReactNode } from 'react'
 // page for "Placeholder" and fill them in one by one.
 
 interface BlockProps {
-  /** What this slot is, e.g. "Figure 1" or "Table 3". */
+  /** What this slot is, e.g. "Figure 1" or "Table 2". */
   label: string
   /** One line on the status, e.g. "author to draw" or "pending main runs". */
   status: string
