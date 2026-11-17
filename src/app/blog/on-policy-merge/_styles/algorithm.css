@@ -17,27 +17,32 @@
 .am-scope .am-algo-kw {
   font-weight: 700;
 }
-.am-scope .am-algo-body {
+/* .am-algo in the selector: it must beat `.am-prose ol`, which adds a left margin and list numbers */
+.am-scope .am-algo .am-algo-body {
   list-style: none;
   margin: 0;
   padding: 0.3em 0 0.6em;
   counter-reset: am-algo-line;
 }
-.am-scope .am-algo-body > li {
+.am-scope .am-algo .am-algo-body > li {
+  --pad: calc(2.1em + var(--ind, 0) * 1.4em);
   counter-increment: am-algo-line;
-  position: relative;
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
   column-gap: 1.2em;
   margin: 0.12em 0;
-  padding-left: calc(2.1em + var(--ind, 0) * 1.4em);
+  padding-left: var(--pad);
 }
-.am-scope .am-algo-body > li::before {
+/* The line number is a zero-width flex item pulled into the left padding, so it
+   sits on the same baseline as the code. Its font is 0.85 of the line's, hence
+   the division. */
+.am-scope .am-algo .am-algo-body > li::before {
   content: counter(am-algo-line);
-  position: absolute;
-  left: 0;
-  width: 1.3em;
+  flex: 0 0 auto;
+  width: calc(1.3em / 0.85);
+  margin-left: calc(-1 * var(--pad) / 0.85);
+  margin-right: calc((var(--pad) - 1.3em) / 0.85 - 1.2em / 0.85);
   text-align: right;
   font-size: 0.85em;
   font-variant-numeric: tabular-nums;
@@ -45,6 +50,7 @@
 }
 .am-scope .am-algo-code {
   flex: 1 1 auto;
+  max-width: 100%; /* long code wraps beside its number instead of dropping below it */
   color: var(--ink);
 }
 .am-scope .am-algo-note {
@@ -60,8 +66,8 @@
   .am-scope .am-algo {
     font-size: 0.92em;
   }
-  .am-scope .am-algo-body > li {
-    padding-left: calc(1.8em + var(--ind, 0) * 0.9em);
+  .am-scope .am-algo .am-algo-body > li {
+    --pad: calc(1.8em + var(--ind, 0) * 0.9em);
   }
   .am-scope .am-algo-note {
     flex-basis: 100%;
