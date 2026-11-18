@@ -285,6 +285,6 @@ export const EXAMPLES: Example[] = [
     "w": 640,
     "h": 480,
     "short": "Place two tagged parts in their trays using camera feedback.",
-    "label": "Robotics"
+    "label": "Robot-Use Agents"
   }
 ]
