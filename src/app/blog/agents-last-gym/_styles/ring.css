@@ -70,6 +70,23 @@
   will-change: transform;
 }
 
+/* Until the script has placed the cards they all sit on one spot, so the
+   ring stays hidden, then fades in as it starts to turn. The fade is on the
+   stage, not on the wheel: opacity on the wheel itself would flatten its 3D
+   while it runs. */
+.am-scope .alg-ring-stage {
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+.am-scope .alg-ring-stage[data-ready] {
+  opacity: 1;
+}
+@media (prefers-reduced-motion: reduce) {
+  .am-scope .alg-ring-stage {
+    transition: none;
+  }
+}
+
 /* A card is a bare wrapper that ExampleRing.tsx places on the ring; its
    face is the visible card, and its domain name hangs above the face. */
 .am-scope .alg-card {
@@ -192,4 +209,15 @@
   font-size: 12.5px;
   font-variant-numeric: tabular-nums;
   color: var(--ink-faint);
+}
+
+/* The blog gives every svg inside a figure a 600px floor on phones, so that
+   diagrams scroll instead of shrinking. Icons are not diagrams. */
+.am-scope figure .alg-chip-icon {
+  min-width: 0;
+}
+/* The ring and the domain grid manage their own overflow. */
+.am-scope figure#fig-1,
+.am-scope figure#fig-2 {
+  overflow-x: visible;
 }

@@ -12,6 +12,7 @@ const GAP = 0.13 // space between neighbouring cards, as a share of card width
 const POP = 1.08 // scale of the card in front
 const PAUSE_MS = 3200 // rest on each card before advancing on its own
 const FRICTION = 0.94 // per 60 Hz frame, while coasting after a drag
+const ENTRANCE_TURN = 216 // degrees the ring turns as it comes in
 
 /** `a` in degrees, normalized to [-180, 180). */
 function wrap(a: number) {
@@ -176,6 +177,16 @@ export default function ExampleRing() {
     )
     io.observe(stage)
 
+    // Entrance: the ring comes in on a random card. It starts most of a turn
+    // away and eases round to it; with reduced motion it simply starts there.
+    const first = Math.floor(Math.random() * N)
+    st.angle = -first * STEP
+    if (!st.reduce) {
+      st.angle += ENTRANCE_TURN
+      st.target = -first * STEP
+      st.ease = 0.955
+    }
+
     let raf = 0
     let prev = performance.now()
     const frame = (now: number) => {
@@ -259,6 +270,9 @@ export default function ExampleRing() {
         st.active = idx
         setActive(idx)
       }
+      // The cards are stacked on one spot until this first frame has placed
+      // them; the stylesheet keeps the ring hidden until then.
+      if (!stage.dataset.ready) stage.dataset.ready = '1'
     }
     raf = requestAnimationFrame(frame)
 

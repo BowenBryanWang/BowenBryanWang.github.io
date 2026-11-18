@@ -1,0 +1,275 @@
+/* Figure 2: the domain grid. Tiles of two sizes in the blog's own style: the
+   text face, paper tones, no colour beyond the ink and the screenshots. */
+
+/* The figure is wider than the text column by the same amount on both sides.
+   From 1280px the left margin holds the table of contents, which stays on
+   screen while the page scrolls; the figure is opaque and passes over it. */
+.am-scope figure.alg-wide {
+  --page: #fdfbf5;
+  position: relative;
+  z-index: 3;
+  background: var(--page);
+}
+.dark .am-scope figure.alg-wide {
+  --page: #000;
+}
+@media (min-width: 1024px) {
+  .am-scope figure.alg-wide {
+    margin-left: calc(-1 * min(9rem, (100vw - 768px) / 2 - 1.5rem));
+    margin-right: calc(-1 * min(9rem, (100vw - 768px) / 2 - 1.5rem));
+  }
+}
+@media (min-width: 1280px) {
+  .am-scope figure.alg-wide {
+    --out: min(var(--sn-gap) + var(--sn-w), (100vw - var(--col)) / 2 - 24px);
+    margin-left: calc(-1 * var(--out));
+    margin-right: calc(-1 * var(--out));
+  }
+}
+
+/* Narrow layout (text column and phones): tiles flow two to a row and take
+   the height of their contents. */
+.am-scope .alg-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+/* Wide layout: twelve columns and eleven rows of 68px; each tile is placed
+   by the --c/--w/--r/--h it is given in DomainGrid.tsx. */
+@media (min-width: 1024px) {
+  .am-scope .alg-grid {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    grid-template-rows: repeat(11, 68px);
+  }
+  .am-scope .alg-tile {
+    grid-column: var(--c) / span var(--w);
+    grid-row: var(--r) / span var(--h);
+  }
+}
+
+/* Level one: a domain */
+.am-scope .alg-tile {
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 7px;
+  border-radius: 11px;
+  /* Each tile has its own soft tint (--hue, set per tile). */
+  background: hsl(var(--hue, 40) 46% 91%);
+  overflow: hidden;
+}
+.dark .am-scope .alg-tile {
+  background: hsl(var(--hue, 40) 26% 17%);
+}
+.am-scope .alg-tile-head {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 20px;
+  padding: 0 3px;
+}
+.am-scope .alg-tile h3 {
+  min-width: 0;
+  margin: 0;
+  font-size: 13.5px;
+  line-height: 1.2;
+  font-weight: 700;
+  color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.am-scope .alg-tile h3 em {
+  font-weight: 400;
+  color: var(--ink-soft);
+}
+.am-scope .alg-tile-lead h3 {
+  font-size: 17px;
+}
+.am-scope .alg-tile-strip {
+  justify-content: center;
+}
+.am-scope .alg-tile-pending {
+  margin: 0;
+  padding: 0 3px;
+  font-size: 11px;
+  line-height: 1.2;
+  font-style: italic;
+  color: var(--ink-faint);
+}
+
+/* Level two: the domain's templates, each a block a shade lighter than the
+   tile, holding a picture and a label. */
+.am-scope .alg-tpls {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: grid;
+  gap: 5px;
+  grid-template-columns: repeat(var(--n), minmax(0, 1fr));
+}
+.am-scope .alg-tpl {
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin: 0;
+  padding: 4px 4px 3px;
+  border-radius: 7px;
+  background: var(--page);
+}
+/* The picture keeps its own proportions: fitted inside its panel, never
+   cropped. An empty panel is a plain block until its picture is in. */
+.am-scope .alg-tpl-img {
+  flex: 1 1 auto;
+  min-height: 0;
+  aspect-ratio: 16 / 9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.am-scope .alg-tpl-img img {
+  display: block;
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  border-radius: 4px;
+}
+.am-scope .alg-tpl-img-empty {
+  border-radius: 4px;
+  background: hsl(var(--hue, 40) 30% 94%);
+}
+.dark .am-scope .alg-tpl-img-empty {
+  background: hsl(var(--hue, 40) 16% 12%);
+}
+.am-scope .alg-tpl figcaption {
+  flex: none;
+  margin: 0;
+  padding: 0 2px;
+  font-size: 10.5px;
+  line-height: 1.22;
+  color: var(--ink);
+  /* Up to two lines, and room for two on every block, so the pictures of
+     neighbouring blocks stay level. */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  min-height: 2.44em;
+}
+
+@media (min-width: 1024px) {
+  /* In the placed layout the tile's height is fixed, so the pictures take
+     what is left instead of setting the height. */
+  .am-scope .alg-tpl-img {
+    aspect-ratio: auto;
+    flex: 1 1 0;
+  }
+  /* 4x4: one large block over two smaller ones */
+  .am-scope .alg-tile-lead .alg-tpls {
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1.75fr 1fr;
+  }
+  .am-scope .alg-tile-lead .alg-tpl:first-child {
+    grid-column: 1 / -1;
+  }
+  /* 3x3: one large block beside two stacked ones */
+  .am-scope .alg-tile-beside .alg-tpls {
+    grid-template-columns: 1.5fr 1fr;
+    grid-template-rows: 1fr 1fr;
+  }
+  .am-scope .alg-tile-beside .alg-tpl:first-child {
+    grid-row: 1 / -1;
+  }
+  /* 2x3: two blocks, one above the other */
+  .am-scope .alg-tile-stack .alg-tpls {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: 1fr 1fr;
+  }
+}
+
+/* Software icons */
+.am-scope .alg-tile-software {
+  display: flex;
+  flex-wrap: wrap;
+  flex: none;
+  gap: 5px;
+}
+.am-scope .alg-app {
+  display: inline-flex;
+  color: var(--ink-soft);
+}
+.am-scope .alg-app img {
+  display: block;
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+}
+.am-scope .alg-app-mono {
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 5px;
+  background: var(--ink-faint);
+  color: var(--paper-deep);
+  font-size: 10px;
+  line-height: 1;
+  font-weight: 700;
+}
+
+/* Phones: one tile to a row. */
+@media (max-width: 520px) {
+  .am-scope .alg-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* Image credits: a closed disclosure under the grid, in small type */
+.am-scope .alg-credits {
+  margin: 8px 0 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--ink-soft);
+}
+.am-scope .alg-credits summary {
+  padding: 0;
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--ink-faint);
+  cursor: pointer;
+}
+.am-scope .alg-credits p {
+  margin: 6px 0 4px;
+  max-width: 48rem;
+}
+.am-scope .alg-credits ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  columns: 2;
+  column-gap: 28px;
+}
+.am-scope .alg-credits li {
+  margin: 0 0 2px;
+  break-inside: avoid;
+}
+.am-scope .alg-credits a {
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-color: var(--rule);
+  text-underline-offset: 2px;
+}
+@media (max-width: 720px) {
+  .am-scope .alg-credits ul {
+    columns: 1;
+  }
+}

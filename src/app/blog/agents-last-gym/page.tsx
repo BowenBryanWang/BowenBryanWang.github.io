@@ -6,12 +6,14 @@ import { Container } from '@/components/Container'
 import './_styles/merge.css'
 import './_styles/algorithm.css'
 import './_styles/ring.css'
+import './_styles/domains.css'
 
 import SectionTitle from './_components/SectionTitle'
 import { Cite } from './_components/Cite'
 import { Pending } from './_components/Placeholder'
 import CopyBib from './_components/CopyBib'
 import ExampleRing from './_components/ExampleRing'
+import DomainGrid, { DomainGridCredits } from './_components/DomainGrid'
 import SideToc, { type TocItem } from './_components/SideToc'
 import SidenoteLayout from './_components/SidenoteLayout'
 
@@ -170,6 +172,16 @@ export default function AgentsLastGymPost() {
               QGIS, 3D Slicer, ParaView, PyMOL, Godot, Shotcut and MuseScore,
               and they read and write the native project formats of each.
             </p>
+          </div>
+
+          {/* Figure 2 sits between two blocks of prose and is wider than the
+              text column on both sides. */}
+          <figure id="fig-2" className="alg-wide">
+            <DomainGrid />
+            <DomainGridCredits />
+          </figure>
+
+          <div className="am-prose">
             <p>
               Breadth does not come at the expense of depth. Every task in ALG
               is <Key>a complete professional project</Key> rather than an

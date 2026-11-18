@@ -101,6 +101,12 @@ const ICONS: Record<string, ReactNode> = {
   office: <path d="M6 3h8l4 4v14H6zM14 3v4h4M9 12h6M9 16h6" />,
   // code brackets
   'visual-swe': <path d="M8 8l-4 4 4 4M16 8l4 4-4 4M13.500 5l-3 14" />,
+  // a cutting tool over a workpiece
+  'cnc-cam': <path d="M12 3v8M9 11h6l-3 6zM4 21h16M7 21v-2.500h10V21" />,
+  // stacked layers
+  'additive-mfg': <path d="M12 4l8 4-8 4-8-4zM4 12l8 4 8-4M4 16l8 4 8-4" />,
+  // a brain-wave trace
+  'neuro-psych': <path d="M3 12h4l2-6 4 12 2-6h6" />,
   // a robot head
   'robot-use': (
     <>
