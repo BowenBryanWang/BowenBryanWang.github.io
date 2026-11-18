@@ -90,7 +90,7 @@
 /* Domain name and icon above the card, in the card's own 3D position, so it
    lines up with the card at every angle. --lab (set per frame) hides it on
    the far side of the ring; the one over the front card is enlarged and
-   coloured. */
+   set in the full text colour. */
 .am-scope .alg-card-domain {
   position: absolute;
   left: -30%;
@@ -114,7 +114,7 @@
   transition: transform 0.3s ease, color 0.3s ease;
 }
 .am-scope .alg-card[data-front='1'] .alg-card-domain span {
-  color: var(--accent);
+  color: var(--ink);
   font-weight: 700;
   transform: scale(1.38);
 }

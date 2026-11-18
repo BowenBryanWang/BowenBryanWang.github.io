@@ -36,7 +36,7 @@ function smooth(a: number, b: number, v: number) {
  *
  * Each card carries its domain name and icon above it, in the same 3D
  * position as the card, so the names form a ring of their own that turns
- * with the cards. The name over the front card is enlarged and coloured.
+ * with the cards. The name over the front card is enlarged and darker.
  *
  * The ring is not tilted: the camera sits above it (perspective-origin), so
  * the far side rises behind the front cards while every card stays upright.
