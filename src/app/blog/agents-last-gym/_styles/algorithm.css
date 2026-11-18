@@ -1,0 +1,201 @@
+/* Algorithm 1: paper-style pseudocode. Uses the colour tokens from merge.css. */
+.am-scope .am-algo {
+  margin: 1.6em 0 2em;
+  border-top: 2px solid var(--ink);
+  border-bottom: 2px solid var(--ink);
+  font-size: 0.96em;
+  line-height: 1.6;
+}
+.am-scope .am-algo-head {
+  padding: 0.45em 0;
+  border-bottom: 1px solid var(--ink);
+}
+.am-scope .am-algo-io {
+  padding: 0.5em 0 0.2em;
+  color: var(--ink);
+}
+.am-scope .am-algo-kw {
+  font-weight: 700;
+}
+/* .am-algo in the selector: it must beat `.am-prose ol`, which adds a left margin and list numbers */
+.am-scope .am-algo .am-algo-body {
+  list-style: none;
+  margin: 0;
+  padding: 0.3em 0 0.6em;
+  counter-reset: am-algo-line;
+}
+.am-scope .am-algo .am-algo-body > li {
+  --pad: calc(2.1em + var(--ind, 0) * 1.4em);
+  counter-increment: am-algo-line;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: 1.2em;
+  margin: 0.12em 0;
+  padding-left: var(--pad);
+}
+/* The line number is a zero-width flex item pulled into the left padding, so it
+   sits on the same baseline as the code. Its font is 0.85 of the line's, hence
+   the division. */
+.am-scope .am-algo .am-algo-body > li::before {
+  content: counter(am-algo-line);
+  flex: 0 0 auto;
+  width: calc(1.3em / 0.85);
+  margin-left: calc(-1 * var(--pad) / 0.85);
+  margin-right: calc((var(--pad) - 1.3em) / 0.85 - 1.2em / 0.85);
+  text-align: right;
+  font-size: 0.85em;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-faint);
+}
+.am-scope .am-algo-code {
+  flex: 1 1 auto;
+  max-width: 100%; /* long code wraps beside its number instead of dropping below it */
+  color: var(--ink);
+}
+.am-scope .am-algo-note {
+  margin-left: auto;
+  color: var(--ink-soft);
+  font-style: italic;
+  text-align: right;
+}
+.am-scope .am-algo-note a {
+  color: inherit;
+}
+@media (max-width: 640px) {
+  .am-scope .am-algo {
+    font-size: 0.92em;
+  }
+  .am-scope .am-algo .am-algo-body > li {
+    --pad: calc(1.8em + var(--ind, 0) * 0.9em);
+  }
+  .am-scope .am-algo-note {
+    flex-basis: 100%;
+    text-align: left;
+    margin-left: 0;
+    font-size: 0.9em;
+    line-height: 1.45;
+  }
+}
+
+/* Theorem / proposition blocks: statement only, a little wider than the text */
+@media (min-width: 768px) {
+  .am-scope .am-prose .am-callout {
+    margin-left: -1.5rem;
+    margin-right: -1.5rem;
+    padding: 1.1em 1.5em;
+  }
+}
+
+/* Section headings (SectionTitle.tsx) */
+.am-scope .am-h2 {
+  position: relative;
+  margin: 3.6rem 0 1.1rem;
+  font-size: 1.75rem;
+  line-height: 1.25;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+.am-scope .am-h2-anchor {
+  position: absolute;
+  right: 100%;
+  padding-right: 0.45em;
+  font-weight: 400;
+  color: var(--rule);
+  text-decoration: none;
+  transition: color 0.15s;
+}
+.am-scope .am-h2:hover .am-h2-anchor,
+.am-scope .am-h2-anchor:focus-visible {
+  color: var(--ink-faint);
+}
+@media (max-width: 640px) {
+  .am-scope .am-h2 {
+    margin-top: 2.8rem;
+    font-size: 1.45rem;
+  }
+  .am-scope .am-h2-anchor {
+    display: none;
+  }
+}
+
+/* Citation: BibTeX with a copy button (CopyBib.tsx) */
+.am-scope .am-bib-wrap {
+  position: relative;
+}
+.am-scope .am-bib-wrap .am-bib {
+  padding-right: 5.5em;
+}
+.am-scope .am-bib-copy {
+  position: absolute;
+  top: 0.6em;
+  right: 0.6em;
+  font-size: 13px;
+  line-height: 1;
+  padding: 0.45em 0.8em;
+  border: 1px solid var(--rule);
+  border-radius: 5px;
+  background: var(--surf-halo);
+  color: var(--ink-soft);
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+}
+.am-scope .am-bib-copy:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+/* Repeat citations: one short line in the margin (Cite.tsx); full reference when tapped on narrow screens */
+.am-scope .am-sn-short {
+  display: none;
+}
+@media (min-width: 1280px) {
+  .am-scope .am-sn-repeat .am-sn-title,
+  .am-scope .am-sn-repeat .am-sn-by {
+    display: none;
+  }
+  .am-scope .am-sn-repeat .am-sn-short {
+    display: inline;
+    color: var(--ink-soft);
+    text-decoration: none;
+  }
+  .am-scope .am-sn-repeat .am-sn-short:hover {
+    color: var(--accent);
+  }
+}
+
+/* Key concepts and claims (Key in page.tsx): bold in the accent brown */
+.am-scope .am-key,
+.am-scope .am-prose strong.am-key,
+.am-scope .am-callout strong.am-key {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+/* Internal cross-references (Appendix, Table, Figure, Theorem, Proposition, sections) */
+.am-scope a.am-ref {
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-style: dotted;
+  text-decoration-color: var(--ink-faint);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  transition: color 0.15s, text-decoration-color 0.15s;
+}
+.am-scope a.am-ref:hover {
+  color: var(--accent);
+  text-decoration-color: var(--accent);
+}
+.am-scope [id^='fig-'],
+.am-scope [id^='table-'],
+.am-scope [id^='thm-'],
+.am-scope [id^='prop-'],
+.am-scope [id^='app-'],
+.am-scope #why-meet-often {
+  scroll-margin-top: 6rem;
+}
+.am-scope .am-anchor {
+  display: block;
+  height: 0;
+}

@@ -1,0 +1,195 @@
+/* The ring of example tasks at the top of the post. Cards are laid out on a
+   circle in 3D; ExampleRing.tsx writes the transforms, the card width
+   (--ring-w), and the stage height and camera position. */
+
+.am-scope {
+  --ring-card: #fffdf8;
+  --ring-shadow: 0 10px 28px -12px rgba(40, 30, 20, 0.3);
+}
+.dark .am-scope {
+  --ring-card: #1f1e1c;
+  --ring-shadow: 0 12px 30px -12px rgba(0, 0, 0, 0.85);
+}
+
+.am-scope .alg-ring {
+  margin: 0.25rem 0 0.75rem;
+}
+
+/* The stage is as wide as the window (ExampleRing.tsx sets its width and
+   left offset). On phones, where the ring is wider than the window, cards
+   fade out as they near its edges and the mask softens whatever is left. */
+.am-scope .alg-ring-stage {
+  --ring-w: 300px;
+  position: relative;
+  height: 480px;
+  overflow: hidden;
+  perspective: 1500px;
+  cursor: grab;
+  touch-action: pan-y;
+  user-select: none;
+  -webkit-user-select: none;
+  outline: none;
+  -webkit-mask-image: linear-gradient(
+    90deg,
+    transparent 0,
+    rgba(0, 0, 0, 0.12) 5%,
+    rgba(0, 0, 0, 0.45) 11%,
+    rgba(0, 0, 0, 0.82) 17%,
+    #000 24%,
+    #000 76%,
+    rgba(0, 0, 0, 0.82) 83%,
+    rgba(0, 0, 0, 0.45) 89%,
+    rgba(0, 0, 0, 0.12) 95%,
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    90deg,
+    transparent 0,
+    rgba(0, 0, 0, 0.12) 5%,
+    rgba(0, 0, 0, 0.45) 11%,
+    rgba(0, 0, 0, 0.82) 17%,
+    #000 24%,
+    #000 76%,
+    rgba(0, 0, 0, 0.82) 83%,
+    rgba(0, 0, 0, 0.45) 89%,
+    rgba(0, 0, 0, 0.12) 95%,
+    transparent 100%
+  );
+}
+.am-scope .alg-ring-stage:active {
+  cursor: grabbing;
+}
+
+.am-scope .alg-ring-wheel {
+  position: absolute;
+  left: 50%;
+  top: 400px;
+  width: 0;
+  height: 0;
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+/* A card is a bare wrapper that ExampleRing.tsx places on the ring; its
+   face is the visible card, and its domain name hangs above the face. */
+.am-scope .alg-card {
+  position: absolute;
+  left: calc(var(--ring-w) / -2);
+  bottom: 0;
+  width: var(--ring-w);
+  transform-origin: 50% 100%;
+  will-change: transform, opacity;
+}
+.am-scope .alg-card-face {
+  background: var(--ring-card);
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: var(--ring-shadow);
+}
+
+/* Domain name and icon above the card, in the card's own 3D position, so it
+   lines up with the card at every angle. --lab (set per frame) hides it on
+   the far side of the ring; the one over the front card is enlarged and
+   coloured. */
+.am-scope .alg-card-domain {
+  position: absolute;
+  left: -30%;
+  right: -30%;
+  bottom: 100%;
+  padding-bottom: calc(var(--ring-w) * 0.05);
+  text-align: center;
+  white-space: nowrap;
+  opacity: var(--lab, 0);
+  pointer-events: none;
+}
+.am-scope .alg-card-domain span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45em;
+  font-size: clamp(11px, calc(var(--ring-w) * 0.048), 15.5px);
+  line-height: 1;
+  font-weight: 600;
+  color: var(--ink-soft);
+  transform-origin: 50% 100%;
+  transition: transform 0.3s ease, color 0.3s ease;
+}
+.am-scope .alg-card[data-front='1'] .alg-card-domain span {
+  color: var(--accent);
+  font-weight: 700;
+  transform: scale(1.38);
+}
+.am-scope .alg-chip-icon {
+  width: 1.2em;
+  height: 1.2em;
+  flex: none;
+}
+
+.am-scope .alg-card-shot {
+  aspect-ratio: 16 / 9;
+  background: var(--paper-deep);
+}
+.am-scope .alg-card-shot img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+  pointer-events: none;
+}
+
+.am-scope .alg-card-body {
+  padding: calc(var(--ring-w) * 0.035) calc(var(--ring-w) * 0.045) calc(var(--ring-w) * 0.042);
+}
+.am-scope .alg-card-title {
+  font-size: clamp(11.5px, calc(var(--ring-w) * 0.052), 16.5px);
+  line-height: 1.25;
+  font-weight: 700;
+  color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.am-scope .alg-card-desc {
+  margin: 4px 0 0;
+  font-size: clamp(10.5px, calc(var(--ring-w) * 0.041), 13.5px);
+  line-height: 1.4;
+  color: var(--ink-soft);
+  /* Two lines on every card, so all cards have one height. */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  min-height: 2.8em;
+}
+
+/* Controls under the ring */
+.am-scope .alg-ring-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  margin-top: 2px;
+}
+.am-scope .alg-ring-btn {
+  width: 30px;
+  height: 30px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--ink-faint);
+  font-size: 15px;
+  line-height: 1;
+  cursor: pointer;
+  transition: color 0.2s, background 0.2s;
+}
+.am-scope .alg-ring-btn:hover,
+.am-scope .alg-ring-btn:focus-visible {
+  color: var(--accent);
+  background: var(--accent-soft);
+  outline: none;
+}
+.am-scope .alg-ring-count {
+  font-size: 12.5px;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-faint);
+}
